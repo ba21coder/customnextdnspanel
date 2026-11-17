@@ -225,7 +225,7 @@
                 </div>
             </div>
 
-            <!-- 6. KURULUM & ANDROID TV -->
+            <!-- 6. KURULUM & MASAÜSTÜ / TV İNDİRME MERKEZİ -->
             <div id="tab-setup" class="tab-content hidden space-y-6">
                 <div class="glass-card p-6 space-y-5">
                     <div>
@@ -256,56 +256,70 @@
                     </div>
                 </div>
 
-                <!-- Android TV & APK İndirme Merkezi -->
+                <!-- Masaüstü (.msi / Windows / Mac) & Android TV İndirme Merkezi -->
                 <div class="glass-card p-6 space-y-5 border-blue-500/20">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
-                            <i data-lucide="tv" class="w-5 h-5"></i>
+                            <i data-lucide="monitor-down" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <h3 class="text-base font-bold text-white" data-i18n="tvHeader">Android TV & Mobil APK İndirme Merkezi</h3>
-                            <p class="text-xs text-zinc-400" data-i18n="tvSub">Google Play olmayan TV Box ve Android TV cihazlar için doğrudan APK bağlantıları ve TV kurulumu.</p>
+                            <h3 class="text-base font-bold text-white" data-i18n="desktopHeader">Masaüstü & TV Uygulama İndirme Merkezi</h3>
+                            <p class="text-xs text-zinc-400" data-i18n="desktopSub">Windows (.msi), macOS ve Android TV cihazlarınız için resmi NextDNS uygulamaları.</p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-4">
                             <div>
                                 <div class="flex items-center justify-between mb-1">
-                                    <span class="text-xs font-bold text-zinc-100">NextDNS Manager APK</span>
-                                    <span class="px-2 py-0.5 text-[10px] rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">GitHub</span>
+                                    <span class="text-xs font-bold text-zinc-100">Windows App</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">.msi / .exe</span>
                                 </div>
-                                <p class="text-[11px] text-zinc-400" data-i18n="apkManagerDesc">Android 11+ ve Google TV cihazlarda profil yönetimi ve istatistikler için açık kaynaklı istemci.</p>
+                                <p class="text-[11px] text-zinc-400" data-i18n="winDesc">Windows sistem tepsisi tabanlı resmi NextDNS masaüstü istemcisi.</p>
                             </div>
-                            <a href="https://github.com/doubleangels/nextdnsmanager/releases/latest" target="_blank" rel="noopener noreferrer" 
+                            <a href="https://nextdns.io/download/windows" target="_blank" rel="noopener noreferrer" 
                                class="w-full py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
-                                <i data-lucide="download" class="w-3.5 h-3.5"></i> <span data-i18n="downloadApkBtn">APK İndir (GitHub)</span>
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i> <span data-i18n="downloadWinBtn">Windows İndir</span>
                             </a>
                         </div>
 
                         <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-4">
                             <div>
                                 <div class="flex items-center justify-between mb-1">
-                                    <span class="text-xs font-bold text-zinc-100">ADNS / NextDNS Client</span>
-                                    <span class="px-2 py-0.5 text-[10px] rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">VPN Modu</span>
+                                    <span class="text-xs font-bold text-zinc-100">macOS App</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-zinc-800 text-zinc-300 border border-zinc-700">Apple / Intel</span>
                                 </div>
-                                <p class="text-[11px] text-zinc-400" data-i18n="apkClientDesc">Özel DNS ayarı kapalı olan Android TV'lerde yerel VPN tüneli ile NextDNS'i aktif eder.</p>
+                                <p class="text-[11px] text-zinc-400" data-i18n="macDesc">Mac bilgisayarlar için menü çubuğu entegreli yerel NextDNS uygulaması.</p>
                             </div>
-                            <a href="https://github.com/eyalm2000/adns/releases/latest" target="_blank" rel="noopener noreferrer" 
+                            <a href="https://nextdns.io/download/mac" target="_blank" rel="noopener noreferrer" 
                                class="w-full py-2 px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
-                                <i data-lucide="download" class="w-3.5 h-3.5"></i> <span data-i18n="downloadApkBtn">APK İndir (GitHub)</span>
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i> <span data-i18n="downloadMacBtn">macOS İndir</span>
+                            </a>
+                        </div>
+
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold text-zinc-100">Android TV APK</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">TV Box</span>
+                                </div>
+                                <p class="text-[11px] text-zinc-400" data-i18n="apkManagerDesc">Android TV ve Google TV cihazlar için açık kaynaklı NextDNS yöneticisi.</p>
+                            </div>
+                            <a href="https://github.com/doubleangels/nextdnsmanager/releases/latest" target="_blank" rel="noopener noreferrer" 
+                               class="w-full py-2 px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i> <span data-i18n="downloadApkBtn">APK İndir</span>
                             </a>
                         </div>
 
                         <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-3">
                             <div>
                                 <div class="flex items-center justify-between mb-1">
-                                    <span class="text-xs font-bold text-zinc-100" data-i18n="tvAdbTitle">Uygulamasız TV Kurulumu (ADB)</span>
+                                    <span class="text-xs font-bold text-zinc-100" data-i18n="tvAdbTitle">TV ADB Komutu</span>
                                     <span class="px-2 py-0.5 text-[10px] rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">ADB</span>
                                 </div>
-                                <p class="text-[11px] text-zinc-400" data-i18n="tvAdbDesc">TV'de APK kurmadan doğrudan sistem düzeyinde Özel DNS açmak için ADB komutu:</p>
+                                <p class="text-[11px] text-zinc-400" data-i18n="tvAdbDesc">TV'de uygulama kurmadan DNS açmak için:</p>
                             </div>
-                            <div class="bg-zinc-900 p-2.5 rounded-lg border border-zinc-800 font-mono text-[10px] text-amber-300 select-all overflow-x-auto">
+                            <div class="bg-zinc-900 p-2 rounded-lg border border-zinc-800 font-mono text-[9px] text-amber-300 select-all overflow-x-auto">
                                 adb shell settings put global private_dns_mode hostname<br>
                                 adb shell settings put global private_dns_specifier <span id="setup-tv-adb">------.dns.nextdns.io</span>
                             </div>
