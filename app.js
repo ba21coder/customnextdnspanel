@@ -5,7 +5,6 @@ let currentProfileId = '';
 let cachedLogs = [];
 let currentLang = localStorage.getItem('nextdns_lang') || 'tr';
 
-// Çeviri Sözlüğü (TR, EN, ES, ZH, DE)
 const translations = {
     tr: {
         loginSub: "Gelişmiş Ağ & DNS Yönetim Merkezi",
@@ -44,6 +43,13 @@ const translations = {
         privacySub: "Profilinizde aktif olan DNS filtre listeleri.",
         setupHeader: "Cihaz Kurulum Bilgileri",
         setupSub: "Seçili profili cihazlarınıza bağlamak için aşağıdaki uç noktaları kullanın.",
+        tvHeader: "Android TV & Mobil APK İndirme Merkezi",
+        tvSub: "Google Play olmayan TV Box ve Android TV cihazlar için doğrudan APK bağlantıları ve TV kurulumu.",
+        apkManagerDesc: "Android 11+ ve Google TV cihazlarda profil yönetimi ve istatistikler için açık kaynaklı istemci.",
+        apkClientDesc: "Özel DNS ayarı kapalı olan Android TV'lerde yerel VPN tüneli ile NextDNS'i aktif eder.",
+        downloadApkBtn: "APK İndir (GitHub)",
+        tvAdbTitle: "Uygulamasız TV Kurulumu (ADB)",
+        tvAdbDesc: "TV'de APK kurmadan doğrudan sistem düzeyinde Özel DNS açmak için ADB komutu:",
         allowedBadge: "İzin Verildi",
         blockedBadge: "Engellendi",
         allowBtn: "İzin Ver",
@@ -89,6 +95,13 @@ const translations = {
         privacySub: "DNS filter lists active in your profile.",
         setupHeader: "Device Setup Information",
         setupSub: "Use the endpoints below to connect the selected profile to your devices.",
+        tvHeader: "Android TV & Mobile APK Download Center",
+        tvSub: "Direct APK links and TV setup for Android TV & TV Boxes without Google Play.",
+        apkManagerDesc: "Open-source client for profile management and stats on Android 11+ and Google TV.",
+        apkClientDesc: "Activates NextDNS via local VPN tunnel on Android TVs lacking Private DNS settings.",
+        downloadApkBtn: "Download APK (GitHub)",
+        tvAdbTitle: "App-Free TV Setup (ADB)",
+        tvAdbDesc: "ADB command to enable system-level Private DNS on TV without installing an APK:",
         allowedBadge: "Allowed",
         blockedBadge: "Blocked",
         allowBtn: "Allow",
@@ -134,6 +147,13 @@ const translations = {
         privacySub: "Listas de filtros DNS activas en tu perfil.",
         setupHeader: "Información de Configuración",
         setupSub: "Usa los siguientes puntos finales para conectar tu perfil.",
+        tvHeader: "Centro de Descarga APK para Android TV",
+        tvSub: "Enlaces directos de APK y configuración para Android TV y TV Box.",
+        apkManagerDesc: "Cliente de código abierto para gestionar perfiles en Android 11+ y Google TV.",
+        apkClientDesc: "Activa NextDNS mediante túnel VPN local en Android TV sin DNS privado.",
+        downloadApkBtn: "Descargar APK (GitHub)",
+        tvAdbTitle: "Configuración TV sin App (ADB)",
+        tvAdbDesc: "Comando ADB para activar DNS privado a nivel de sistema en tu TV:",
         allowedBadge: "Permitido",
         blockedBadge: "Bloqueado",
         allowBtn: "Permitir",
@@ -179,6 +199,13 @@ const translations = {
         privacySub: "当前配置文件中激活的 DNS 过滤列表。",
         setupHeader: "设备安装信息",
         setupSub: "使用以下终端将选定的配置文件连接到您的设备。",
+        tvHeader: "Android TV 与手机 APK 下载中心",
+        tvSub: "适用于没有 Google Play 的电视盒和 Android TV 设备的直接 APK 链接和电视设置。",
+        apkManagerDesc: "适用于 Android 11+ 和 Google TV 的开源配置文件管理客户端。",
+        apkClientDesc: "在缺少私人 DNS 设置的 Android TV 上通过本地 VPN 隧道激活 NextDNS。",
+        downloadApkBtn: "下载 APK (GitHub)",
+        tvAdbTitle: "免应用电视设置 (ADB)",
+        tvAdbDesc: "无需安装 APK 即可在电视上启用系统级私人 DNS 的 ADB 命令：",
         allowedBadge: "允许",
         blockedBadge: "已拦截",
         allowBtn: "允许",
@@ -224,6 +251,13 @@ const translations = {
         privacySub: "In Ihrem Profil aktive DNS-Filterlisten.",
         setupHeader: "Geräteeinrichtung",
         setupSub: "Verwenden Sie die Endpunkte unten, um Ihr Profil zu verbinden.",
+        tvHeader: "Android TV & Mobile APK Download-Center",
+        tvSub: "Direkte APK-Links und TV-Einrichtung für Android TV & TV-Boxen ohne Google Play.",
+        apkManagerDesc: "Open-Source-Client für Profilverwaltung auf Android 11+ und Google TV.",
+        apkClientDesc: "Aktiviert NextDNS per lokalem VPN-Tunnel auf Android TVs ohne Private-DNS-Menü.",
+        downloadApkBtn: "APK herunterladen (GitHub)",
+        tvAdbTitle: "App-freie TV-Einrichtung (ADB)",
+        tvAdbDesc: "ADB-Befehl zum Aktivieren von Private DNS auf dem TV ohne APK:",
         allowedBadge: "Erlaubt",
         blockedBadge: "Blockiert",
         allowBtn: "Erlauben",
@@ -252,7 +286,6 @@ const POPULAR_SERVICES = [
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
 
-    // Dil seçicilerini senkronize et
     document.getElementById('lang-select').value = currentLang;
     document.getElementById('lang-select-login').value = currentLang;
     updateLanguageTexts(currentLang);
@@ -585,6 +618,7 @@ async function fetchPrivacyAndSetup(profileId) {
         document.getElementById('setup-dot').textContent = `${profileId}.dns.nextdns.io`;
         document.getElementById('setup-ipv6').innerHTML = (p.setup?.ipv6 || ['2a07:a8c0::']).map(ip => `<div>${ip}</div>`).join('');
         document.getElementById('setup-linked-ip').textContent = `IPv4: ${p.setup?.linkedIp?.ip || 'N/A'}`;
+        document.getElementById('setup-tv-adb').textContent = `${profileId}.dns.nextdns.io`;
     } catch (err) { console.error(err); }
 }
 
