@@ -12,7 +12,7 @@ const translations = {
         connectBtn: "Panele Bağlan",
         logoutBtn: "Çıkış",
         tabOverview: "Genel Bakış",
-        tabLogs: "Canlı Sorgular",
+        tabLogs: "Canlı Cihaz Trafiği",
         tabLists: "Kara & Beyaz Liste",
         tabParental: "Ebeveyn Kontrolü",
         tabPrivacy: "Gizlilik & Filtreler",
@@ -22,15 +22,15 @@ const translations = {
         statBlockRatio: "Engelleme Oranı",
         connectedDevices: "Bağlı Cihazlar (Clients)",
         topBlockedDomains: "En Çok Engellenen Alan Adları",
-        searchPlaceholder: "Alan adı veya cihaz ara...",
-        filterAll: "Tüm Sorgular",
+        searchPlaceholder: "Cihaz, IP veya alan adı ara...",
+        filterAll: "Tüm Trafik",
         filterBlocked: "Sadece Engellenenler",
         filterAllowed: "Sadece İzin Verilenler",
         refreshBtn: "Yenile",
         thTime: "Saat",
-        thDomain: "Alan Adı (Domain)",
-        thDevice: "Cihaz / IP",
-        thStatus: "Durum & Neden",
+        thDomain: "Ziyaret Edilen / Talep Edilen Adres",
+        thDevice: "Cihaz & IP Adresi",
+        thStatus: "Trafik Durumu",
         thProtocol: "Protokol",
         thAction: "Hızlı İşlem",
         denylistTitle: "Kara Liste (Denylist)",
@@ -67,7 +67,7 @@ const translations = {
         connectBtn: "Connect to Panel",
         logoutBtn: "Logout",
         tabOverview: "Overview",
-        tabLogs: "Live Logs",
+        tabLogs: "Live Device Traffic",
         tabLists: "Denylist & Allowlist",
         tabParental: "Parental Control",
         tabPrivacy: "Privacy & Filters",
@@ -77,15 +77,15 @@ const translations = {
         statBlockRatio: "Block Ratio",
         connectedDevices: "Connected Devices (Clients)",
         topBlockedDomains: "Top Blocked Domains",
-        searchPlaceholder: "Search domain or device...",
-        filterAll: "All Queries",
+        searchPlaceholder: "Search device, IP or domain...",
+        filterAll: "All Traffic",
         filterBlocked: "Blocked Only",
         filterAllowed: "Allowed Only",
         refreshBtn: "Refresh",
         thTime: "Time",
-        thDomain: "Domain",
-        thDevice: "Device / IP",
-        thStatus: "Status & Reason",
+        thDomain: "Visited / Requested Domain",
+        thDevice: "Device & IP",
+        thStatus: "Traffic Status",
         thProtocol: "Protocol",
         thAction: "Quick Action",
         denylistTitle: "Denylist",
@@ -122,7 +122,7 @@ const translations = {
         connectBtn: "Conectar al Panel",
         logoutBtn: "Cerrar Sesión",
         tabOverview: "Resumen",
-        tabLogs: "Registros en Vivo",
+        tabLogs: "Tráfico de Dispositivos en Vivo",
         tabLists: "Lista Negra y Blanca",
         tabParental: "Control Parental",
         tabPrivacy: "Privacidad y Filtros",
@@ -132,15 +132,15 @@ const translations = {
         statBlockRatio: "Tasa de Bloqueo",
         connectedDevices: "Dispositivos Conectados (Clientes)",
         topBlockedDomains: "Dominios Más Bloqueados",
-        searchPlaceholder: "Buscar dominio o dispositivo...",
-        filterAll: "Todas las Consultas",
+        searchPlaceholder: "Buscar dispositivo, IP o dominio...",
+        filterAll: "Todo el Tráfico",
         filterBlocked: "Solo Bloqueadas",
         filterAllowed: "Solo Permitidas",
         refreshBtn: "Actualizar",
         thTime: "Hora",
-        thDomain: "Dominio",
-        thDevice: "Dispositivo / IP",
-        thStatus: "Estado y Motivo",
+        thDomain: "Dominio Visitado / Solicitado",
+        thDevice: "Dispositivo y IP",
+        thStatus: "Estado del Tráfico",
         thProtocol: "Protocolo",
         thAction: "Acción Rápida",
         denylistTitle: "Lista Negra (Denylist)",
@@ -177,7 +177,7 @@ const translations = {
         connectBtn: "连接到面板",
         logoutBtn: "登出",
         tabOverview: "概览",
-        tabLogs: "实时日志",
+        tabLogs: "实时设备流量",
         tabLists: "黑白名单",
         tabParental: "家长控制",
         tabPrivacy: "隐私与过滤",
@@ -187,15 +187,15 @@ const translations = {
         statBlockRatio: "拦截率",
         connectedDevices: "已连接设备 (客户端)",
         topBlockedDomains: "最常拦截的域",
-        searchPlaceholder: "搜索域或设备...",
-        filterAll: "所有查询",
+        searchPlaceholder: "搜索设备、IP 或域...",
+        filterAll: "所有流量",
         filterBlocked: "仅已拦截",
         filterAllowed: "仅允许",
         refreshBtn: "刷新",
         thTime: "时间",
-        thDomain: "域",
-        thDevice: "设备 / IP",
-        thStatus: "状态与原因",
+        thDomain: "访问 / 请求的域",
+        thDevice: "设备与 IP",
+        thStatus: "流量状态",
         thProtocol: "协议",
         thAction: "快捷操作",
         denylistTitle: "黑名单 (Denylist)",
@@ -232,7 +232,7 @@ const translations = {
         connectBtn: "Mit Panel verbinden",
         logoutBtn: "Abmelden",
         tabOverview: "Übersicht",
-        tabLogs: "Live-Protokolle",
+        tabLogs: "Live-Geräteverkehr",
         tabLists: "Blacklist & Whitelist",
         tabParental: "Kindersicherung",
         tabPrivacy: "Datenschutz & Filter",
@@ -242,15 +242,15 @@ const translations = {
         statBlockRatio: "Blockierrate",
         connectedDevices: "Verbundene Geräte (Clients)",
         topBlockedDomains: "Meistblockierte Domains",
-        searchPlaceholder: "Domain oder Gerät suchen...",
-        filterAll: "Alle Abfragen",
+        searchPlaceholder: "Gerät, IP oder Domain suchen...",
+        filterAll: "Gesamter Datenverkehr",
         filterBlocked: "Nur Blockierte",
         filterAllowed: "Nur Erlaubte",
         refreshBtn: "Aktualisieren",
         thTime: "Uhrzeit",
-        thDomain: "Domain",
-        thDevice: "Gerät / IP",
-        thStatus: "Status & Grund",
+        thDomain: "Besuchte / Angefragte Domain",
+        thDevice: "Gerät & IP",
+        thStatus: "Status",
         thProtocol: "Protokoll",
         thAction: "Aktion",
         denylistTitle: "Blacklist (Denylist)",
@@ -529,11 +529,11 @@ async function fetchOverviewStats(profileId) {
 async function fetchLogs(profileId) {
     const tbody = document.getElementById('logs-table-body');
     try {
-        const res = await apiFetch(`/profiles/${profileId}/logs?limit=50`);
+        const res = await apiFetch(`/profiles/${profileId}/logs?limit=100`);
         cachedLogs = res.data || [];
         filterAndRenderLogs();
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Error loading logs.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Loglar yüklenemedi.</td></tr>`;
     }
 }
 
@@ -545,18 +545,24 @@ function filterAndRenderLogs() {
 
     const filtered = cachedLogs.filter(log => {
         const domain = (log.domain || log.name || '').toLowerCase();
-        const device = (log.device?.name || log.client || '').toLowerCase();
-        return (domain.includes(query) || device.includes(query)) && (filter === 'all' || log.status === filter);
+        const deviceName = (log.device?.name || '').toLowerCase();
+        const clientIp = (log.clientIp || log.client || '').toLowerCase();
+        
+        const matchesQuery = domain.includes(query) || deviceName.includes(query) || clientIp.includes(query);
+        const matchesFilter = filter === 'all' || log.status === filter;
+        
+        return matchesQuery && matchesFilter;
     });
 
     if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-zinc-500">--</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-zinc-500">Eşleşen cihaz aktivitesi bulunamadı.</td></tr>`;
         return;
     }
 
     tbody.innerHTML = filtered.map(log => {
         const domain = log.domain || log.name || 'Bilinmiyor';
-        const deviceName = log.device?.name || log.clientIp || log.client || 'Tanımsız';
+        const deviceName = log.device?.name || 'İsimsiz Cihaz';
+        const clientIp = log.clientIp || log.client || 'IP Yok';
         const timeStr = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '--:--';
         const isBlocked = log.status === 'blocked';
         const reason = log.reasons && log.reasons.length > 0 ? log.reasons[0].name : '';
@@ -573,7 +579,10 @@ function filterAndRenderLogs() {
             <tr class="hover:bg-zinc-900/50 transition">
                 <td class="px-5 py-3 text-zinc-400 whitespace-nowrap">${timeStr}</td>
                 <td class="px-5 py-3 font-mono text-zinc-100 font-medium">${domain}</td>
-                <td class="px-5 py-3 text-zinc-400">${deviceName}</td>
+                <td class="px-5 py-3">
+                    <div class="text-zinc-200 font-medium">${deviceName}</div>
+                    <div class="text-[10px] text-zinc-500 font-mono">${clientIp}</div>
+                </td>
                 <td class="px-5 py-3">${statusBadge}</td>
                 <td class="px-5 py-3"><span class="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[10px] font-mono uppercase text-zinc-400">${log.protocol || 'DNS'}</span></td>
                 <td class="px-5 py-3 text-right">${quickAction}</td>
@@ -696,5 +705,5 @@ async function fetchPrivacyAndSetup(profileId) {
 function showError(msg) {
     const el = document.getElementById('login-error');
     el.textContent = msg;
-    el.classList.remove('hidden');
+    el.classList.add('hidden');
 }
