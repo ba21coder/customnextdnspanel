@@ -3,8 +3,237 @@ const PROXY_URL = 'https://nextdns-proxy.batuhan-gulsen15.workers.dev';
 let apiKey = localStorage.getItem('nextdns_api_key') || '';
 let currentProfileId = '';
 let cachedLogs = [];
+let currentLang = localStorage.getItem('nextdns_lang') || 'tr';
 
-// Engellenebilir Popüler Servisler (GAMAF & Sosyal Medya)
+// Çeviri Sözlüğü (TR, EN, ES, ZH, DE)
+const translations = {
+    tr: {
+        loginSub: "Gelişmiş Ağ & DNS Yönetim Merkezi",
+        apiKeyLabel: "NextDNS API Anahtarı",
+        connectBtn: "Panele Bağlan",
+        logoutBtn: "Çıkış",
+        tabOverview: "Genel Bakış",
+        tabLogs: "Canlı Sorgular",
+        tabLists: "Kara & Beyaz Liste",
+        tabParental: "Ebeveyn Kontrolü",
+        tabPrivacy: "Gizlilik & Filtreler",
+        tabSetup: "Kurulum",
+        statTotalQueries: "Toplam DNS Sorgusu",
+        statBlockedQueries: "Engellenen Sorgular",
+        statBlockRatio: "Engelleme Oranı",
+        connectedDevices: "Bağlı Cihazlar (Clients)",
+        topBlockedDomains: "En Çok Engellenen Alan Adları",
+        searchPlaceholder: "Alan adı veya cihaz ara...",
+        filterAll: "Tüm Sorgular",
+        filterBlocked: "Sadece Engellenenler",
+        filterAllowed: "Sadece İzin Verilenler",
+        refreshBtn: "Yenile",
+        thTime: "Saat",
+        thDomain: "Alan Adı (Domain)",
+        thDevice: "Cihaz / IP",
+        thStatus: "Durum & Neden",
+        thProtocol: "Protokol",
+        thAction: "Hızlı İşlem",
+        denylistTitle: "Kara Liste (Denylist)",
+        allowlistTitle: "Beyaz Liste (Allowlist)",
+        btnBlock: "Engelle",
+        btnAllow: "İzin Ver",
+        parentalHeader: "Uygulama & Oyun Engelleme (GAMAF / Servisler)",
+        parentalSub: "Tek tıkla popüler sosyal medya, oyun ve platformların DNS erişimini kesin.",
+        privacyHeader: "Aktif Reklam & İzleyici Engelleyici Listeler",
+        privacySub: "Profilinizde aktif olan DNS filtre listeleri.",
+        setupHeader: "Cihaz Kurulum Bilgileri",
+        setupSub: "Seçili profili cihazlarınıza bağlamak için aşağıdaki uç noktaları kullanın.",
+        allowedBadge: "İzin Verildi",
+        blockedBadge: "Engellendi",
+        allowBtn: "İzin Ver",
+        blockBtn: "Engelle",
+        active: "Aktif",
+        blocked: "Engelli",
+        open: "Açık"
+    },
+    en: {
+        loginSub: "Advanced Network & DNS Management Center",
+        apiKeyLabel: "NextDNS API Key",
+        connectBtn: "Connect to Panel",
+        logoutBtn: "Logout",
+        tabOverview: "Overview",
+        tabLogs: "Live Logs",
+        tabLists: "Denylist & Allowlist",
+        tabParental: "Parental Control",
+        tabPrivacy: "Privacy & Filters",
+        tabSetup: "Setup",
+        statTotalQueries: "Total DNS Queries",
+        statBlockedQueries: "Blocked Queries",
+        statBlockRatio: "Block Ratio",
+        connectedDevices: "Connected Devices (Clients)",
+        topBlockedDomains: "Top Blocked Domains",
+        searchPlaceholder: "Search domain or device...",
+        filterAll: "All Queries",
+        filterBlocked: "Blocked Only",
+        filterAllowed: "Allowed Only",
+        refreshBtn: "Refresh",
+        thTime: "Time",
+        thDomain: "Domain",
+        thDevice: "Device / IP",
+        thStatus: "Status & Reason",
+        thProtocol: "Protocol",
+        thAction: "Quick Action",
+        denylistTitle: "Denylist",
+        allowlistTitle: "Allowlist",
+        btnBlock: "Block",
+        btnAllow: "Allow",
+        parentalHeader: "App & Game Blocking (GAMAF / Services)",
+        parentalSub: "Cut off DNS access to popular social media, games and platforms with one click.",
+        privacyHeader: "Active Ad & Tracker Blocker Lists",
+        privacySub: "DNS filter lists active in your profile.",
+        setupHeader: "Device Setup Information",
+        setupSub: "Use the endpoints below to connect the selected profile to your devices.",
+        allowedBadge: "Allowed",
+        blockedBadge: "Blocked",
+        allowBtn: "Allow",
+        blockBtn: "Block",
+        active: "Active",
+        blocked: "Blocked",
+        open: "Open"
+    },
+    es: {
+        loginSub: "Centro de Gestión Avanzada de Red y DNS",
+        apiKeyLabel: "Clave API de NextDNS",
+        connectBtn: "Conectar al Panel",
+        logoutBtn: "Cerrar Sesión",
+        tabOverview: "Resumen",
+        tabLogs: "Registros en Vivo",
+        tabLists: "Lista Negra y Blanca",
+        tabParental: "Control Parental",
+        tabPrivacy: "Privacidad y Filtros",
+        tabSetup: "Configuración",
+        statTotalQueries: "Consultas DNS Totales",
+        statBlockedQueries: "Consultas Bloqueadas",
+        statBlockRatio: "Tasa de Bloqueo",
+        connectedDevices: "Dispositivos Conectados (Clientes)",
+        topBlockedDomains: "Dominios Más Bloqueados",
+        searchPlaceholder: "Buscar dominio o dispositivo...",
+        filterAll: "Todas las Consultas",
+        filterBlocked: "Solo Bloqueadas",
+        filterAllowed: "Solo Permitidas",
+        refreshBtn: "Actualizar",
+        thTime: "Hora",
+        thDomain: "Dominio",
+        thDevice: "Dispositivo / IP",
+        thStatus: "Estado y Motivo",
+        thProtocol: "Protocolo",
+        thAction: "Acción Rápida",
+        denylistTitle: "Lista Negra (Denylist)",
+        allowlistTitle: "Lista Blanca (Allowlist)",
+        btnBlock: "Bloquear",
+        btnAllow: "Permitir",
+        parentalHeader: "Bloqueo de Apps y Juegos (GAMAF)",
+        parentalSub: "Corta el acceso DNS a redes sociales, juegos y plataformas con un solo clic.",
+        privacyHeader: "Listas de Bloqueo de Anuncios y Rastreadores",
+        privacySub: "Listas de filtros DNS activas en tu perfil.",
+        setupHeader: "Información de Configuración",
+        setupSub: "Usa los siguientes puntos finales para conectar tu perfil.",
+        allowedBadge: "Permitido",
+        blockedBadge: "Bloqueado",
+        allowBtn: "Permitir",
+        blockBtn: "Bloquear",
+        active: "Activo",
+        blocked: "Bloqueado",
+        open: "Abierto"
+    },
+    zh: {
+        loginSub: "高级网络与 DNS 管理中心",
+        apiKeyLabel: "NextDNS API 密钥",
+        connectBtn: "连接到面板",
+        logoutBtn: "登出",
+        tabOverview: "概览",
+        tabLogs: "实时日志",
+        tabLists: "黑白名单",
+        tabParental: "家长控制",
+        tabPrivacy: "隐私与过滤",
+        tabSetup: "设置",
+        statTotalQueries: "DNS 查询总数",
+        statBlockedQueries: "已拦截查询",
+        statBlockRatio: "拦截率",
+        connectedDevices: "已连接设备 (客户端)",
+        topBlockedDomains: "最常拦截的域",
+        searchPlaceholder: "搜索域或设备...",
+        filterAll: "所有查询",
+        filterBlocked: "仅已拦截",
+        filterAllowed: "仅允许",
+        refreshBtn: "刷新",
+        thTime: "时间",
+        thDomain: "域",
+        thDevice: "设备 / IP",
+        thStatus: "状态与原因",
+        thProtocol: "协议",
+        thAction: "快捷操作",
+        denylistTitle: "黑名单 (Denylist)",
+        allowlistTitle: "白名单 (Allowlist)",
+        btnBlock: "拦截",
+        btnAllow: "允许",
+        parentalHeader: "应用与游戏拦截 (GAMAF / 服务)",
+        parentalSub: "一键切断对热门社交媒体、游戏和平台的 DNS 访问。",
+        privacyHeader: "广告与跟踪器拦截列表",
+        privacySub: "当前配置文件中激活的 DNS 过滤列表。",
+        setupHeader: "设备安装信息",
+        setupSub: "使用以下终端将选定的配置文件连接到您的设备。",
+        allowedBadge: "允许",
+        blockedBadge: "已拦截",
+        allowBtn: "允许",
+        blockBtn: "拦截",
+        active: "活跃",
+        blocked: "已拦截",
+        open: "开启"
+    },
+    de: {
+        loginSub: "Erweitertes Netzwerk- und DNS-Verwaltungszentrum",
+        apiKeyLabel: "NextDNS API-Schlüssel",
+        connectBtn: "Mit Panel verbinden",
+        logoutBtn: "Abmelden",
+        tabOverview: "Übersicht",
+        tabLogs: "Live-Protokolle",
+        tabLists: "Blacklist & Whitelist",
+        tabParental: "Kindersicherung",
+        tabPrivacy: "Datenschutz & Filter",
+        tabSetup: "Einrichtung",
+        statTotalQueries: "DNS-Gesamtabfragen",
+        statBlockedQueries: "Blockierte Abfragen",
+        statBlockRatio: "Blockierrate",
+        connectedDevices: "Verbundene Geräte (Clients)",
+        topBlockedDomains: "Meistblockierte Domains",
+        searchPlaceholder: "Domain oder Gerät suchen...",
+        filterAll: "Alle Abfragen",
+        filterBlocked: "Nur Blockierte",
+        filterAllowed: "Nur Erlaubte",
+        refreshBtn: "Aktualisieren",
+        thTime: "Uhrzeit",
+        thDomain: "Domain",
+        thDevice: "Gerät / IP",
+        thStatus: "Status & Grund",
+        thProtocol: "Protokoll",
+        thAction: "Aktion",
+        denylistTitle: "Blacklist (Denylist)",
+        allowlistTitle: "Whitelist (Allowlist)",
+        btnBlock: "Blockieren",
+        btnAllow: "Erlauben",
+        parentalHeader: "App- & Spielesperre (GAMAF / Dienste)",
+        parentalSub: "Sperren Sie mit einem Klick den DNS-Zugriff auf soziale Medien und Spiele.",
+        privacyHeader: "Werbe- & Tracker-Blocker-Listen",
+        privacySub: "In Ihrem Profil aktive DNS-Filterlisten.",
+        setupHeader: "Geräteeinrichtung",
+        setupSub: "Verwenden Sie die Endpunkte unten, um Ihr Profil zu verbinden.",
+        allowedBadge: "Erlaubt",
+        blockedBadge: "Blockiert",
+        allowBtn: "Erlauben",
+        blockBtn: "Blockieren",
+        active: "Aktiv",
+        blocked: "Blockiert",
+        open: "Offen"
+    }
+};
+
 const POPULAR_SERVICES = [
     { id: 'tiktok', name: 'TikTok' },
     { id: 'instagram', name: 'Instagram' },
@@ -23,12 +252,19 @@ const POPULAR_SERVICES = [
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
 
+    // Dil seçicilerini senkronize et
+    document.getElementById('lang-select').value = currentLang;
+    document.getElementById('lang-select-login').value = currentLang;
+    updateLanguageTexts(currentLang);
+
+    document.getElementById('lang-select').addEventListener('change', (e) => changeLanguage(e.target.value));
+    document.getElementById('lang-select-login').addEventListener('change', (e) => changeLanguage(e.target.value));
+
     if (apiKey) {
         document.getElementById('api-key-input').value = apiKey;
         checkLogin(apiKey);
     }
 
-    // Giriş / Çıkış
     document.getElementById('login-btn').addEventListener('click', () => {
         const key = document.getElementById('api-key-input').value.trim();
         if (!key) return showError('Lütfen geçerli bir API anahtarı girin.');
@@ -42,7 +278,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('login-screen').classList.remove('hidden');
     });
 
-    // Profil ve Yenileme
     document.getElementById('profile-select').addEventListener('change', (e) => {
         currentProfileId = e.target.value;
         loadAllProfileData(currentProfileId);
@@ -52,7 +287,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentProfileId) loadAllProfileData(currentProfileId);
     });
 
-    // Sekme Geçişleri
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn').forEach(b => {
@@ -68,11 +302,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Log Filtreleme & Arama
     document.getElementById('log-search').addEventListener('input', filterAndRenderLogs);
     document.getElementById('log-filter').addEventListener('change', filterAndRenderLogs);
     document.getElementById('reload-logs-btn').addEventListener('click', () => fetchLogs(currentProfileId));
 });
+
+function changeLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('nextdns_lang', lang);
+    document.getElementById('lang-select').value = lang;
+    document.getElementById('lang-select-login').value = lang;
+    updateLanguageTexts(lang);
+    if (currentProfileId) loadAllProfileData(currentProfileId);
+}
+
+function updateLanguageTexts(lang) {
+    const t = translations[lang] || translations.tr;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key]) el.textContent = t[key];
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (t[key]) el.placeholder = t[key];
+    });
+}
 
 async function apiFetch(endpoint, options = {}) {
     const res = await fetch(`${PROXY_URL}${endpoint}`, {
@@ -126,7 +380,6 @@ async function loadAllProfileData(profileId) {
     fetchPrivacyAndSetup(profileId);
 }
 
-// 1. GENEL BAKIŞ & CİHAZLAR
 async function fetchOverviewStats(profileId) {
     try {
         const statusRes = await apiFetch(`/profiles/${profileId}/analytics/status`);
@@ -142,21 +395,19 @@ async function fetchOverviewStats(profileId) {
         document.getElementById('stat-blocked').textContent = blocked.toLocaleString();
         document.getElementById('stat-ratio').textContent = `${ratio}%`;
 
-        // Cihazlar (Devices)
         const devRes = await apiFetch(`/profiles/${profileId}/analytics/devices`);
         const devContainer = document.getElementById('devices-list');
         if (devRes.data && devRes.data.length > 0) {
             devContainer.innerHTML = devRes.data.map(d => `
                 <div class="flex items-center justify-between p-2.5 bg-zinc-950/60 border border-zinc-800/60 rounded-lg">
                     <span class="font-medium text-zinc-200">${d.name || d.id || 'Bilinmeyen Cihaz'}</span>
-                    <span class="font-mono text-blue-400">${(d.queries || 0).toLocaleString()} sorgu</span>
+                    <span class="font-mono text-blue-400">${(d.queries || 0).toLocaleString()}</span>
                 </div>
             `).join('');
         } else {
-            devContainer.innerHTML = '<p class="text-zinc-500">Kayıtlı cihaz verisi bulunamadı.</p>';
+            devContainer.innerHTML = '<p class="text-zinc-500">--</p>';
         }
 
-        // En çok engellenenler
         const topRes = await apiFetch(`/profiles/${profileId}/analytics/domains?status=blocked&limit=6`);
         const topContainer = document.getElementById('top-blocked-list');
         if (topRes.data && topRes.data.length > 0) {
@@ -167,23 +418,21 @@ async function fetchOverviewStats(profileId) {
                 </div>
             `).join('');
         } else {
-            topContainer.innerHTML = '<p class="text-zinc-500">Henüz engellenen alan adı yok.</p>';
+            topContainer.innerHTML = '<p class="text-zinc-500">--</p>';
         }
     } catch (err) {
-        console.error('İstatistik hatası:', err);
+        console.error(err);
     }
 }
 
-// 2. CANLI SORGULAR (LOGS)
 async function fetchLogs(profileId) {
     const tbody = document.getElementById('logs-table-body');
-    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-zinc-500">Canlı veriler çekiliyor...</td></tr>`;
     try {
         const res = await apiFetch(`/profiles/${profileId}/logs?limit=50`);
         cachedLogs = res.data || [];
         filterAndRenderLogs();
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Loglar yüklenemedi.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Error loading logs.</td></tr>`;
     }
 }
 
@@ -191,34 +440,33 @@ function filterAndRenderLogs() {
     const query = document.getElementById('log-search').value.toLowerCase();
     const filter = document.getElementById('log-filter').value;
     const tbody = document.getElementById('logs-table-body');
+    const t = translations[currentLang] || translations.tr;
 
     const filtered = cachedLogs.filter(log => {
         const domain = (log.domain || log.name || '').toLowerCase();
         const device = (log.device?.name || log.client || '').toLowerCase();
-        const matchesSearch = domain.includes(query) || device.includes(query);
-        const matchesStatus = filter === 'all' || log.status === filter;
-        return matchesSearch && matchesStatus;
+        return (domain.includes(query) || device.includes(query)) && (filter === 'all' || log.status === filter);
     });
 
     if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-zinc-500">Eşleşen kayıt bulunamadı.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-zinc-500">--</td></tr>`;
         return;
     }
 
     tbody.innerHTML = filtered.map(log => {
         const domain = log.domain || log.name || 'Bilinmiyor';
-        const deviceName = log.device?.name || log.clientIp || log.client || 'Tanımsız Aygıt';
-        const timeStr = log.timestamp ? new Date(log.timestamp).toLocaleTimeString('tr-TR') : '--:--';
+        const deviceName = log.device?.name || log.clientIp || log.client || 'Tanımsız';
+        const timeStr = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '--:--';
         const isBlocked = log.status === 'blocked';
         const reason = log.reasons && log.reasons.length > 0 ? log.reasons[0].name : '';
 
         const statusBadge = isBlocked
-            ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] bg-red-500/10 text-red-400 border border-red-500/20">Engellendi ${reason ? `(${reason})` : ''}</span>`
-            : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">İzin Verildi</span>`;
+            ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] bg-red-500/10 text-red-400 border border-red-500/20">${t.blockedBadge} ${reason ? `(${reason})` : ''}</span>`
+            : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${t.allowedBadge}</span>`;
 
         const quickAction = isBlocked
-            ? `<button onclick="quickRule('allowlist', '${domain}')" class="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded text-[11px]">İzin Ver</button>`
-            : `<button onclick="quickRule('denylist', '${domain}')" class="px-2.5 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded text-[11px]">Engelle</button>`;
+            ? `<button onclick="quickRule('allowlist', '${domain}')" class="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded text-[11px]">${t.allowBtn}</button>`
+            : `<button onclick="quickRule('denylist', '${domain}')" class="px-2.5 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded text-[11px]">${t.blockBtn}</button>`;
 
         return `
             <tr class="hover:bg-zinc-900/50 transition">
@@ -233,25 +481,21 @@ function filterAndRenderLogs() {
     }).join('');
 }
 
-// 3. KARA LİSTE & BEYAZ LİSTE
 async function fetchLists(profileId) {
     try {
         const [denyRes, allowRes] = await Promise.all([
             apiFetch(`/profiles/${profileId}/denylist`),
             apiFetch(`/profiles/${profileId}/allowlist`)
         ]);
-
         renderRuleList('denylist', denyRes.data || []);
         renderRuleList('allowlist', allowRes.data || []);
-    } catch (err) {
-        console.error('Liste yükleme hatası:', err);
-    }
+    } catch (err) { console.error(err); }
 }
 
 function renderRuleList(type, items) {
     const container = document.getElementById(`${type}-items`);
     if (items.length === 0) {
-        container.innerHTML = `<p class="text-zinc-500 py-4 text-center">Liste şu an boş.</p>`;
+        container.innerHTML = `<p class="text-zinc-500 py-2">--</p>`;
         return;
     }
     container.innerHTML = items.map(item => `
@@ -266,7 +510,6 @@ async function addDomainRule(type) {
     const input = document.getElementById(type === 'denylist' ? 'deny-input' : 'allow-input');
     const domain = input.value.trim();
     if (!domain) return;
-
     await quickRule(type, domain);
     input.value = '';
 }
@@ -278,24 +521,19 @@ async function quickRule(type, domain) {
             body: JSON.stringify({ id: domain, active: true })
         });
         fetchLists(currentProfileId);
-        alert(`${domain} başarıyla ${type === 'denylist' ? 'Kara Listeye' : 'Beyaz Listeye'} eklendi!`);
-    } catch (err) {
-        alert('İşlem başarısız oldu.');
-    }
+    } catch (err) { alert('Error'); }
 }
 
 async function removeDomainRule(type, domain) {
     try {
         await apiFetch(`/profiles/${currentProfileId}/${type}/${domain}`, { method: 'DELETE' });
         fetchLists(currentProfileId);
-    } catch (err) {
-        alert('Silme işlemi başarısız.');
-    }
+    } catch (err) { alert('Error'); }
 }
 
-// 4. EBEVEYN KONTROLÜ (GAMAF / SERVİSLER)
 async function fetchParentalServices(profileId) {
     const grid = document.getElementById('parental-services-grid');
+    const t = translations[currentLang] || translations.tr;
     try {
         const res = await apiFetch(`/profiles/${profileId}/parentalControl`);
         const activeServices = (res.data?.services || []).map(s => s.id);
@@ -306,14 +544,12 @@ async function fetchParentalServices(profileId) {
                 <div class="flex items-center justify-between p-3.5 bg-zinc-950 border ${isBlocked ? 'border-red-500/40 bg-red-500/5' : 'border-zinc-800'} rounded-xl">
                     <span class="text-xs font-medium ${isBlocked ? 'text-red-300' : 'text-zinc-200'}">${srv.name}</span>
                     <button onclick="toggleService('${srv.id}', ${isBlocked})" class="px-2.5 py-1 rounded-lg text-[11px] font-medium transition ${isBlocked ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}">
-                        ${isBlocked ? 'Engelli' : 'Açık'}
+                        ${isBlocked ? t.blocked : t.open}
                     </button>
                 </div>
             `;
         }).join('');
-    } catch (err) {
-        grid.innerHTML = '<p class="text-xs text-zinc-500">Ebeveyn kontrolü verileri alınamadı.</p>';
-    }
+    } catch (err) { grid.innerHTML = '<p class="text-xs text-zinc-500">--</p>'; }
 }
 
 async function toggleService(serviceId, currentlyBlocked) {
@@ -327,43 +563,29 @@ async function toggleService(serviceId, currentlyBlocked) {
             });
         }
         fetchParentalServices(currentProfileId);
-    } catch (err) {
-        alert('Servis durumu güncellenemedi.');
-    }
+    } catch (err) { alert('Error'); }
 }
 
-// 5. GİZLİLİK & KURULUM (SETUP)
 async function fetchPrivacyAndSetup(profileId) {
     try {
         const profileRes = await apiFetch(`/profiles/${profileId}`);
         const p = profileRes.data || {};
+        const t = translations[currentLang] || translations.tr;
 
-        // Gizlilik Listeleri
         const blocklists = p.privacy?.blocklists || [];
         const privContainer = document.getElementById('privacy-lists');
-        if (blocklists.length > 0) {
-            privContainer.innerHTML = blocklists.map(b => `
-                <div class="flex items-center justify-between p-3 bg-zinc-950 border border-zinc-800 rounded-xl">
-                    <span class="font-mono text-zinc-200">${b.id}</span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Aktif</span>
-                </div>
-            `).join('');
-        } else {
-            privContainer.innerHTML = '<p class="text-zinc-500">Aktif gizlilik listesi bulunamadı.</p>';
-        }
+        privContainer.innerHTML = blocklists.length > 0 ? blocklists.map(b => `
+            <div class="flex items-center justify-between p-3 bg-zinc-950 border border-zinc-800 rounded-xl">
+                <span class="font-mono text-zinc-200">${b.id}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${t.active}</span>
+            </div>
+        `).join('') : '<p class="text-zinc-500">--</p>';
 
-        // Kurulum (Setup) Bilgileri
         document.getElementById('setup-doh').textContent = `https://dns.nextdns.io/${profileId}`;
         document.getElementById('setup-dot').textContent = `${profileId}.dns.nextdns.io`;
-        
-        const ipv6 = p.setup?.ipv6 || ['2a07:a8c0::', '2a07:a8c1::'];
-        document.getElementById('setup-ipv6').innerHTML = ipv6.map(ip => `<div>${ip}</div>`).join('');
-
-        const linkedIp = p.setup?.linkedIp?.ip || 'Tanımlanmamış';
-        document.getElementById('setup-linked-ip').textContent = `Kayıtlı IPv4: ${linkedIp}`;
-    } catch (err) {
-        console.error('Kurulum bilgisi hatası:', err);
-    }
+        document.getElementById('setup-ipv6').innerHTML = (p.setup?.ipv6 || ['2a07:a8c0::']).map(ip => `<div>${ip}</div>`).join('');
+        document.getElementById('setup-linked-ip').textContent = `IPv4: ${p.setup?.linkedIp?.ip || 'N/A'}`;
+    } catch (err) { console.error(err); }
 }
 
 function showError(msg) {
