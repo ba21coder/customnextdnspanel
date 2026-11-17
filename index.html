@@ -1,6 +1,232 @@
-<!-- 6. KURULUM -->
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextDNS Kontrol Merkezi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-sans antialiased selection:bg-blue-500/30 selection:text-blue-200">
+
+    <!-- Giriş Ekranı -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md glass-card p-8 space-y-6 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight">NextDNS Panel</h1>
+                        <p class="text-xs text-zinc-400" data-i18n="loginSub">Gelişmiş Ağ & DNS Yönetim Merkezi</p>
+                    </div>
+                </div>
+                <select id="lang-select-login" class="bg-zinc-950 border border-zinc-800 text-xs rounded-lg px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-blue-500">
+                    <option value="tr">🇹🇷 TR</option>
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="de">🇩🇪 DE</option>
+                </select>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1.5" data-i18n="apiKeyLabel">NextDNS API Anahtarı</label>
+                    <input type="password" id="api-key-input" placeholder="API anahtarınızı yapıştırın..." 
+                        class="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition font-mono">
+                </div>
+                <p id="login-error" class="text-xs text-red-400 hidden"></p>
+                <button id="login-btn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl text-sm transition shadow-lg shadow-blue-600/20" data-i18n="connectBtn">
+                    Panele Bağlan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ana Dashboard Ekranı -->
+    <div id="dashboard-screen" class="hidden min-h-screen flex flex-col">
+        <header class="sticky top-0 z-30 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/80 px-6 py-3.5">
+            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                        <i data-lucide="activity" class="w-4 h-4"></i>
+                    </div>
+                    <span class="font-bold text-sm tracking-wide">NextDNS<span class="text-blue-500">PRO</span></span>
+                    <span class="text-zinc-700">|</span>
+                    <select id="profile-select" class="bg-zinc-900 border border-zinc-800 text-xs rounded-lg px-3 py-1.5 text-zinc-200 focus:outline-none focus:border-blue-500"></select>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <select id="lang-select" class="bg-zinc-900 border border-zinc-800 text-xs rounded-lg px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-blue-500">
+                        <option value="tr">🇹🇷 TR</option>
+                        <option value="en">🇬🇧 EN</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="zh">🇨🇳 中文</option>
+                        <option value="de">🇩🇪 DE</option>
+                    </select>
+                    <button id="refresh-btn" class="p-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-zinc-400 hover:text-white transition" title="Yenile">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    </button>
+                    <button id="logout-btn" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-lg text-xs font-medium transition" data-i18n="logoutBtn">
+                        Çıkış
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <nav class="bg-zinc-900/40 border-b border-zinc-800/80 px-6 overflow-x-auto">
+            <div class="max-w-7xl mx-auto flex items-center gap-1" id="nav-tabs">
+                <button data-tab="overview" class="tab-btn active px-4 py-3 text-xs font-medium border-b-2 border-blue-500 text-blue-400 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> <span data-i18n="tabOverview">Genel Bakış</span>
+                </button>
+                <button data-tab="logs" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="list-filter" class="w-3.5 h-3.5"></i> <span data-i18n="tabLogs">Canlı Sorgular</span>
+                </button>
+                <button data-tab="lists" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="shield-ban" class="w-3.5 h-3.5"></i> <span data-i18n="tabLists">Kara & Beyaz Liste</span>
+                </button>
+                <button data-tab="parental" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="lock" class="w-3.5 h-3.5"></i> <span data-i18n="tabParental">Ebeveyn Kontrolü</span>
+                </button>
+                <button data-tab="privacy" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="eye-off" class="w-3.5 h-3.5"></i> <span data-i18n="tabPrivacy">Gizlilik & Filtreler</span>
+                </button>
+                <button data-tab="setup" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="terminal" class="w-3.5 h-3.5"></i> <span data-i18n="tabSetup">Kurulum</span>
+                </button>
+            </div>
+        </nav>
+
+        <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+            <!-- 1. GENEL BAKIŞ -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass-card p-5">
+                        <div class="flex items-center justify-between text-zinc-400 text-xs mb-2">
+                            <span data-i18n="statTotalQueries">Toplam DNS Sorgusu</span>
+                            <i data-lucide="globe" class="w-4 h-4 text-blue-400"></i>
+                        </div>
+                        <div id="stat-total" class="text-2xl font-bold font-mono">--</div>
+                    </div>
+                    <div class="glass-card p-5">
+                        <div class="flex items-center justify-between text-zinc-400 text-xs mb-2">
+                            <span data-i18n="statBlockedQueries">Engellenen Sorgular</span>
+                            <i data-lucide="shield-alert" class="w-4 h-4 text-red-400"></i>
+                        </div>
+                        <div id="stat-blocked" class="text-2xl font-bold font-mono text-red-400">--</div>
+                    </div>
+                    <div class="glass-card p-5">
+                        <div class="flex items-center justify-between text-zinc-400 text-xs mb-2">
+                            <span data-i18n="statBlockRatio">Engelleme Oranı</span>
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-400"></i>
+                        </div>
+                        <div id="stat-ratio" class="text-2xl font-bold font-mono text-emerald-400">--%</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-card p-5">
+                        <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+                            <i data-lucide="smartphone" class="w-4 h-4 text-blue-400"></i> <span data-i18n="connectedDevices">Bağlı Cihazlar (Clients)</span>
+                        </h3>
+                        <div id="devices-list" class="space-y-2.5 text-xs text-zinc-400">Yükleniyor...</div>
+                    </div>
+                    <div class="glass-card p-5">
+                        <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+                            <i data-lucide="flame" class="w-4 h-4 text-orange-400"></i> <span data-i18n="topBlockedDomains">En Çok Engellenen Alan Adları</span>
+                        </h3>
+                        <div id="top-blocked-list" class="space-y-2.5 text-xs text-zinc-400">Yükleniyor...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. CANLI SORGULAR -->
+            <div id="tab-logs" class="tab-content hidden space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 glass-card p-4">
+                    <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                        <i data-lucide="search" class="w-4 h-4 text-zinc-500"></i>
+                        <input type="text" id="log-search" data-i18n-placeholder="searchPlaceholder" placeholder="Alan adı veya cihaz ara..." class="bg-transparent text-xs w-full focus:outline-none">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="log-filter" class="bg-zinc-950 border border-zinc-800 text-xs rounded-lg px-3 py-1.5">
+                            <option value="all" data-i18n="filterAll">Tüm Sorgular</option>
+                            <option value="blocked" data-i18n="filterBlocked">Sadece Engellenenler</option>
+                            <option value="allowed" data-i18n="filterAllowed">Sadece İzin Verilenler</option>
+                        </select>
+                        <button id="reload-logs-btn" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-lg transition" data-i18n="refreshBtn">Yenile</button>
+                    </div>
+                </div>
+
+                <div class="glass-card overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-zinc-800/80 text-[11px] uppercase tracking-wider text-zinc-500 bg-zinc-950/40">
+                                    <th class="px-5 py-3" data-i18n="thTime">Saat</th>
+                                    <th class="px-5 py-3" data-i18n="thDomain">Alan Adı (Domain)</th>
+                                    <th class="px-5 py-3" data-i18n="thDevice">Cihaz / IP</th>
+                                    <th class="px-5 py-3" data-i18n="thStatus">Durum & Neden</th>
+                                    <th class="px-5 py-3" data-i18n="thProtocol">Protokol</th>
+                                    <th class="px-5 py-3 text-right" data-i18n="thAction">Hızlı İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-table-body" class="divide-y divide-zinc-800/50 text-xs">
+                                <tr><td colspan="6" class="px-6 py-8 text-center text-zinc-500">Loglar yükleniyor...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. KARA & BEYAZ LİSTE -->
+            <div id="tab-lists" class="tab-content hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card p-5 space-y-4">
+                    <h3 class="text-sm font-semibold text-red-400 flex items-center gap-2">
+                        <i data-lucide="ban" class="w-4 h-4"></i> <span data-i18n="denylistTitle">Kara Liste (Denylist)</span>
+                    </h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="deny-input" placeholder="örn: tiktok.com" class="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-red-500">
+                        <button onclick="addDomainRule('denylist')" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition" data-i18n="btnBlock">Engelle</button>
+                    </div>
+                    <div id="denylist-items" class="space-y-2 max-h-96 overflow-y-auto text-xs">Yükleniyor...</div>
+                </div>
+
+                <div class="glass-card p-5 space-y-4">
+                    <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i> <span data-i18n="allowlistTitle">Beyaz Liste (Allowlist)</span>
+                    </h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="allow-input" placeholder="örn: example.com" class="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-emerald-500">
+                        <button onclick="addDomainRule('allowlist')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition" data-i18n="btnAllow">İzin Ver</button>
+                    </div>
+                    <div id="allowlist-items" class="space-y-2 max-h-96 overflow-y-auto text-xs">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <!-- 4. EBEVEYN KONTROLÜ -->
+            <div id="tab-parental" class="tab-content hidden space-y-6">
+                <div class="glass-card p-5">
+                    <h3 class="text-sm font-semibold mb-1" data-i18n="parentalHeader">Uygulama & Oyun Engelleme (GAMAF / Servisler)</h3>
+                    <p class="text-xs text-zinc-400 mb-4" data-i18n="parentalSub">Tek tıkla popüler sosyal medya, oyun ve platformların DNS erişimini kesin.</p>
+                    <div id="parental-services-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <!-- 5. GİZLİLİK -->
+            <div id="tab-privacy" class="tab-content hidden space-y-6">
+                <div class="glass-card p-5">
+                    <h3 class="text-sm font-semibold mb-1" data-i18n="privacyHeader">Aktif Reklam & İzleyici Engelleyici Listeler</h3>
+                    <p class="text-xs text-zinc-400 mb-4" data-i18n="privacySub">Profilinizde aktif olan DNS filtre listeleri.</p>
+                    <div id="privacy-lists" class="space-y-2 text-xs">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <!-- 6. KURULUM & ANDROID TV -->
             <div id="tab-setup" class="tab-content hidden space-y-6">
-                <!-- Uç Noktalar Kartı -->
                 <div class="glass-card p-6 space-y-5">
                     <div>
                         <h3 class="text-base font-bold text-white" data-i18n="setupHeader">Cihaz Kurulum Bilgileri</h3>
@@ -30,7 +256,7 @@
                     </div>
                 </div>
 
-                <!-- ANDROID TV & APK İNDİRME MERKEZİ -->
+                <!-- Android TV & APK İndirme Merkezi -->
                 <div class="glass-card p-6 space-y-5 border-blue-500/20">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
@@ -43,12 +269,11 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- 1. APK: NextDNS Manager (GitHub Releases) -->
                         <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-4">
                             <div>
                                 <div class="flex items-center justify-between mb-1">
                                     <span class="text-xs font-bold text-zinc-100">NextDNS Manager APK</span>
-                                    <span class="px-2 py-0.5 text-[10px] rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">GitHub (Açık Kaynak)</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">GitHub</span>
                                 </div>
                                 <p class="text-[11px] text-zinc-400" data-i18n="apkManagerDesc">Android 11+ ve Google TV cihazlarda profil yönetimi ve istatistikler için açık kaynaklı istemci.</p>
                             </div>
@@ -58,12 +283,11 @@
                             </a>
                         </div>
 
-                        <!-- 2. APK: ADNS / Native NextDNS İstemcisi -->
                         <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-4">
                             <div>
                                 <div class="flex items-center justify-between mb-1">
                                     <span class="text-xs font-bold text-zinc-100">ADNS / NextDNS Client</span>
-                                    <span class="px-2 py-0.5 text-[10px] rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">TV / VPN Modu</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">VPN Modu</span>
                                 </div>
                                 <p class="text-[11px] text-zinc-400" data-i18n="apkClientDesc">Özel DNS ayarı kapalı olan Android TV'lerde yerel VPN tüneli ile NextDNS'i aktif eder.</p>
                             </div>
@@ -73,12 +297,11 @@
                             </a>
                         </div>
 
-                        <!-- 3. Yöntem: Android TV ADB Komutu (Uygulamasız) -->
                         <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-3">
                             <div>
                                 <div class="flex items-center justify-between mb-1">
                                     <span class="text-xs font-bold text-zinc-100" data-i18n="tvAdbTitle">Uygulamasız TV Kurulumu (ADB)</span>
-                                    <span class="px-2 py-0.5 text-[10px] rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">En Stabil</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">ADB</span>
                                 </div>
                                 <p class="text-[11px] text-zinc-400" data-i18n="tvAdbDesc">TV'de APK kurmadan doğrudan sistem düzeyinde Özel DNS açmak için ADB komutu:</p>
                             </div>
@@ -90,3 +313,10 @@
                     </div>
                 </div>
             </div>
+
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
