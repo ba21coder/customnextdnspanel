@@ -57,3 +57,12 @@ input:focus, select:focus {
 .tab-content {
     animation: fadeIn 0.3s ease-out forwards;
 }
+
+/* Android TV Kumanda Odak (Focus) Stili */
+.tv-focused {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5) !important;
+    transform: scale(1.02);
+    background-color: rgba(39, 39, 42, 0.9) !important;
+}
