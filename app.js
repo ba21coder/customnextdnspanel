@@ -22,14 +22,14 @@ const translations = {
         statBlockRatio: "Engelleme Oranı",
         connectedDevices: "Bağlı Cihazlar (Clients)",
         topBlockedDomains: "En Çok Engellenen Alan Adları",
-        searchPlaceholder: "Cihaz, IP veya alan adı ara...",
+        searchPlaceholder: "Cihaz adı veya alan adı ara...",
         filterAll: "Tüm Trafik",
         filterBlocked: "Sadece Engellenenler",
         filterAllowed: "Sadece İzin Verilenler",
         refreshBtn: "Yenile",
         thTime: "Saat",
         thDomain: "Ziyaret Edilen / Talep Edilen Adres",
-        thDevice: "Cihaz & IP Adresi",
+        thDevice: "Bağlı Cihaz",
         thStatus: "Trafik Durumu",
         thProtocol: "Protokol",
         thAction: "Hızlı İşlem",
@@ -77,14 +77,14 @@ const translations = {
         statBlockRatio: "Block Ratio",
         connectedDevices: "Connected Devices (Clients)",
         topBlockedDomains: "Top Blocked Domains",
-        searchPlaceholder: "Search device, IP or domain...",
+        searchPlaceholder: "Search device name or domain...",
         filterAll: "All Traffic",
         filterBlocked: "Blocked Only",
         filterAllowed: "Allowed Only",
         refreshBtn: "Refresh",
         thTime: "Time",
         thDomain: "Visited / Requested Domain",
-        thDevice: "Device & IP",
+        thDevice: "Connected Device",
         thStatus: "Traffic Status",
         thProtocol: "Protocol",
         thAction: "Quick Action",
@@ -132,14 +132,14 @@ const translations = {
         statBlockRatio: "Tasa de Bloqueo",
         connectedDevices: "Dispositivos Conectados (Clientes)",
         topBlockedDomains: "Dominios Más Bloqueados",
-        searchPlaceholder: "Buscar dispositivo, IP o dominio...",
+        searchPlaceholder: "Buscar nombre de dispositivo o dominio...",
         filterAll: "Todo el Tráfico",
         filterBlocked: "Solo Bloqueadas",
         filterAllowed: "Solo Permitidas",
         refreshBtn: "Actualizar",
         thTime: "Hora",
         thDomain: "Dominio Visitado / Solicitado",
-        thDevice: "Dispositivo y IP",
+        thDevice: "Dispositivo Conectado",
         thStatus: "Estado del Tráfico",
         thProtocol: "Protocolo",
         thAction: "Acción Rápida",
@@ -187,14 +187,14 @@ const translations = {
         statBlockRatio: "拦截率",
         connectedDevices: "已连接设备 (客户端)",
         topBlockedDomains: "最常拦截的域",
-        searchPlaceholder: "搜索设备、IP 或域...",
+        searchPlaceholder: "搜索设备名称或域...",
         filterAll: "所有流量",
         filterBlocked: "仅已拦截",
         filterAllowed: "仅允许",
         refreshBtn: "刷新",
         thTime: "时间",
         thDomain: "访问 / 请求的域",
-        thDevice: "设备与 IP",
+        thDevice: "连接的设备",
         thStatus: "流量状态",
         thProtocol: "协议",
         thAction: "快捷操作",
@@ -242,14 +242,14 @@ const translations = {
         statBlockRatio: "Blockierrate",
         connectedDevices: "Verbundene Geräte (Clients)",
         topBlockedDomains: "Meistblockierte Domains",
-        searchPlaceholder: "Gerät, IP oder Domain suchen...",
+        searchPlaceholder: "Gerätename oder Domain suchen...",
         filterAll: "Gesamter Datenverkehr",
         filterBlocked: "Nur Blockierte",
         filterAllowed: "Nur Erlaubte",
         refreshBtn: "Aktualisieren",
         thTime: "Uhrzeit",
         thDomain: "Besuchte / Angefragte Domain",
-        thDevice: "Gerät & IP",
+        thDevice: "Verbundenes Gerät",
         thStatus: "Status",
         thProtocol: "Protokoll",
         thAction: "Aktion",
@@ -545,10 +545,10 @@ function filterAndRenderLogs() {
 
     const filtered = cachedLogs.filter(log => {
         const domain = (log.domain || log.name || '').toLowerCase();
-        const deviceName = (log.device?.name || '').toLowerCase();
-        const clientIp = (log.clientIp || log.client || '').toLowerCase();
+        // Cihaz adına öncelik veriyoruz, yoksa client adına bakıyoruz
+        const deviceName = (log.device?.name || log.client || log.clientIp || '').toLowerCase();
         
-        const matchesQuery = domain.includes(query) || deviceName.includes(query) || clientIp.includes(query);
+        const matchesQuery = domain.includes(query) || deviceName.includes(query);
         const matchesFilter = filter === 'all' || log.status === filter;
         
         return matchesQuery && matchesFilter;
@@ -561,8 +561,8 @@ function filterAndRenderLogs() {
 
     tbody.innerHTML = filtered.map(log => {
         const domain = log.domain || log.name || 'Bilinmiyor';
-        const deviceName = log.device?.name || 'İsimsiz Cihaz';
-        const clientIp = log.clientIp || log.client || 'IP Yok';
+        // Sadece cihaz adını gösteriyoruz (IP adresini kaldırdık)
+        const deviceName = log.device?.name || log.client || 'Bilinmeyen Cihaz';
         const timeStr = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '--:--';
         const isBlocked = log.status === 'blocked';
         const reason = log.reasons && log.reasons.length > 0 ? log.reasons[0].name : '';
@@ -579,10 +579,7 @@ function filterAndRenderLogs() {
             <tr class="hover:bg-zinc-900/50 transition">
                 <td class="px-5 py-3 text-zinc-400 whitespace-nowrap">${timeStr}</td>
                 <td class="px-5 py-3 font-mono text-zinc-100 font-medium">${domain}</td>
-                <td class="px-5 py-3">
-                    <div class="text-zinc-200 font-medium">${deviceName}</div>
-                    <div class="text-[10px] text-zinc-500 font-mono">${clientIp}</div>
-                </td>
+                <td class="px-5 py-3 text-zinc-200 font-medium">${deviceName}</td>
                 <td class="px-5 py-3">${statusBadge}</td>
                 <td class="px-5 py-3"><span class="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[10px] font-mono uppercase text-zinc-400">${log.protocol || 'DNS'}</span></td>
                 <td class="px-5 py-3 text-right">${quickAction}</td>
@@ -703,7 +700,7 @@ async function fetchPrivacyAndSetup(profileId) {
 }
 
 function showError(msg) {
-    const el = document.getElementById('login-error');
+    The el = document.getElementById('login-error');
     el.textContent = msg;
-    el.classList.add('hidden');
+    el.classList.remove('hidden');
 }
