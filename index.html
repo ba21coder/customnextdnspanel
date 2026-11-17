@@ -83,7 +83,7 @@
                     <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> <span data-i18n="tabOverview">Genel Bakış</span>
                 </button>
                 <button data-tab="logs" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="list-filter" class="w-3.5 h-3.5"></i> <span data-i18n="tabLogs">Canlı Sorgular</span>
+                    <i data-lucide="list-filter" class="w-3.5 h-3.5"></i> <span data-i18n="tabLogs">Canlı Cihaz Trafiği</span>
                 </button>
                 <button data-tab="lists" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="shield-ban" class="w-3.5 h-3.5"></i> <span data-i18n="tabLists">Kara & Beyaz Liste</span>
@@ -144,16 +144,16 @@
                 </div>
             </div>
 
-            <!-- 2. CANLI SORGULAR -->
+            <!-- 2. CANLI CİHAZ TRAFİĞİ -->
             <div id="tab-logs" class="tab-content hidden space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-3 glass-card p-4">
                     <div class="flex items-center gap-2 flex-1 min-w-[200px]">
                         <i data-lucide="search" class="w-4 h-4 text-zinc-500"></i>
-                        <input type="text" id="log-search" data-i18n-placeholder="searchPlaceholder" placeholder="Alan adı veya cihaz ara..." class="bg-transparent text-xs w-full focus:outline-none">
+                        <input type="text" id="log-search" data-i18n-placeholder="searchPlaceholder" placeholder="Cihaz, IP veya alan adı ara..." class="bg-transparent text-xs w-full focus:outline-none">
                     </div>
                     <div class="flex items-center gap-2">
                         <select id="log-filter" class="bg-zinc-950 border border-zinc-800 text-xs rounded-lg px-3 py-1.5">
-                            <option value="all" data-i18n="filterAll">Tüm Sorgular</option>
+                            <option value="all" data-i18n="filterAll">Tüm Trafik</option>
                             <option value="blocked" data-i18n="filterBlocked">Sadece Engellenenler</option>
                             <option value="allowed" data-i18n="filterAllowed">Sadece İzin Verilenler</option>
                         </select>
@@ -167,15 +167,15 @@
                             <thead>
                                 <tr class="border-b border-zinc-800/80 text-[11px] uppercase tracking-wider text-zinc-500 bg-zinc-950/40">
                                     <th class="px-5 py-3" data-i18n="thTime">Saat</th>
-                                    <th class="px-5 py-3" data-i18n="thDomain">Alan Adı (Domain)</th>
-                                    <th class="px-5 py-3" data-i18n="thDevice">Cihaz / IP</th>
-                                    <th class="px-5 py-3" data-i18n="thStatus">Durum & Neden</th>
+                                    <th class="px-5 py-3" data-i18n="thDomain">Ziyaret Edilen / Talep Edilen Adres</th>
+                                    <th class="px-5 py-3" data-i18n="thDevice">Cihaz & IP Adresi</th>
+                                    <th class="px-5 py-3" data-i18n="thStatus">Trafik Durumu</th>
                                     <th class="px-5 py-3" data-i18n="thProtocol">Protokol</th>
                                     <th class="px-5 py-3 text-right" data-i18n="thAction">Hızlı İşlem</th>
                                 </tr>
                             </thead>
                             <tbody id="logs-table-body" class="divide-y divide-zinc-800/50 text-xs">
-                                <tr><td colspan="6" class="px-6 py-8 text-center text-zinc-500">Loglar yükleniyor...</td></tr>
+                                <tr><td colspan="6" class="px-6 py-8 text-center text-zinc-500">Trafik yükleniyor...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -256,7 +256,7 @@
                     </div>
                 </div>
 
-                <!-- Masaüstü (.msi / Windows / Mac) & Android TV İndirme Merkezi -->
+                <!-- Masaüstü & TV İndirme Merkezi -->
                 <div class="glass-card p-6 space-y-5 border-blue-500/20">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
