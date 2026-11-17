@@ -17,25 +17,35 @@
 
     <!-- Giriş Ekranı -->
     <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-md bg-zinc-900/70 border border-zinc-800 rounded-2xl p-8 backdrop-blur-xl shadow-2xl">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
-                    <i data-lucide="shield-check" class="w-6 h-6"></i>
+        <div class="w-full max-w-md bg-zinc-900/70 border border-zinc-800 rounded-2xl p-8 backdrop-blur-xl shadow-2xl space-y-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight">NextDNS Panel</h1>
+                        <p class="text-xs text-zinc-400" data-i18n="loginSub">Gelişmiş Ağ & DNS Yönetim Merkezi</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight">NextDNS Panel</h1>
-                    <p class="text-xs text-zinc-400">Gelişmiş Ağ & DNS Yönetim Merkezi</p>
-                </div>
+                <!-- Giriş Ekranı Dil Seçici -->
+                <select id="lang-select-login" class="bg-zinc-950 border border-zinc-800 text-xs rounded-lg px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-blue-500">
+                    <option value="tr">🇹🇷 TR</option>
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="de">🇩🇪 DE</option>
+                </select>
             </div>
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs font-medium text-zinc-400 mb-1.5">NextDNS API Anahtarı</label>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1.5" data-i18n="apiKeyLabel">NextDNS API Anahtarı</label>
                     <input type="password" id="api-key-input" placeholder="API anahtarınızı yapıştırın..." 
                         class="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition font-mono">
                 </div>
                 <p id="login-error" class="text-xs text-red-400 hidden"></p>
-                <button id="login-btn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl text-sm transition shadow-lg shadow-blue-600/20">
+                <button id="login-btn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl text-sm transition shadow-lg shadow-blue-600/20" data-i18n="connectBtn">
                     Panele Bağlan
                 </button>
             </div>
@@ -57,10 +67,18 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button id="refresh-btn" class="p-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-zinc-400 hover:text-white transition" title="Verileri Yenile">
+                    <!-- Üst Menü Dil Seçici -->
+                    <select id="lang-select" class="bg-zinc-900 border border-zinc-800 text-xs rounded-lg px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-blue-500">
+                        <option value="tr">🇹🇷 TR</option>
+                        <option value="en">🇬🇧 EN</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="zh">🇨🇳 中文</option>
+                        <option value="de">🇩🇪 DE</option>
+                    </select>
+                    <button id="refresh-btn" class="p-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-zinc-400 hover:text-white transition" title="Yenile">
                         <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                     </button>
-                    <button id="logout-btn" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-lg text-xs font-medium transition">
+                    <button id="logout-btn" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-lg text-xs font-medium transition" data-i18n="logoutBtn">
                         Çıkış
                     </button>
                 </div>
@@ -71,22 +89,22 @@
         <nav class="bg-zinc-900/40 border-b border-zinc-800/80 px-6 overflow-x-auto">
             <div class="max-w-7xl mx-auto flex items-center gap-1" id="nav-tabs">
                 <button data-tab="overview" class="tab-btn active px-4 py-3 text-xs font-medium border-b-2 border-blue-500 text-blue-400 flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> Genel Bakış & Cihazlar
+                    <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> <span data-i18n="tabOverview">Genel Bakış</span>
                 </button>
                 <button data-tab="logs" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="list-filter" class="w-3.5 h-3.5"></i> Canlı Sorgular (Logs)
+                    <i data-lucide="list-filter" class="w-3.5 h-3.5"></i> <span data-i18n="tabLogs">Canlı Sorgular</span>
                 </button>
                 <button data-tab="lists" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="shield-ban" class="w-3.5 h-3.5"></i> Kara & Beyaz Liste
+                    <i data-lucide="shield-ban" class="w-3.5 h-3.5"></i> <span data-i18n="tabLists">Kara & Beyaz Liste</span>
                 </button>
                 <button data-tab="parental" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="lock" class="w-3.5 h-3.5"></i> Ebeveyn Kontrolü (GAMAF)
+                    <i data-lucide="lock" class="w-3.5 h-3.5"></i> <span data-i18n="tabParental">Ebeveyn Kontrolü</span>
                 </button>
                 <button data-tab="privacy" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="eye-off" class="w-3.5 h-3.5"></i> Gizlilik & Filtreler
+                    <i data-lucide="eye-off" class="w-3.5 h-3.5"></i> <span data-i18n="tabPrivacy">Gizlilik & Filtreler</span>
                 </button>
                 <button data-tab="setup" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Kurulum (Setup)
+                    <i data-lucide="terminal" class="w-3.5 h-3.5"></i> <span data-i18n="tabSetup">Kurulum</span>
                 </button>
             </div>
         </nav>
@@ -94,64 +112,62 @@
         <!-- İçerik Alanı -->
         <main class="flex-1 max-w-7xl w-full mx-auto p-6">
 
-            <!-- 1. SEKME: GENEL BAKIŞ & CİHAZLAR -->
+            <!-- 1. GENEL BAKIŞ -->
             <div id="tab-overview" class="tab-content space-y-6">
-                <!-- İstatistik Kartları -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-5">
                         <div class="flex items-center justify-between text-zinc-400 text-xs mb-2">
-                            <span>Toplam DNS Sorgusu</span>
+                            <span data-i18n="statTotalQueries">Toplam DNS Sorgusu</span>
                             <i data-lucide="globe" class="w-4 h-4 text-blue-400"></i>
                         </div>
                         <div id="stat-total" class="text-2xl font-bold font-mono">--</div>
                     </div>
                     <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-5">
                         <div class="flex items-center justify-between text-zinc-400 text-xs mb-2">
-                            <span>Engellenen Sorgular</span>
+                            <span data-i18n="statBlockedQueries">Engellenen Sorgular</span>
                             <i data-lucide="shield-alert" class="w-4 h-4 text-red-400"></i>
                         </div>
                         <div id="stat-blocked" class="text-2xl font-bold font-mono text-red-400">--</div>
                     </div>
                     <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-5">
                         <div class="flex items-center justify-between text-zinc-400 text-xs mb-2">
-                            <span>Engelleme Oranı</span>
+                            <span data-i18n="statBlockRatio">Engelleme Oranı</span>
                             <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-400"></i>
                         </div>
                         <div id="stat-ratio" class="text-2xl font-bold font-mono text-emerald-400">--%</div>
                     </div>
                 </div>
 
-                <!-- Bağlı Cihazlar (Clients) & En Çok Engellenenler -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-5">
                         <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
-                            <i data-lucide="smartphone" class="w-4 h-4 text-blue-400"></i> Bağlı Cihazlar (Clients)
+                            <i data-lucide="smartphone" class="w-4 h-4 text-blue-400"></i> <span data-i18n="connectedDevices">Bağlı Cihazlar (Clients)</span>
                         </h3>
                         <div id="devices-list" class="space-y-2.5 text-xs text-zinc-400">Yükleniyor...</div>
                     </div>
                     <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-5">
                         <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
-                            <i data-lucide="flame" class="w-4 h-4 text-orange-400"></i> En Çok Engellenen Alan Adları
+                            <i data-lucide="flame" class="w-4 h-4 text-orange-400"></i> <span data-i18n="topBlockedDomains">En Çok Engellenen Alan Adları</span>
                         </h3>
                         <div id="top-blocked-list" class="space-y-2.5 text-xs text-zinc-400">Yükleniyor...</div>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. SEKME: CANLI SORGULAR (LOGS) -->
+            <!-- 2. CANLI SORGULAR -->
             <div id="tab-logs" class="tab-content hidden space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-3 bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl">
                     <div class="flex items-center gap-2 flex-1 min-w-[200px]">
                         <i data-lucide="search" class="w-4 h-4 text-zinc-500"></i>
-                        <input type="text" id="log-search" placeholder="Alan adı veya cihaz ara..." class="bg-transparent text-xs w-full focus:outline-none">
+                        <input type="text" id="log-search" data-i18n-placeholder="searchPlaceholder" placeholder="Alan adı veya cihaz ara..." class="bg-transparent text-xs w-full focus:outline-none">
                     </div>
                     <div class="flex items-center gap-2">
                         <select id="log-filter" class="bg-zinc-950 border border-zinc-800 text-xs rounded-lg px-3 py-1.5">
-                            <option value="all">Tüm Sorgular</option>
-                            <option value="blocked">Sadece Engellenenler</option>
-                            <option value="allowed">Sadece İzin Verilenler</option>
+                            <option value="all" data-i18n="filterAll">Tüm Sorgular</option>
+                            <option value="blocked" data-i18n="filterBlocked">Sadece Engellenenler</option>
+                            <option value="allowed" data-i18n="filterAllowed">Sadece İzin Verilenler</option>
                         </select>
-                        <button id="reload-logs-btn" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-lg transition">Yenile</button>
+                        <button id="reload-logs-btn" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-lg transition" data-i18n="refreshBtn">Yenile</button>
                     </div>
                 </div>
 
@@ -160,12 +176,12 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="border-b border-zinc-800/80 text-[11px] uppercase tracking-wider text-zinc-500 bg-zinc-950/40">
-                                    <th class="px-5 py-3">Saat</th>
-                                    <th class="px-5 py-3">Alan Adı (Domain)</th>
-                                    <th class="px-5 py-3">Cihaz / IP</th>
-                                    <th class="px-5 py-3">Durum & Neden</th>
-                                    <th class="px-5 py-3">Protokol</th>
-                                    <th class="px-5 py-3 text-right">Hızlı İşlem</th>
+                                    <th class="px-5 py-3" data-i18n="thTime">Saat</th>
+                                    <th class="px-5 py-3" data-i18n="thDomain">Alan Adı (Domain)</th>
+                                    <th class="px-5 py-3" data-i18n="thDevice">Cihaz / IP</th>
+                                    <th class="px-5 py-3" data-i18n="thStatus">Durum & Neden</th>
+                                    <th class="px-5 py-3" data-i18n="thProtocol">Protokol</th>
+                                    <th class="px-5 py-3 text-right" data-i18n="thAction">Hızlı İşlem</th>
                                 </tr>
                             </thead>
                             <tbody id="logs-table-body" class="divide-y divide-zinc-800/50 text-xs">
@@ -176,65 +192,56 @@
                 </div>
             </div>
 
-            <!-- 3. SEKME: KARA LİSTE & BEYAZ LİSTE -->
+            <!-- 3. KARA & BEYAZ LİSTE -->
             <div id="tab-lists" class="tab-content hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Kara Liste (Denylist) -->
                 <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-5 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-semibold text-red-400 flex items-center gap-2">
-                            <i data-lucide="ban" class="w-4 h-4"></i> Kara Liste (Denylist)
-                        </h3>
-                    </div>
+                    <h3 class="text-sm font-semibold text-red-400 flex items-center gap-2">
+                        <i data-lucide="ban" class="w-4 h-4"></i> <span data-i18n="denylistTitle">Kara Liste (Denylist)</span>
+                    </h3>
                     <div class="flex gap-2">
                         <input type="text" id="deny-input" placeholder="örn: tiktok.com" class="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-red-500">
-                        <button onclick="addDomainRule('denylist')" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition">Engelle</button>
+                        <button onclick="addDomainRule('denylist')" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition" data-i18n="btnBlock">Engelle</button>
                     </div>
                     <div id="denylist-items" class="space-y-2 max-h-96 overflow-y-auto text-xs">Yükleniyor...</div>
                 </div>
 
-                <!-- Beyaz Liste (Allowlist) -->
                 <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-5 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">
-                            <i data-lucide="check-circle" class="w-4 h-4"></i> Beyaz Liste (Allowlist)
-                        </h3>
-                    </div>
+                    <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i> <span data-i18n="allowlistTitle">Beyaz Liste (Allowlist)</span>
+                    </h3>
                     <div class="flex gap-2">
                         <input type="text" id="allow-input" placeholder="örn: example.com" class="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-emerald-500">
-                        <button onclick="addDomainRule('allowlist')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition">İzin Ver</button>
+                        <button onclick="addDomainRule('allowlist')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition" data-i18n="btnAllow">İzin Ver</button>
                     </div>
                     <div id="allowlist-items" class="space-y-2 max-h-96 overflow-y-auto text-xs">Yükleniyor...</div>
                 </div>
             </div>
 
-            <!-- 4. SEKME: EBEVEYN KONTROLÜ (GAMAF / UYGULAMA ENGELLEME) -->
+            <!-- 4. EBEVEYN KONTROLÜ -->
             <div id="tab-parental" class="tab-content hidden space-y-6">
                 <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-5">
-                    <h3 class="text-sm font-semibold mb-1">Uygulama & Oyun Engelleme (GAMAF / Servisler)</h3>
-                    <p class="text-xs text-zinc-400 mb-4">Tek tıkla popüler sosyal medya, oyun ve platformların DNS erişimini kesin.</p>
-                    <div id="parental-services-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                        Yükleniyor...
-                    </div>
+                    <h3 class="text-sm font-semibold mb-1" data-i18n="parentalHeader">Uygulama & Oyun Engelleme (GAMAF / Servisler)</h3>
+                    <p class="text-xs text-zinc-400 mb-4" data-i18n="parentalSub">Tek tıkla popüler sosyal medya, oyun ve platformların DNS erişimini kesin.</p>
+                    <div id="parental-services-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">Yükleniyor...</div>
                 </div>
             </div>
 
-            <!-- 5. SEKME: GİZLİLİK & REKLAM ENGELLEYİCİLER -->
+            <!-- 5. GİZLİLİK -->
             <div id="tab-privacy" class="tab-content hidden space-y-6">
                 <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-5">
-                    <h3 class="text-sm font-semibold mb-1">Aktif Reklam & İzleyici Engelleyici Listeler</h3>
-                    <p class="text-xs text-zinc-400 mb-4">Profilinizde aktif olan DNS filtre listeleri.</p>
+                    <h3 class="text-sm font-semibold mb-1" data-i18n="privacyHeader">Aktif Reklam & İzleyici Engelleyici Listeler</h3>
+                    <p class="text-xs text-zinc-400 mb-4" data-i18n="privacySub">Profilinizde aktif olan DNS filtre listeleri.</p>
                     <div id="privacy-lists" class="space-y-2 text-xs">Yükleniyor...</div>
                 </div>
             </div>
 
-            <!-- 6. SEKME: KURULUM (SETUP) -->
+            <!-- 6. KURULUM -->
             <div id="tab-setup" class="tab-content hidden space-y-6">
                 <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-6 space-y-5">
                     <div>
-                        <h3 class="text-base font-bold text-white">Cihaz Kurulum Bilgileri</h3>
-                        <p class="text-xs text-zinc-400 mt-1">Seçili profili cihazlarınıza bağlamak için aşağıdaki uç noktaları kullanın.</p>
+                        <h3 class="text-base font-bold text-white" data-i18n="setupHeader">Cihaz Kurulum Bilgileri</h3>
+                        <p class="text-xs text-zinc-400 mt-1" data-i18n="setupSub">Seçili profili cihazlarınıza bağlamak için aşağıdaki uç noktaları kullanın.</p>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2">
                             <span class="text-[11px] uppercase tracking-wider text-blue-400 font-semibold">DNS-over-HTTPS (DoH)</span>
@@ -242,26 +249,19 @@
                                 <code id="setup-doh" class="text-xs text-zinc-200 select-all">https://dns.nextdns.io/------</code>
                             </div>
                         </div>
-
                         <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2">
-                            <span class="text-[11px] uppercase tracking-wider text-purple-400 font-semibold">DNS-over-TLS / QUIC (Android / iOS)</span>
+                            <span class="text-[11px] uppercase tracking-wider text-purple-400 font-semibold">DNS-over-TLS / QUIC</span>
                             <div class="flex items-center justify-between bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-800">
                                 <code id="setup-dot" class="text-xs text-zinc-200 select-all">------.dns.nextdns.io</code>
                             </div>
                         </div>
-
                         <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2">
-                            <span class="text-[11px] uppercase tracking-wider text-emerald-400 font-semibold">IPv6 Adresleri</span>
-                            <div class="bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-800 font-mono text-xs text-zinc-300 space-y-1" id="setup-ipv6">
-                                Yükleniyor...
-                            </div>
+                            <span class="text-[11px] uppercase tracking-wider text-emerald-400 font-semibold">IPv6</span>
+                            <div class="bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-800 font-mono text-xs text-zinc-300 space-y-1" id="setup-ipv6">Yükleniyor...</div>
                         </div>
-
                         <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2">
-                            <span class="text-[11px] uppercase tracking-wider text-amber-400 font-semibold">Bağlı IP (Linked IP) Durumu</span>
-                            <div class="bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-800 text-xs text-zinc-300" id="setup-linked-ip">
-                                Yükleniyor...
-                            </div>
+                            <span class="text-[11px] uppercase tracking-wider text-amber-400 font-semibold">Linked IP</span>
+                            <div class="bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-800 text-xs text-zinc-300" id="setup-linked-ip">Yükleniyor...</div>
                         </div>
                     </div>
                 </div>
