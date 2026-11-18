@@ -284,6 +284,8 @@
 
       '<div id="nd-ai-messages" role="log" aria-live="polite" style="padding:14px;flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px"></div>',
 
+      '<div id="nd-ai-faq" role="listbox" aria-label="Sık sorulan sorular" hidden style="margin:0 12px 8px;max-height:220px;overflow-y:auto;border:1px solid #3f3f46;border-radius:12px;background:#18181b;box-shadow:0 10px 28px #0008"></div>',
+
       '<form id="nd-ai-form" style="padding:12px;border-top:1px solid #27272a;display:flex;gap:8px">',
 
       '<input id="nd-ai-input" maxlength="1200" autocomplete="off" style="min-width:0;flex:1;background:#18181b;border:1px solid #3f3f46;border-radius:10px;padding:10px;color:#fff;font-size:13px">',
@@ -308,6 +310,111 @@
 
     const input =
       panel.querySelector('#nd-ai-input');
+
+    const faqPanel = panel.querySelector('#nd-ai-faq');
+    const faqQuestions = [
+      'NextDNS nedir ve ne işe yarar?',
+      'NextDNS hesabı nasıl oluşturulur?',
+      'NextDNS yapılandırma kimliğimi nereden bulurum?',
+      'Bir cihazı NextDNS’e nasıl bağlarım?',
+      'Windows’ta NextDNS nasıl kurulur?',
+      'Android telefonda Özel DNS nasıl açılır?',
+      'iPhone ve iPad’de NextDNS nasıl kullanılır?',
+      'Mac bilgisayarda NextDNS nasıl kurulur?',
+      'Linux’ta NextDNS nasıl ayarlanır?',
+      'Tarayıcıda NextDNS kullanabilir miyim?',
+      'NextDNS profili ile cihaz profili arasındaki fark nedir?',
+      'Birden fazla cihazı aynı hesaba bağlayabilir miyim?',
+      'Cihazımın NextDNS’e bağlı olup olmadığını nasıl anlarım?',
+      'Sorgu günlüklerini nereden görüntülerim?',
+      'DNS sorgusu ne demektir?',
+      'Engellenen alan adlarını nasıl görürüm?',
+      'Bir alan adının neden engellendiğini nasıl anlarım?',
+      'Bir alan adını izin listesine nasıl eklerim?',
+      'Bir alan adını engelleme listesine nasıl eklerim?',
+      'Özel izin listesi ve engelleme listesi nasıl çalışır?',
+      'Reklam engelleme nasıl etkinleştirilir?',
+      'İzleyici engelleme ne işe yarar?',
+      'Kimlik avı koruması nedir?',
+      'Kötü amaçlı yazılım koruması nasıl çalışır?',
+      'Ebeveyn denetimleri nasıl ayarlanır?',
+      'Belirli kategorileri nasıl engellerim?',
+      'Sosyal medya sitelerini nasıl kısıtlarım?',
+      'Oyun sitelerini engellemek mümkün mü?',
+      'Güvenli arama nasıl etkinleştirilir?',
+      'YouTube Kısıtlı Mod nasıl açılır?',
+      'DNS-over-HTTPS (DoH) nedir?',
+      'DNS-over-TLS (DoT) nedir?',
+      'DNS-over-QUIC (DoQ) nedir?',
+      'DoH ile DoT arasındaki fark nedir?',
+      'NextDNS VPN midir?',
+      'NextDNS ile VPN aynı anda kullanılabilir mi?',
+      'WireGuard ile NextDNS birlikte çalışır mı?',
+      'NextDNS bağlantısı neden çalışmıyor?',
+      'DNS önbelleğini nasıl temizlerim?',
+      'Ayar değişiklikleri ne kadar sürede uygulanır?',
+      'İstatistikler neden güncellenmiyor?',
+      'Sorgu sayımı ve aylık kullanım nasıl takip edilir?',
+      'Aylık sorgu sınırına ulaşırsam ne olur?',
+      'NextDNS ücretsiz planında neler var?',
+      'NextDNS Pro ile ücretsiz planın farkı nedir?',
+      'Bir yapılandırmayı başka cihaza nasıl taşırım?',
+      'Yedek DNS sunucusu eklemeli miyim?',
+      'IPv6 ile NextDNS kullanabilir miyim?',
+      'NextDNS gizliliğimi nasıl korur?',
+      'NextDNS bağlantısını nasıl test ederim?'
+    ];
+
+    function renderFaq(filter = '') {
+      const query = filter.trim().toLocaleLowerCase('tr');
+      const matches = faqQuestions.filter(question =>
+        question.toLocaleLowerCase('tr').includes(query)
+      );
+      faqPanel.replaceChildren();
+
+      if (!matches.length) {
+        const empty = document.createElement('div');
+        empty.textContent = 'Eşleşen soru bulunamadı.';
+        empty.style.cssText = 'padding:12px;color:#a1a1aa;font-size:12px';
+        faqPanel.appendChild(empty);
+        return;
+      }
+
+      matches.forEach((question, index) => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.setAttribute('role', 'option');
+        item.textContent = question;
+        item.style.cssText = 'display:block;width:100%;padding:10px 12px;text-align:left;background:transparent;color:#e4e4e7;font-size:12px;line-height:1.4;border:0;border-bottom:1px solid #27272a;cursor:pointer';
+        item.addEventListener('mouseenter', () => item.style.background = '#27272a');
+        item.addEventListener('mouseleave', () => item.style.background = 'transparent');
+        item.addEventListener('click', () => {
+          input.value = question;
+          faqPanel.hidden = true;
+          input.focus();
+        });
+        faqPanel.appendChild(item);
+      });
+    }
+
+    function openFaq() {
+      renderFaq(input.value);
+      faqPanel.hidden = false;
+    }
+
+    input.addEventListener('focus', openFaq);
+    input.addEventListener('click', openFaq);
+    input.addEventListener('input', () => {
+      if (!faqPanel.hidden) renderFaq(input.value);
+    });
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') faqPanel.hidden = true;
+    });
+    document.addEventListener('pointerdown', (event) => {
+      if (!faqPanel.contains(event.target) && event.target !== input) {
+        faqPanel.hidden = true;
+      }
+    });
 
     modelStatus =
       panel.querySelector('#nd-ai-status');
@@ -395,6 +502,7 @@
         }
 
         input.value = '';
+        faqPanel.hidden = true;
 
         bubble(prompt, 'user');
 
