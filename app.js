@@ -710,6 +710,8 @@ async function fetchOverviewStats(profileId) {
         const ratio = total > 0 ? ((blocked / total) * 100).toFixed(1) : 0;
 
         document.getElementById('stat-total').textContent = total.toLocaleString();
+        const wifiDnsQueries = document.getElementById('wifi-dns-queries');
+        if (wifiDnsQueries) wifiDnsQueries.textContent = total.toLocaleString();
         document.getElementById('stat-blocked').textContent = blocked.toLocaleString();
         document.getElementById('stat-ratio').textContent = `${ratio}%`;
 
