@@ -145,7 +145,17 @@
                     </div>
                 </div>
 
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <section id="monthly-query-card" class="glass-card p-5 border border-zinc-800/60 space-y-2">
+                    <div class="flex items-center justify-between gap-3">
+                        <h3 class="text-sm font-semibold text-zinc-100">Bu Ay NextDNS Sorgu Kullanımı</h3>
+                        <span class="text-[10px] text-zinc-500">300.000 aylık ücretsiz sınır</span>
+                    </div>
+                    <div id="monthly-query-count" class="text-2xl font-bold font-mono text-zinc-200">-- / 300.000</div>
+                    <p id="monthly-query-message" class="text-xs text-zinc-400">Kullanım verisi yükleniyor...</p>
+                    <p class="text-[10px] text-zinc-500">Tahmini değer: API analiz verileri toplanır. NextDNS'in hesap sayacında bazı sorgular tekilleştirilebildiği için resmi kota sayısıyla birebir aynı olmayabilir.</p>
+                </section>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="glass-card p-5">
                         <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
                             <i data-lucide="smartphone" class="w-4 h-4 text-blue-400"></i> <span>En Çok DNS Sorgusu Yapan Cihazlar</span>
