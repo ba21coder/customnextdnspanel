@@ -4,7 +4,7 @@
 
   // API anahtarı ve AI Worker gerekmez.
   // Model doğrudan kullanıcının tarayıcısında çalışır.
-  const MODEL = 'onnx-community/Qwen2.5-0.5B-Instruct';
+  const MODEL = 'onnx-community/SmolLM2-135M-Instruct-ONNX-MHA';
   const LIBRARY_URL =
     'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2';
 
@@ -117,6 +117,14 @@
         lib.env.allowLocalModels = false;
         lib.env.useBrowserCache = true;
 
+        // 2–4 GB RAM'li cihazlarda WASM'i tek iş parçacığıyla çalıştır.
+        // Daha güçlü cihazlarda WebGPU tercih edilebilir.
+        const lowMemory = Number(navigator.deviceMemory || 0) > 0 && Number(navigator.deviceMemory) <= 4;
+        try {
+          lib.env.backends.onnx.wasm.numThreads = 1;
+        } catch (_) {}
+
+
         const onProgress = (info) => {
           if (!info) return;
 
@@ -140,7 +148,7 @@
           }
         };
 
-        const preferred = navigator.gpu
+        const preferred = navigator.gpu && !lowMemory
           ? 'webgpu'
           : 'wasm';
 
@@ -416,13 +424,13 @@
               role: 'system',
               content: systemPrompt
             },
-            ...history.slice(-8)
+            ...history.slice(-4)
           ];
 
           const result = await generator(
             messagesForModel,
             {
-              max_new_tokens: 180,
+              max_new_tokens: 96,
               do_sample: false,
               repetition_penalty: 1.08
             }
@@ -446,11 +454,12 @@
         } catch (error) {
           console.error('NextDNS local AI:', error);
 
-          waiting.textContent =
-            getLang().error +
-            ' (' +
-            (error.message || 'Unknown error') +
-            ')';
+          const errorMessage = String(error && error.message || 'Unknown error');
+          waiting.textContent = /Array buffer allocation failed|memory|allocate/i.test(errorMessage)
+            ? (getLangCode() === 'tr'
+                ? 'Bu cihazda model için yeterli boş bellek ayrılamadı. Diğer sekmeleri kapatıp tekrar deneyebilirsin.'
+                : 'There is not enough free memory to load the model. Close other tabs and try again.')
+            : getLang().error + ' (' + errorMessage + ')';
 
           history.pop();
 
