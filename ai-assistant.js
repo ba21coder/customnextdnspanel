@@ -122,8 +122,12 @@
         const lowMemory = Number(navigator.deviceMemory || 0) > 0 && Number(navigator.deviceMemory) <= 4;
         try {
           lib.env.backends.onnx.wasm.numThreads = 1;
-        } catch (_) {}
-
+          // Eski işlemciler/tarayıcılar SIMD desteklemeyebilir.
+          // SIMD kapalı WASM ikilisini zorla; aksi halde backend açılamaz.
+          lib.env.backends.onnx.wasm.simd = false;
+        } catch (configError) {
+          console.warn('WASM uyumluluk ayarı uygulanamadı:', configError);
+        }
 
         const onProgress = (info) => {
           if (!info) return;
