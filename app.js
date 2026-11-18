@@ -460,6 +460,10 @@ function updateLanguageTexts(lang) {
 }
 
 async function apiFetch(endpoint, options = {}) {
+    const method = (options.method || 'GET').toUpperCase();
+    if (readOnlyStatsMode && method !== 'GET') {
+        throw new Error('Salt okunur modda değişiklik yapılamaz.');
+    }
     const res = await fetch(`${PROXY_URL}${endpoint}`, {
         ...options,
         headers: {
