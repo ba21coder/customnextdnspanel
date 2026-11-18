@@ -715,23 +715,106 @@ async function fetchOverviewStats(profileId) {
         document.getElementById('stat-blocked').textContent = blocked.toLocaleString();
         document.getElementById('stat-ratio').textContent = `${ratio}%`;
 
-        const devRes = await apiFetch(`/profiles/${profileId}/analytics/devices`);
+        const devRes = await apiFetch(`/profiles/${profileId}/analytics/devices?from=-30d&limit=500`);
         const devContainer = document.getElementById('devices-list');
+        const profileOptions = Array.from(document.getElementById('profile-select')?.options || [])
+            .map(option => ({ id: option.value, name: option.textContent.split(' (')[0] }));
+        const allProfiles = readOnlyStatsMode ? [{ id: profileId, name: profileId }] : profileOptions;
+
+        // Compare device IDs across every profile in the currently connected NextDNS account.
+        const devicesByProfile = await Promise.all(allProfiles.map(async profile => {
+            try {
+                const response = profile.id === profileId
+                    ? devRes
+                    : await apiFetch(`/profiles/${encodeURIComponent(profile.id)}/analytics/devices?from=-30d&limit=500`);
+                return { profile, devices: response.data || [] };
+            } catch (error) {
+                console.warn('Profil cihazları alınamadı:', profile.id, error);
+                return { profile, devices: [] };
+            }
+        }));
+
         if (devRes.data && devRes.data.length > 0) {
             const rankedDevices = [...devRes.data].sort((a, b) =>
                 Number(b.queries || 0) - Number(a.queries || 0)
             );
-            devContainer.innerHTML = rankedDevices.map((d, index) => `
-                <div class="flex items-center justify-between gap-3 p-2.5 bg-zinc-950/60 border border-zinc-800/60 rounded-lg">
-                    <div class="flex items-center gap-2 min-w-0">
-                        <span class="text-[10px] text-zinc-500 font-mono w-5">${index + 1}.</span>
-                        <span class="font-medium text-zinc-200 truncate">${escapeHtml(d.name || d.id || 'Bilinmeyen Cihaz')}</span>
+            devContainer.innerHTML = rankedDevices.map((d, index) => {
+                const matches = devicesByProfile.filter(entry => entry.devices.some(other =>
+                    (d.id && other.id === d.id) ||
+                    (d.name && other.name && other.name.toLowerCase() === d.name.toLowerCase() &&
+                     (!d.localIp || !other.localIp || d.localIp === other.localIp))
+                ));
+                const uniqueProfiles = [...new Map(matches.map(entry => [entry.profile.id, entry.profile])).values()];
+                const profileText = readOnlyStatsMode
+                    ? 'Yalnızca açık profil kontrol edilebildi'
+                    : uniqueProfiles.length > 1
+                        ? 'Bu hesapta birden fazla profilde kullanılıyor: ' + uniqueProfiles.map(p => escapeHtml(p.name)).join(', ')
+                        : uniqueProfiles.length === 1
+                            ? (uniqueProfiles[0].id === profileId ? 'Seçili profili kullanıyor' : 'Başka profilde kullanıyor: ' + escapeHtml(uniqueProfiles[0].name))
+                            : 'Diğer profillerde eşleşme bulunamadı';
+                return `
+                    <div class="p-2.5 bg-zinc-950/60 border border-zinc-800/60 rounded-lg space-y-1.5">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="text-[10px] text-zinc-500 font-mono w-5">${index + 1}.</span>
+                                <span class="font-medium text-zinc-200 truncate">${escapeHtml(d.name || d.id || 'Bilinmeyen Cihaz')}</span>
+                            </div>
+                            <span class="font-mono text-blue-400 whitespace-nowrap">${Number(d.queries || 0).toLocaleString()} sorgu</span>
+                        </div>
+                        <p class="text-[10px] text-zinc-400 pl-7">${profileText}</p>
                     </div>
-                    <span class="font-mono text-blue-400 whitespace-nowrap">${Number(d.queries || 0).toLocaleString()} sorgu</span>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         } else {
             devContainer.innerHTML = '<p class="text-zinc-500">--</p>';
+        }
+
+        // The API exposes analytics, not NextDNS's exact deduplicated account quota counter.
+        // Use current-calendar-month analytics as an estimate and label it accordingly.
+        const monthStart = new Date();
+        monthStart.setDate(1);
+        monthStart.setHours(0, 0, 0, 0);
+        const monthFrom = encodeURIComponent(monthStart.toISOString());
+        const monthlyResults = await Promise.all(allProfiles.map(async profile => {
+            try {
+                const response = await apiFetch(`/profiles/${encodeURIComponent(profile.id)}/analytics/status?from=${monthFrom}&to=now`);
+                return (response.data || []).reduce((sum, item) => sum + Number(item.queries || 0), 0);
+            } catch (error) {
+                console.warn('Aylık sorgu verisi alınamadı:', profile.id, error);
+                return null;
+            }
+        }));
+        const monthlyCard = document.getElementById('monthly-query-card');
+        const monthlyValue = document.getElementById('monthly-query-count');
+        const monthlyMessage = document.getElementById('monthly-query-message');
+        if (monthlyCard && monthlyValue && monthlyMessage) {
+            const validMonthlyResults = monthlyResults.filter(value => value !== null);
+            if (validMonthlyResults.length === allProfiles.length && validMonthlyResults.length > 0) {
+                const monthlyTotal = validMonthlyResults.reduce((sum, value) => sum + value, 0);
+                monthlyValue.textContent = monthlyTotal.toLocaleString('tr-TR') + ' / 300.000';
+                monthlyCard.classList.remove('border-emerald-500/40', 'border-amber-500/40', 'border-red-500/50');
+                monthlyValue.classList.remove('text-emerald-400', 'text-amber-400', 'text-red-400');
+                if (monthlyTotal > 300000) {
+                    monthlyCard.classList.add('border-red-500/50');
+                    monthlyValue.classList.add('text-red-400');
+                    monthlyMessage.textContent = '300.000 sınırı aşılmış olabilir. Ücretsiz planda filtreleme ve günlükler devre dışı kalır; temel DNS çözümlemesi normalde sürer.';
+                    monthlyMessage.className = 'text-xs text-red-400';
+                } else if (monthlyTotal >= 250000) {
+                    monthlyCard.classList.add('border-amber-500/40');
+                    monthlyValue.classList.add('text-amber-400');
+                    monthlyMessage.textContent = '250.000 sorgu aşıldı. 300.000 aylık sınıra yaklaşıyorsun.';
+                    monthlyMessage.className = 'text-xs text-amber-400';
+                } else {
+                    monthlyCard.classList.add('border-emerald-500/40');
+                    monthlyValue.classList.add('text-emerald-400');
+                    monthlyMessage.textContent = 'Kullanım 250.000 sorgunun altında.';
+                    monthlyMessage.className = 'text-xs text-emerald-400';
+                }
+            } else {
+                monthlyValue.textContent = 'Veri alınamadı';
+                monthlyMessage.textContent = 'Aylık kullanım tüm profillerden okunamadı.';
+                monthlyMessage.className = 'text-xs text-zinc-400';
+            }
         }
 
         const topRes = await apiFetch(`/profiles/${profileId}/analytics/domains?status=blocked&limit=6`);
