@@ -1,18 +1,18 @@
-# NextDNS Panel – OpenAI AI Assistant
+# NextDNS Panel – Tarayıcıda çalışan AI
 
-## Deploy the secure AI endpoint
+Bu sürüm yalnızca GitHub Pages ile çalışacak şekilde tasarlanmıştır. Cloudflare Worker, sunucu veya API anahtarı gerekmez.
 
-1. In Cloudflare, create a new **Worker** and paste the contents of `ai-worker.js`.
-2. In Worker **Settings → Variables and Secrets**, add:
-   - Secret: `OPENAI_API_KEY` = your OpenAI API key
-   - Variable: `ALLOWED_ORIGIN` = `https://bthn1.github.io`
-   - (Optional) Variable: `OPENAI_MODEL` = `gpt-4.1-mini`
-3. Deploy the Worker. Its URL will look like `https://your-worker-name.workers.dev/chat`.
-4. In `ai-assistant.js`, replace `https://YOUR-AI-WORKER.workers.dev/chat` with that URL, then commit the change.
+## Nasıl çalışır?
 
-The OpenAI key stays in the Worker secret and is never sent to the browser. The assistant does not receive the NextDNS API key or automatically access account data. It answers general NextDNS and dashboard questions based on the conversation.
+- Sohbet asistanı, Hugging Face Transformers.js kitaplığını CDN üzerinden yükler.
+- Qwen2.5-0.5B-Instruct modeli kullanıcının tarayıcısında çalışır.
+- Model ilk kullanımda internet üzerinden indirilir ve tarayıcı önbelleğinde saklanabilir.
+- WebGPU destekleniyorsa GPU kullanılır; başarısız olursa WASM ile denenir.
+- NextDNS API anahtarı sohbet modeline gönderilmez.
 
-## Security notes
-- Do not put the OpenAI key in `index.html`, `app.js`, or any other public file.
-- Configure an appropriate usage limit/budget in your OpenAI account.
-- The Worker only accepts requests from the GitHub Pages origin configured above.
+## Bilinen sınırlamalar
+
+- Model dosyaları büyük olabilir; ilk açılış ve ilk yanıt zaman alabilir.
+- Performans cihazın RAM, işlemci/GPU ve tarayıcı desteğine bağlıdır.
+- Bu küçük yerel model, bulut tabanlı büyük modeller kadar güçlü olmayabilir.
+- GitHub Pages statik barındırma sunduğundan, API anahtarı gizleyerek OpenAI gibi bulut modellerini doğrudan çağırmak mümkün değildir. Bu nedenle bu sürüm bulut OpenAI API'sini kullanmaz.
