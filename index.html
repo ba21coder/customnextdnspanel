@@ -42,6 +42,9 @@
                 <button id="login-btn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl text-sm transition shadow-lg shadow-blue-600/20" data-i18n="connectBtn">
                     Panele Bağlan
                 </button>
+                <button id="login-manage-profiles-btn" class="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-medium rounded-xl text-sm transition">Kayıtlı API hesapları</button>
+                <a href="https://my.nextdns.io/account" target="_blank" rel="noopener noreferrer" class="block text-center text-xs text-blue-400 hover:text-blue-300">NextDNS hesabımda API anahtarını aç</a>
+                <p class="text-[10px] leading-relaxed text-zinc-500">Güvenlik: API anahtarları yalnızca bu tarayıcı oturumunda tutulur. Oturum kapandığında tekrar girmeniz gerekir.</p>
             </div>
         </div>
     </div>
@@ -57,6 +60,7 @@
                     <span class="font-bold text-sm tracking-wide">NextDNS<span class="text-blue-500">PRO</span></span>
                     <span class="text-zinc-700">|</span>
                     <select id="profile-select" class="bg-zinc-900 border border-zinc-800 text-xs rounded-lg px-3 py-1.5 text-zinc-200 focus:outline-none focus:border-blue-500"></select>
+                    <button id="manage-api-profiles-btn" class="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-[11px] text-zinc-200">API Hesapları</button>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -331,6 +335,28 @@
         </main>
     </div>
 
+    <!-- API hesap yöneticisi --> 
+    <div id="api-profiles-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <section class="glass-card w-full max-w-lg p-5 space-y-4 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="api-profiles-title">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <h2 id="api-profiles-title" class="text-base font-bold">API Hesapları & Hızlı Geçiş</h2>
+                    <p class="text-[11px] text-zinc-400 mt-1">Farklı NextDNS hesaplarının API anahtarlarını ayrı profiller olarak ekleyin.</p>
+                </div>
+                <button id="close-api-profiles-btn" class="px-3 py-1.5 rounded-lg bg-zinc-800 text-xs">Kapat</button>
+            </div>
+            <div id="api-profiles-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
+            <div class="border-t border-zinc-800 pt-4 space-y-3">
+                <h3 class="text-xs font-semibold text-zinc-200">Yeni API hesabı ekle</h3>
+                <input id="api-profile-name" type="text" maxlength="40" placeholder="Hesap adı (ör. Ev / Aile)" class="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs">
+                <input id="api-profile-key" type="password" autocomplete="off" placeholder="NextDNS API anahtarı" class="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs font-mono">
+                <p id="api-profile-error" class="text-xs text-red-400" aria-live="polite"></p>
+                <button id="add-api-profile-btn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-semibold text-white">Anahtarı doğrula ve hesabı ekle</button>
+                <a href="https://my.nextdns.io/account" target="_blank" rel="noopener noreferrer" class="block text-center text-xs text-blue-400">NextDNS hesap sayfası / API anahtarı</a>
+                <p class="text-[10px] leading-relaxed text-zinc-500">NextDNS'in yayımladığı API belgelerinde OAuth ile hesap girişi bulunmuyor; bu nedenle panel NextDNS parolanızı istemez. Bağlantı API anahtarıyla doğrulanır. Anahtarlar localStorage yerine sessionStorage içinde tutulur.</p>
+            </div>
+        </section>
+    </div>
     <script src="app.js"></script>
 </body>
 </html>
