@@ -145,32 +145,10 @@
                     </div>
                 </div>
 
-                <section class="glass-card p-5 space-y-3" aria-labelledby="wifi-usage-title">
-                    <div class="flex items-center justify-between gap-3">
-                        <h3 id="wifi-usage-title" class="text-sm font-semibold flex items-center gap-2">
-                            <i data-lucide="wifi" class="w-4 h-4 text-blue-400"></i> Wi-Fi Veri Kullanımı
-                        </h3>
-                        <span class="text-[10px] px-2 py-1 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-300">Bayt ölçümü yok</span>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="rounded-lg border border-zinc-800 bg-zinc-950/50 p-3">
-                            <p class="text-[11px] text-zinc-400">Gerçek internet kullanımı</p>
-                            <p class="mt-1 text-xl font-bold font-mono text-zinc-200">Ölçülemiyor</p>
-                            <p class="mt-1 text-[10px] text-zinc-500">NextDNS API toplam indirilen/yüklenen MB veya GB bilgisini sağlamaz.</p>
-                        </div>
-                        <div class="rounded-lg border border-zinc-800 bg-zinc-950/50 p-3">
-                            <p class="text-[11px] text-zinc-400">NextDNS DNS sorguları</p>
-                            <p id="wifi-dns-queries" class="mt-1 text-xl font-bold font-mono text-blue-400">--</p>
-                            <p class="mt-1 text-[10px] text-zinc-500">Bu sayı veri miktarı değildir; yalnızca DNS isteklerini sayar.</p>
-                        </div>
-                    </div>
-                    <p class="text-[10px] leading-relaxed text-zinc-500">Gerçek Wi-Fi veri miktarını ölçmek için Windows ağ sayaçlarına veya modem/router trafik istatistiklerine erişen ayrı bir ölçüm kaynağı gerekir. Bu kart ölçülmeyen veriyi tahmin edip gerçekmiş gibi göstermez.</p>
-                </section>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="glass-card p-5">
                         <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
-                            <i data-lucide="smartphone" class="w-4 h-4 text-blue-400"></i> <span data-i18n="connectedDevices">Bağlı Cihazlar (Clients)</span>
+                            <i data-lucide="smartphone" class="w-4 h-4 text-blue-400"></i> <span>En Çok DNS Sorgusu Yapan Cihazlar</span>
                         </h3>
                         <div id="devices-list" class="space-y-2.5 text-xs text-zinc-400">Yükleniyor...</div>
                     </div>
