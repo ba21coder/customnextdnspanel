@@ -383,8 +383,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('logout-btn').addEventListener('click', () => {
-        localStorage.removeItem('nextdns_api_key');
+        sessionStorage.removeItem('nextdns_api_key');
         apiKey = '';
+        currentProfileId = '';
         document.getElementById('dashboard-screen').classList.add('hidden');
         document.getElementById('login-screen').classList.remove('hidden');
         setTimeout(initTvNavigation, 300);
@@ -457,7 +458,7 @@ async function apiFetch(endpoint, options = {}) {
     return res.json();
 }
 
-async function checkLogin(key) {
+async function checkLogin(key, options = {}) {
     const errorEl = document.getElementById('login-error');
     errorEl.classList.add('hidden');
     apiKey = key;
