@@ -10,20 +10,32 @@
     el.className = error ? 'text-xs text-red-400' : 'text-xs text-zinc-400';
   };
   const parseConfig = (source) => {
-    const text = String(source || '').replace(/^\uFEFF/, '');
-    const interfaceMatch = text.match(/^\s*\[Interface\]\s*$([\s\S]*?)(?=^\s*\[|\s*$)/im);
-    const peerMatch = text.match(/^\s*\[Peer\]\s*$([\s\S]*?)(?=^\s*\[|\s*$)/im);
-    const get = (block, key) => {
-      const match = block && block.match(new RegExp('^\\s*' + key + '\\s*=\\s*(.+?)\\s*$', 'im'));
-      return match ? match[1].trim() : '';
-    };
-    if (!interfaceMatch || !peerMatch) throw new Error('Dosyada [Interface] ve [Peer] bölümleri bulunamadı.');
-    const privateKey = get(interfaceMatch[1], 'PrivateKey');
-    const address = get(interfaceMatch[1], 'Address');
-    const publicKey = get(peerMatch[1], 'PublicKey');
-    const endpoint = get(peerMatch[1], 'Endpoint');
+    const text = String(source || '').replace(/^\\uFEFF/, '');
+    const sections = {};
+    let current = '';
+    for (const rawLine of text.split(/\\r?\\n/)) {
+      const line = rawLine.trim();
+      const section = line.match(/^\\[([^\\]]+)\\]$/);
+      if (section) {
+        current = section[1].toLowerCase();
+        sections[current] = sections[current] || {};
+        continue;
+      }
+      if (!current || !line || line.startsWith('#')) continue;
+      const separator = line.indexOf('=');
+      if (separator < 1) continue;
+      const key = line.slice(0, separator).trim().toLowerCase();
+      const value = line.slice(separator + 1).trim();
+      sections[current][key] = value;
+    }
+    const iface = sections.interface || {};
+    const peer = sections.peer || {};
+    const privateKey = iface.privatekey || '';
+    const address = iface.address || '';
+    const publicKey = peer.publickey || '';
+    const endpoint = peer.endpoint || '';
     if (!privateKey || !address || !publicKey || !endpoint) {
-      throw new Error('Gerekli alanlar eksik: PrivateKey, Address, PublicKey veya Endpoint.');
+      throw new Error('Gerekli alanlar eksik: [Interface] içindeki PrivateKey ve Address ile [Peer] içindeki PublicKey ve Endpoint gerekli.');
     }
     return { address, endpoint, source: text };
   };
