@@ -12,6 +12,8 @@ if (!apiKey && legacyApiKey) {
 }
 if (legacyApiKey) localStorage.removeItem('nextdns_api_key');
 let currentProfileId = '';
+let readOnlyStatsMode = false;
+let readOnlyProfileId = '';
 let cachedLogs = [];
 let currentLang = localStorage.getItem('nextdns_lang') || 'tr';
 
@@ -382,10 +384,23 @@ document.addEventListener('DOMContentLoaded', () => {
         checkLogin(key);
     });
 
+    document.getElementById('readonly-stats-btn').addEventListener('click', () => {
+        const key = document.getElementById('api-key-input').value.trim();
+        const profileId = document.getElementById('readonly-profile-id').value.trim();
+        if (!key) return showError('İstatistikleri görüntülemek için API anahtarını girin.');
+        if (!/^[a-zA-Z0-9_-]{3,64}$/.test(profileId)) {
+            return showError('Geçerli bir NextDNS Profil ID girin.');
+        }
+        checkReadonlyStats(key, profileId);
+    });
+
     document.getElementById('logout-btn').addEventListener('click', () => {
         sessionStorage.removeItem('nextdns_api_key');
         apiKey = '';
         currentProfileId = '';
+        readOnlyStatsMode = false;
+        readOnlyProfileId = '';
+        setReadOnlyDashboardUI(false);
         document.getElementById('dashboard-screen').classList.add('hidden');
         document.getElementById('login-screen').classList.remove('hidden');
         setTimeout(initTvNavigation, 300);
@@ -461,6 +476,9 @@ async function apiFetch(endpoint, options = {}) {
 async function checkLogin(key, options = {}) {
     const errorEl = document.getElementById('login-error');
     errorEl.classList.add('hidden');
+    readOnlyStatsMode = false;
+    readOnlyProfileId = '';
+    setReadOnlyDashboardUI(false);
     apiKey = key;
 
     try {
@@ -504,6 +522,53 @@ async function checkLogin(key, options = {}) {
     }
 }
 
+
+function setReadOnlyDashboardUI(enabled) {
+    const nav = document.querySelector('nav');
+    const profileSelect = document.getElementById('profile-select');
+    const accountButton = document.getElementById('manage-api-profiles-btn');
+    const profileLabel = document.getElementById('readonly-profile-label');
+
+    nav?.classList.toggle('hidden', enabled);
+    profileSelect?.classList.toggle('hidden', enabled);
+    accountButton?.classList.toggle('hidden', enabled);
+    if (profileLabel) {
+        profileLabel.classList.toggle('hidden', !enabled);
+        profileLabel.textContent = enabled ? `Salt okunur · ${readOnlyProfileId}` : '';
+    }
+
+    // Always return to the overview tab when changing access modes.
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.toggle('hidden', tab.id !== 'tab-overview');
+    });
+}
+
+async function checkReadonlyStats(key, profileId) {
+    const errorEl = document.getElementById('login-error');
+    errorEl.classList.add('hidden');
+    apiKey = key;
+
+    try {
+        // Validate access with a read-only analytics endpoint.
+        const result = await apiFetch(`/profiles/${encodeURIComponent(profileId)}/analytics/status`);
+        if (!Array.isArray(result.data)) throw new Error('İstatistik verisi alınamadı.');
+
+        readOnlyStatsMode = true;
+        readOnlyProfileId = profileId;
+        currentProfileId = profileId;
+        sessionStorage.setItem('nextdns_api_key', apiKey);
+
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('dashboard-screen').classList.remove('hidden');
+        setReadOnlyDashboardUI(true);
+        await fetchOverviewStats(profileId);
+        setTimeout(initTvNavigation, 300);
+    } catch (err) {
+        apiKey = '';
+        errorEl.textContent = 'Bağlantı kurulamadı. API anahtarını ve Profil ID bilgisini kontrol edin.';
+        errorEl.classList.remove('hidden');
+    }
+}
 
 /* Multi-account / API profile manager */
 function saveApiProfiles() {
@@ -617,6 +682,11 @@ function removeApiProfile(id) {
 }
 
 async function loadAllProfileData(profileId) {
+    // Read-only profile-ID mode performs only GET analytics requests.
+    if (readOnlyStatsMode) {
+        fetchOverviewStats(profileId);
+        return;
+    }
     fetchOverviewStats(profileId);
     fetchLogs(profileId);
     fetchLists(profileId);
