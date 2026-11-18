@@ -38,6 +38,15 @@
                     <input type="password" id="api-key-input" placeholder="API anahtarınızı yapıştırın..." 
                         class="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition font-mono">
                 </div>
+                <div class="pt-3 border-t border-zinc-800 space-y-2">
+                    <label for="readonly-profile-id" class="block text-xs font-medium text-zinc-400">Profil ID ile sadece istatistikleri görüntüle</label>
+                    <input type="text" id="readonly-profile-id" maxlength="64" autocomplete="off" placeholder="Örn: 48fe15"
+                        class="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition font-mono">
+                    <button id="readonly-stats-btn" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white font-medium rounded-xl text-sm transition">
+                        Sadece istatistikleri görüntüle
+                    </button>
+                    <p class="text-[10px] leading-relaxed text-zinc-500">Bu modda yalnızca istatistikler okunur. Profil ID tek başına yeterli değildir; yukarıdaki API anahtarı da gerekir. Hiçbir ayar değiştirilmez.</p>
+                </div>
                 <p id="login-error" class="text-xs text-red-400 hidden"></p>
                 <button id="login-btn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl text-sm transition shadow-lg shadow-blue-600/20" data-i18n="connectBtn">
                     Panele Bağlan
@@ -60,6 +69,7 @@
                     <span class="font-bold text-sm tracking-wide">NextDNS<span class="text-blue-500">PRO</span></span>
                     <span class="text-zinc-700">|</span>
                     <select id="profile-select" class="bg-zinc-900 border border-zinc-800 text-xs rounded-lg px-3 py-1.5 text-zinc-200 focus:outline-none focus:border-blue-500"></select>
+                    <span id="readonly-profile-label" class="hidden text-xs text-emerald-300 border border-emerald-500/30 bg-emerald-500/10 rounded-lg px-3 py-1.5"></span>
                     <button id="manage-api-profiles-btn" class="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-[11px] text-zinc-200">API Hesapları</button>
                 </div>
 
