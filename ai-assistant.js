@@ -68,28 +68,22 @@
       input.value='';bubble(prompt,'user');history.push({role:'user',content:prompt});
       const t=getLang();const waiting=bubble(t.busy,'assistant');send.disabled=true;
       try{
-        const model=await loadModel(progress=>{
-          if(progress && progress.status==='progress' && progress.total)
-            waiting.textContent=t.loading+' '+Math.round(progress.loaded/progress.total*100)+'%';
-          else waiting.textContent=t.loading;
+        waiting.textContent=t.loading;
+        const response=await fetch('https://workerforaiextension.batuhan-gulsen15.workers.dev/chat',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({messages:history.slice(-12),language:window.currentLang||localStorage.getItem('nextdns_lang')||'tr'})
         });
-        waiting.textContent=t.busy;
-        const messagesForModel=[
-          {role:'system',content:'Sen NextDNS Panel için yardımcı, doğru ve güvenli bir teknik asistansın. Kullanıcının seçtiği dilde ('+(localStorage.getItem('nextdns_lang')||'tr')+') yanıt ver. NextDNS, DNS, gizlilik, panel kullanımı ve bağlantı sorunlarını açıkla. Kullanıcının canlı NextDNS hesabını görebildiğini veya değiştirebildiğini iddia etme. API anahtarı, parola, WireGuard özel anahtarı veya başka gizli bilgi isteme. Kısa, anlaşılır ve yaşa uygun yanıt ver.'},
-          ...history.slice(-8)
-        ];
-        const result=await model(messagesForModel,{max_new_tokens:220, do_sample:true, temperature:0.65});
-        const generated=result && result[0] && result[0].generated_text;
-        let answer='';
-        if(Array.isArray(generated)){const last=generated[generated.length-1];answer=typeof last==='string'?last:(last&&last.content)||'';}
-        else if(typeof generated==='string')answer=generated;
-        answer=String(answer).trim();
-        if(!answer)throw new Error('Empty model response');
+        const data=await response.json().catch(()=>({}));
+        if(!response.ok)throw new Error(data.error||'AI service request failed ('+response.status+')');
+        const answer=String(data.reply||'').trim();
+        if(!answer)throw new Error('Empty AI response');
         waiting.textContent=answer;history.push({role:'assistant',content:answer});
       }catch(err){
-        console.error('NextDNS browser AI:',err);
-        waiting.textContent=t.error;history.pop();
-      }finally{send.disabled=false;input.focus();}
+        console.error('NextDNS Worker AI:',err);
+        waiting.textContent='AI bağlantısı kurulamadı: '+(err.message||t.error);
+        history.pop();
+      }      }finally{send.disabled=false;input.focus();}
     });
     paint();
     document.querySelectorAll('#lang-select,#lang-select-login').forEach(el=>el.addEventListener('change',paint));
