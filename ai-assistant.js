@@ -270,7 +270,7 @@
       borderRadius: '18px',
       boxShadow: '0 18px 60px #000b',
       color: '#f4f4f5',
-      display: 'flex',
+      display: 'none',
       flexDirection: 'column',
       overflow: 'hidden'
     });
@@ -625,6 +625,7 @@
 
     launcher.addEventListener('click', () => {
       panel.hidden = !panel.hidden;
+      panel.style.display = panel.hidden ? 'none' : 'flex';
 
       if (!panel.hidden) {
         input.focus();
@@ -634,6 +635,7 @@
     panel.querySelector('#nd-ai-close')
       .addEventListener('click', () => {
         panel.hidden = true;
+        panel.style.display = 'none';
       });
 
     panel.querySelector('#nd-ai-clear')
