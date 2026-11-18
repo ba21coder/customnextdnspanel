@@ -718,10 +718,16 @@ async function fetchOverviewStats(profileId) {
         const devRes = await apiFetch(`/profiles/${profileId}/analytics/devices`);
         const devContainer = document.getElementById('devices-list');
         if (devRes.data && devRes.data.length > 0) {
-            devContainer.innerHTML = devRes.data.map(d => `
-                <div class="flex items-center justify-between p-2.5 bg-zinc-950/60 border border-zinc-800/60 rounded-lg">
-                    <span class="font-medium text-zinc-200">${d.name || d.id || 'Bilinmeyen Cihaz'}</span>
-                    <span class="font-mono text-blue-400">${(d.queries || 0).toLocaleString()}</span>
+            const rankedDevices = [...devRes.data].sort((a, b) =>
+                Number(b.queries || 0) - Number(a.queries || 0)
+            );
+            devContainer.innerHTML = rankedDevices.map((d, index) => `
+                <div class="flex items-center justify-between gap-3 p-2.5 bg-zinc-950/60 border border-zinc-800/60 rounded-lg">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="text-[10px] text-zinc-500 font-mono w-5">${index + 1}.</span>
+                        <span class="font-medium text-zinc-200 truncate">${escapeHtml(d.name || d.id || 'Bilinmeyen Cihaz')}</span>
+                    </div>
+                    <span class="font-mono text-blue-400 whitespace-nowrap">${Number(d.queries || 0).toLocaleString()} sorgu</span>
                 </div>
             `).join('');
         } else {
