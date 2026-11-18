@@ -1,7 +1,19 @@
 const PROXY_URL = 'https://nextdns-proxy.batuhan-gulsen15.workers.dev';
 
-let apiKey = localStorage.getItem('nextdns_api_key') || '';
+// API keys are kept only for the current browser session; profile labels are non-secret metadata.
+let apiKey = sessionStorage.getItem('nextdns_api_key') || '';
+let apiProfiles = JSON.parse(localStorage.getItem('nextdns_profiles') || '[]');
+let activeApiProfileId = sessionStorage.getItem('nextdns_active_profile') || '';
+// Migrate the old persistent key once, then remove it from localStorage.
+const legacyApiKey = localStorage.getItem('nextdns_api_key');
+if (!apiKey && legacyApiKey) {
+    apiKey = legacyApiKey;
+    sessionStorage.setItem('nextdns_api_key', legacyApiKey);
+}
+if (legacyApiKey) localStorage.removeItem('nextdns_api_key');
 let currentProfileId = '';
+let readOnlyStatsMode = false;
+let readOnlyProfileId = '';
 let cachedLogs = [];
 let currentLang = localStorage.getItem('nextdns_lang') || 'tr';
 
@@ -358,7 +370,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (apiKey) {
         document.getElementById('api-key-input').value = apiKey;
-        checkLogin(apiKey);
+        const rememberedAccount = activeApiProfileId;
+        if (rememberedAccount) {
+            const accountKey = sessionStorage.getItem('nd_api_key_' + rememberedAccount);
+            if (accountKey) apiKey = accountKey;
+        }
+        checkLogin(apiKey, { skipAccountSave: Boolean(activeApiProfileId) });
     }
 
     document.getElementById('login-btn').addEventListener('click', () => {
@@ -367,9 +384,23 @@ document.addEventListener('DOMContentLoaded', () => {
         checkLogin(key);
     });
 
+    document.getElementById('readonly-stats-btn').addEventListener('click', () => {
+        const key = document.getElementById('api-key-input').value.trim();
+        const profileId = document.getElementById('readonly-profile-id').value.trim();
+        if (!key) return showError('İstatistikleri görüntülemek için API anahtarını girin.');
+        if (!/^[a-zA-Z0-9_-]{3,64}$/.test(profileId)) {
+            return showError('Geçerli bir NextDNS Profil ID girin.');
+        }
+        checkReadonlyStats(key, profileId);
+    });
+
     document.getElementById('logout-btn').addEventListener('click', () => {
-        localStorage.removeItem('nextdns_api_key');
+        sessionStorage.removeItem('nextdns_api_key');
         apiKey = '';
+        currentProfileId = '';
+        readOnlyStatsMode = false;
+        readOnlyProfileId = '';
+        setReadOnlyDashboardUI(false);
         document.getElementById('dashboard-screen').classList.add('hidden');
         document.getElementById('login-screen').classList.remove('hidden');
         setTimeout(initTvNavigation, 300);
@@ -429,6 +460,10 @@ function updateLanguageTexts(lang) {
 }
 
 async function apiFetch(endpoint, options = {}) {
+    const method = (options.method || 'GET').toUpperCase();
+    if (readOnlyStatsMode && method !== 'GET') {
+        throw new Error('Salt okunur modda değişiklik yapılamaz.');
+    }
     const res = await fetch(`${PROXY_URL}${endpoint}`, {
         ...options,
         headers: {
@@ -442,16 +477,30 @@ async function apiFetch(endpoint, options = {}) {
     return res.json();
 }
 
-async function checkLogin(key) {
+async function checkLogin(key, options = {}) {
     const errorEl = document.getElementById('login-error');
     errorEl.classList.add('hidden');
+    readOnlyStatsMode = false;
+    readOnlyProfileId = '';
+    setReadOnlyDashboardUI(false);
     apiKey = key;
 
     try {
         const data = await apiFetch('/profiles');
         if (!data.data || data.data.length === 0) throw new Error('Profil bulunamadı.');
 
-        localStorage.setItem('nextdns_api_key', apiKey);
+        sessionStorage.setItem('nextdns_api_key', apiKey);
+        if (!options.skipAccountSave) {
+            const existing = apiProfiles.find(item => item.id === activeApiProfileId);
+            if (existing) {
+                existing.name = existing.name || 'NextDNS hesabım';
+            } else {
+                activeApiProfileId = 'api-' + Date.now().toString(36);
+                apiProfiles.push({ id: activeApiProfileId, name: 'NextDNS hesabım' });
+            }
+            sessionStorage.setItem('nextdns_active_profile', activeApiProfileId);
+            localStorage.setItem('nextdns_profiles', JSON.stringify(apiProfiles));
+        }
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('dashboard-screen').classList.remove('hidden');
 
@@ -464,7 +513,11 @@ async function checkLogin(key) {
             select.appendChild(opt);
         });
 
-        currentProfileId = data.data[0].id;
+        const rememberedProfile = activeApiProfileId && sessionStorage.getItem('nextdns_selected_profile_' + activeApiProfileId);
+        currentProfileId = data.data.some(p => p.id === rememberedProfile) ? rememberedProfile : data.data[0].id;
+        select.value = currentProfileId;
+        if (activeApiProfileId) sessionStorage.setItem('nextdns_selected_profile_' + activeApiProfileId, currentProfileId);
+        renderApiProfiles();
         loadAllProfileData(currentProfileId);
         setTimeout(initTvNavigation, 300);
     } catch (err) {
@@ -473,7 +526,171 @@ async function checkLogin(key) {
     }
 }
 
+
+function setReadOnlyDashboardUI(enabled) {
+    const nav = document.querySelector('nav');
+    const profileSelect = document.getElementById('profile-select');
+    const accountButton = document.getElementById('manage-api-profiles-btn');
+    const profileLabel = document.getElementById('readonly-profile-label');
+
+    nav?.classList.toggle('hidden', enabled);
+    profileSelect?.classList.toggle('hidden', enabled);
+    accountButton?.classList.toggle('hidden', enabled);
+    if (profileLabel) {
+        profileLabel.classList.toggle('hidden', !enabled);
+        profileLabel.textContent = enabled ? `Salt okunur · ${readOnlyProfileId}` : '';
+    }
+
+    // Always return to the overview tab when changing access modes.
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.toggle('hidden', tab.id !== 'tab-overview');
+    });
+}
+
+async function checkReadonlyStats(key, profileId) {
+    const errorEl = document.getElementById('login-error');
+    errorEl.classList.add('hidden');
+    apiKey = key;
+
+    try {
+        // Validate access with a read-only analytics endpoint.
+        const result = await apiFetch(`/profiles/${encodeURIComponent(profileId)}/analytics/status`);
+        if (!Array.isArray(result.data)) throw new Error('İstatistik verisi alınamadı.');
+
+        readOnlyStatsMode = true;
+        readOnlyProfileId = profileId;
+        currentProfileId = profileId;
+        sessionStorage.setItem('nextdns_api_key', apiKey);
+
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('dashboard-screen').classList.remove('hidden');
+        setReadOnlyDashboardUI(true);
+        await fetchOverviewStats(profileId);
+        setTimeout(initTvNavigation, 300);
+    } catch (err) {
+        apiKey = '';
+        errorEl.textContent = 'Bağlantı kurulamadı. API anahtarını ve Profil ID bilgisini kontrol edin.';
+        errorEl.classList.remove('hidden');
+    }
+}
+
+/* Multi-account / API profile manager */
+function saveApiProfiles() {
+    localStorage.setItem('nextdns_profiles', JSON.stringify(apiProfiles));
+    renderApiProfiles();
+}
+
+function openApiProfiles() {
+    const modal = document.getElementById('api-profiles-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    renderApiProfiles();
+    setTimeout(initTvNavigation, 100);
+}
+
+function closeApiProfiles() {
+    document.getElementById('api-profiles-modal')?.classList.add('hidden');
+    setTimeout(initTvNavigation, 100);
+}
+
+function renderApiProfiles() {
+    const container = document.getElementById('api-profiles-list');
+    if (!container) return;
+    if (!apiProfiles.length) {
+        container.innerHTML = '<p class="text-xs text-zinc-500 py-3">Henüz kayıtlı hesap yok. API anahtarı ekleyerek başlayın.</p>';
+        return;
+    }
+    container.innerHTML = apiProfiles.map(profile => {
+        const active = profile.id === activeApiProfileId;
+        const hasSessionKey = Boolean(sessionStorage.getItem('nd_api_key_' + profile.id));
+        return `
+            <div class="flex items-center justify-between gap-3 p-3 rounded-xl border ${active ? 'border-blue-500/50 bg-blue-500/10' : 'border-zinc-800 bg-zinc-950'}">
+                <div class="min-w-0">
+                    <p class="text-sm font-medium text-zinc-100 truncate">${escapeHtml(profile.name)}</p>
+                    <p class="text-[10px] text-zinc-500">${active ? 'Aktif hesap' : (hasSessionKey ? 'Bu oturumda hazır' : 'Tekrar API anahtarı gerekli')}</p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    ${active ? '<span class="text-[10px] text-emerald-400">Aktif</span>' : `<button data-switch-api="${escapeHtml(profile.id)}" class="px-2.5 py-1.5 rounded-lg bg-blue-600 text-white text-[11px]">Geçiş</button>`}
+                    <button data-remove-api="${escapeHtml(profile.id)}" class="px-2 py-1.5 rounded-lg border border-red-500/20 text-red-400 text-[11px]" aria-label="Hesabı kaldır">Sil</button>
+                </div>
+            </div>`;
+    }).join('');
+}
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[char]);
+}
+
+async function addApiProfile() {
+    const nameInput = document.getElementById('api-profile-name');
+    const keyInput = document.getElementById('api-profile-key');
+    const error = document.getElementById('api-profile-error');
+    const name = nameInput.value.trim() || 'NextDNS hesabı ' + (apiProfiles.length + 1);
+    const key = keyInput.value.trim();
+    error.textContent = '';
+    if (!key) { error.textContent = 'Önce API anahtarını girin.'; return; }
+
+    const previousKey = apiKey;
+    apiKey = key;
+    try {
+        const response = await apiFetch('/profiles');
+        if (!Array.isArray(response.data) || !response.data.length) throw new Error('Bu anahtarla profil bulunamadı.');
+        const id = 'api-' + Date.now().toString(36);
+        apiProfiles.push({ id, name });
+        sessionStorage.setItem('nd_api_key_' + id, key);
+        sessionStorage.setItem('nd_api_profiles_' + id, JSON.stringify(response.data.map(p => ({ id: p.id, name: p.name || p.fingerprint || p.id }))));
+        activeApiProfileId = id;
+        sessionStorage.setItem('nextdns_active_profile', id);
+        sessionStorage.setItem('nextdns_api_key', key);
+        localStorage.setItem('nextdns_profiles', JSON.stringify(apiProfiles));
+        keyInput.value = '';
+        nameInput.value = '';
+        closeApiProfiles();
+        await checkLogin(key, { skipAccountSave: true });
+    } catch (err) {
+        apiKey = previousKey;
+        error.textContent = 'Bağlantı kurulamadı. API anahtarını kontrol edin.';
+    }
+}
+
+async function switchApiProfile(id) {
+    const key = sessionStorage.getItem('nd_api_key_' + id);
+    if (!key) {
+        const error = document.getElementById('api-profile-error');
+        error.textContent = 'Bu hesap anahtarı güvenlik nedeniyle oturum sonunda temizlendi. Yeniden ekleyin.';
+        return;
+    }
+    activeApiProfileId = id;
+    sessionStorage.setItem('nextdns_active_profile', id);
+    sessionStorage.setItem('nextdns_api_key', key);
+    closeApiProfiles();
+    await checkLogin(key, { skipAccountSave: true });
+}
+
+function removeApiProfile(id) {
+    apiProfiles = apiProfiles.filter(profile => profile.id !== id);
+    sessionStorage.removeItem('nd_api_key_' + id);
+    sessionStorage.removeItem('nd_api_profiles_' + id);
+    sessionStorage.removeItem('nextdns_selected_profile_' + id);
+    if (activeApiProfileId === id) {
+        activeApiProfileId = '';
+        apiKey = '';
+        sessionStorage.removeItem('nextdns_active_profile');
+        sessionStorage.removeItem('nextdns_api_key');
+        document.getElementById('dashboard-screen').classList.add('hidden');
+        document.getElementById('login-screen').classList.remove('hidden');
+    }
+    saveApiProfiles();
+}
+
 async function loadAllProfileData(profileId) {
+    // Read-only profile-ID mode performs only GET analytics requests.
+    if (readOnlyStatsMode) {
+        fetchOverviewStats(profileId);
+        return;
+    }
     fetchOverviewStats(profileId);
     fetchLogs(profileId);
     fetchLists(profileId);
