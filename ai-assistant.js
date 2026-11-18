@@ -313,62 +313,212 @@
 
     const faqPanel = panel.querySelector('#nd-ai-faq');
     const faqQuestions = [
-      'NextDNS nedir ve ne işe yarar?',
-      'NextDNS hesabı nasıl oluşturulur?',
-      'NextDNS yapılandırma kimliğimi nereden bulurum?',
-      'Bir cihazı NextDNS’e nasıl bağlarım?',
-      'Windows’ta NextDNS nasıl kurulur?',
-      'Android telefonda Özel DNS nasıl açılır?',
-      'iPhone ve iPad’de NextDNS nasıl kullanılır?',
-      'Mac bilgisayarda NextDNS nasıl kurulur?',
-      'Linux’ta NextDNS nasıl ayarlanır?',
-      'Tarayıcıda NextDNS kullanabilir miyim?',
-      'NextDNS profili ile cihaz profili arasındaki fark nedir?',
-      'Birden fazla cihazı aynı hesaba bağlayabilir miyim?',
-      'Cihazımın NextDNS’e bağlı olup olmadığını nasıl anlarım?',
-      'Sorgu günlüklerini nereden görüntülerim?',
-      'DNS sorgusu ne demektir?',
-      'Engellenen alan adlarını nasıl görürüm?',
-      'Bir alan adının neden engellendiğini nasıl anlarım?',
-      'Bir alan adını izin listesine nasıl eklerim?',
-      'Bir alan adını engelleme listesine nasıl eklerim?',
-      'Özel izin listesi ve engelleme listesi nasıl çalışır?',
-      'Reklam engelleme nasıl etkinleştirilir?',
-      'İzleyici engelleme ne işe yarar?',
-      'Kimlik avı koruması nedir?',
-      'Kötü amaçlı yazılım koruması nasıl çalışır?',
-      'Ebeveyn denetimleri nasıl ayarlanır?',
-      'Belirli kategorileri nasıl engellerim?',
-      'Sosyal medya sitelerini nasıl kısıtlarım?',
-      'Oyun sitelerini engellemek mümkün mü?',
-      'Güvenli arama nasıl etkinleştirilir?',
-      'YouTube Kısıtlı Mod nasıl açılır?',
-      'DNS-over-HTTPS (DoH) nedir?',
-      'DNS-over-TLS (DoT) nedir?',
-      'DNS-over-QUIC (DoQ) nedir?',
-      'DoH ile DoT arasındaki fark nedir?',
-      'NextDNS VPN midir?',
-      'NextDNS ile VPN aynı anda kullanılabilir mi?',
-      'WireGuard ile NextDNS birlikte çalışır mı?',
-      'NextDNS bağlantısı neden çalışmıyor?',
-      'DNS önbelleğini nasıl temizlerim?',
-      'Ayar değişiklikleri ne kadar sürede uygulanır?',
-      'İstatistikler neden güncellenmiyor?',
-      'Sorgu sayımı ve aylık kullanım nasıl takip edilir?',
-      'Aylık sorgu sınırına ulaşırsam ne olur?',
-      'NextDNS ücretsiz planında neler var?',
-      'NextDNS Pro ile ücretsiz planın farkı nedir?',
-      'Bir yapılandırmayı başka cihaza nasıl taşırım?',
-      'Yedek DNS sunucusu eklemeli miyim?',
-      'IPv6 ile NextDNS kullanabilir miyim?',
-      'NextDNS gizliliğimi nasıl korur?',
-      'NextDNS bağlantısını nasıl test ederim?'
-    ];
+      {
+            "q": "NextDNS nedir ve ne işe yarar?",
+            "a": "NextDNS, DNS isteklerini filtreleyerek reklamları, izleyicileri ve zararlı alan adlarını engellemeye yardımcı olan bir DNS hizmetidir."
+      },
+      {
+            "q": "NextDNS hesabı nasıl oluşturulur?",
+            "a": "NextDNS’in resmî sitesine girip kayıt ol bölümünden e-posta adresinle hesap oluşturabilirsin."
+      },
+      {
+            "q": "NextDNS yapılandırma kimliğimi nereden bulurum?",
+            "a": "NextDNS kontrol panelinde Kurulum (Setup) bölümünü aç. Yapılandırma kimliğin burada gösterilir."
+      },
+      {
+            "q": "Bir cihazı NextDNS’e nasıl bağlarım?",
+            "a": "Kontrol panelindeki Kurulum bölümünden cihazının işletim sistemini seç ve ekrandaki yönergeleri uygula."
+      },
+      {
+            "q": "Windows’ta NextDNS nasıl kurulur?",
+            "a": "Kurulum sayfasında Windows seçeneğini aç. Uygulama veya DNS-over-HTTPS yönergelerini izleyip yapılandırma kimliğini kullan."
+      },
+      {
+            "q": "Android telefonda Özel DNS nasıl açılır?",
+            "a": "Ayarlar > Ağ ve internet > Özel DNS bölümüne gir. NextDNS Kurulum sayfasındaki TLS ana bilgisayar adını buraya yaz."
+      },
+      {
+            "q": "iPhone ve iPad’de NextDNS nasıl kullanılır?",
+            "a": "NextDNS Kurulum sayfasında iOS seçeneğini aç. Sağlanan yapılandırma profilini indirip Ayarlar’dan yükle."
+      },
+      {
+            "q": "Mac bilgisayarda NextDNS nasıl kurulur?",
+            "a": "NextDNS Kurulum sayfasında macOS seçeneğini seç ve sunulan uygulama ya da profil yönergelerini uygula."
+      },
+      {
+            "q": "Linux’ta NextDNS nasıl ayarlanır?",
+            "a": "NextDNS Kurulum sayfasındaki Linux yönergelerini izle. Kullanılan dağıtıma ve DNS yöneticisine göre adımlar değişebilir."
+      },
+      {
+            "q": "Tarayıcıda NextDNS kullanabilir miyim?",
+            "a": "Evet. Tarayıcının güvenli DNS (DNS-over-HTTPS) ayarına NextDNS adresini girerek kullanabilirsin."
+      },
+      {
+            "q": "NextDNS profili ile cihaz profili arasındaki fark nedir?",
+            "a": "Yapılandırma profili DNS filtreleme ayarlarını belirler. Cihaz etiketi veya cihaz profili ise sorguları cihaz bazında ayırmana yardımcı olur."
+      },
+      {
+            "q": "Birden fazla cihazı aynı hesaba bağlayabilir miyim?",
+            "a": "Evet. Aynı yapılandırma kimliğini birden fazla cihazda kullanabilirsin. İstersen cihazları ayrı ayrı tanımlayabilirsin."
+      },
+      {
+            "q": "Cihazımın NextDNS’e bağlı olup olmadığını nasıl anlarım?",
+            "a": "NextDNS kontrol panelindeki Kurulum veya Test sayfasını aç. 'This device is using NextDNS' benzeri doğrulama mesajını kontrol et."
+      },
+      {
+            "q": "Sorgu günlüklerini nereden görüntülerim?",
+            "a": "Kontrol panelindeki Günlükler (Logs) bölümünü aç. Günlük kaydı etkinse DNS sorgularını burada görebilirsin."
+      },
+      {
+            "q": "DNS sorgusu ne demektir?",
+            "a": "Bir uygulama veya cihaz alan adının IP adresini öğrenmek için DNS sunucusuna istek gönderir. Bu isteğe DNS sorgusu denir."
+      },
+      {
+            "q": "Engellenen alan adlarını nasıl görürüm?",
+            "a": "Günlükler bölümünde engellenen sorguları filtreleyebilir ve engelleme nedenini inceleyebilirsin."
+      },
+      {
+            "q": "Bir alan adının neden engellendiğini nasıl anlarım?",
+            "a": "Günlüklerde alan adını seç. Engelleme nedeni veya eşleşen liste bilgisi görünüyorsa hangi kuralın etkili olduğunu gösterir."
+      },
+      {
+            "q": "Bir alan adını izin listesine nasıl eklerim?",
+            "a": "İzin Listesi (Allowlist) bölümüne alan adını ekle ve kaydet. Bu alan adı engelleme listelerinden muaf tutulur."
+      },
+      {
+            "q": "Bir alan adını engelleme listesine nasıl eklerim?",
+            "a": "Engelleme Listesi (Denylist) bölümüne alan adını ekle ve değişikliği kaydet."
+      },
+      {
+            "q": "Özel izin listesi ve engelleme listesi nasıl çalışır?",
+            "a": "İzin listesi belirli alan adlarının engellenmesini önler; engelleme listesi ise belirttiğin alan adlarını engeller."
+      },
+      {
+            "q": "Reklam engelleme nasıl etkinleştirilir?",
+            "a": "Gizlilik (Privacy) bölümünde uygun reklam engelleme listelerini etkinleştir. Değişiklikleri kaydet."
+      },
+      {
+            "q": "İzleyici engelleme ne işe yarar?",
+            "a": "İzleyici engelleme listeleri, uygulama ve sitelerin bilinen takip alan adlarına yaptığı DNS isteklerini durdurmaya yardımcı olur."
+      },
+      {
+            "q": "Kimlik avı koruması nedir?",
+            "a": "Kimlik avı koruması, kullanıcıları sahte giriş sayfaları ve kimlik bilgilerini çalmaya çalışan bilinen alan adlarından korumaya yardımcı olur."
+      },
+      {
+            "q": "Kötü amaçlı yazılım koruması nasıl çalışır?",
+            "a": "Etkinleştirilen güvenlik listeleri bilinen zararlı alan adlarına yapılan DNS isteklerini engellemeye yardımcı olur."
+      },
+      {
+            "q": "Ebeveyn denetimleri nasıl ayarlanır?",
+            "a": "Ebeveyn Denetimleri bölümünden uygun içerik kategorilerini seçebilir ve istersen belirli siteleri ayrıca engelleyebilirsin."
+      },
+      {
+            "q": "Belirli kategorileri nasıl engellerim?",
+            "a": "Ebeveyn Denetimleri veya Güvenlik bölümünde kategori listesini aç, engellemek istediklerini etkinleştir ve kaydet."
+      },
+      {
+            "q": "Sosyal medya sitelerini nasıl kısıtlarım?",
+            "a": "Ebeveyn Denetimleri bölümünde sosyal ağ kategorisini etkinleştir. Gerekirse belirli alan adlarını engelleme listesine ekle."
+      },
+      {
+            "q": "Oyun sitelerini engellemek mümkün mü?",
+            "a": "Evet. Uygun oyun kategorisini ebeveyn denetimlerinden engelleyebilir veya belirli oyun alan adlarını engelleme listesine ekleyebilirsin."
+      },
+      {
+            "q": "Güvenli arama nasıl etkinleştirilir?",
+            "a": "Ebeveyn Denetimleri bölümündeki Güvenli Arama (Safe Search) seçeneğini etkinleştir."
+      },
+      {
+            "q": "YouTube Kısıtlı Mod nasıl açılır?",
+            "a": "Ebeveyn Denetimleri bölümünde YouTube Kısıtlı Mod seçeneği varsa etkinleştir. Sonuçların uygulanması cihaz ve uygulamaya göre değişebilir."
+      },
+      {
+            "q": "DNS-over-HTTPS (DoH) nedir?",
+            "a": "DoH, DNS sorgularını HTTPS bağlantısı içinde şifreleyerek ileten DNS protokolüdür."
+      },
+      {
+            "q": "DNS-over-TLS (DoT) nedir?",
+            "a": "DoT, DNS sorgularını TLS ile şifreleyerek DNS sunucusuna iletir. Android Özel DNS bu yöntemi destekler."
+      },
+      {
+            "q": "DNS-over-QUIC (DoQ) nedir?",
+            "a": "DoQ, DNS sorgularını QUIC protokolü üzerinden şifreli biçimde taşır."
+      },
+      {
+            "q": "DoH ile DoT arasındaki fark nedir?",
+            "a": "İkisi de DNS trafiğini şifreler. DoH HTTPS üzerinden, DoT ise ayrı bir TLS bağlantısı üzerinden çalışır."
+      },
+      {
+            "q": "NextDNS VPN midir?",
+            "a": "Hayır. NextDNS bir VPN değildir; DNS sorgularını filtreler. Cihazının tüm internet trafiğini VPN gibi tünellemez."
+      },
+      {
+            "q": "NextDNS ile VPN aynı anda kullanılabilir mi?",
+            "a": "Çoğu durumda evet; ancak VPN uygulaması kendi DNS ayarlarını kullanıyorsa NextDNS devre dışı kalabilir. VPN’in DNS seçeneklerini kontrol et."
+      },
+      {
+            "q": "WireGuard ile NextDNS birlikte çalışır mı?",
+            "a": "Evet, yapılandırmaya bağlı olarak birlikte çalışabilir. WireGuard tünelinin DNS ayarında NextDNS sunucusunu belirtmen gerekir."
+      },
+      {
+            "q": "NextDNS bağlantısı neden çalışmıyor?",
+            "a": "İnternet bağlantını, yapılandırma kimliğini, cihazın DNS ayarını ve VPN/özel DNS çakışmalarını kontrol et. Ardından NextDNS test sayfasını dene."
+      },
+      {
+            "q": "DNS önbelleğini nasıl temizlerim?",
+            "a": "DNS önbelleği temizleme yöntemi işletim sistemine göre değişir. Windows, macOS ve Linux için kendi sisteminin DNS önbelleği komutunu kullan."
+      },
+      {
+            "q": "Ayar değişiklikleri ne kadar sürede uygulanır?",
+            "a": "Çoğu NextDNS ayarı kaydedildikten kısa süre sonra uygulanır. Cihazın veya uygulamanın DNS önbelleği eski sonucu bir süre tutabilir."
+      },
+      {
+            "q": "İstatistikler neden güncellenmiyor?",
+            "a": "Cihazın gerçekten NextDNS kullandığını, doğru yapılandırma kimliğini ve günlük/istatistik ayarlarını kontrol et. Veriler anında görünmeyebilir."
+      },
+      {
+            "q": "Sorgu sayımı ve aylık kullanım nasıl takip edilir?",
+            "a": "NextDNS kontrol panelindeki Analitik veya İstatistikler bölümünde sorgu sayısını ve kullanım dönemini kontrol edebilirsin."
+      },
+      {
+            "q": "Aylık sorgu sınırına ulaşırsam ne olur?",
+            "a": "Ücretsiz planın aylık sorgu kotası dolduğunda hizmetin filtreleme ve sorgu işleme koşulları planın güncel kurallarına göre değişebilir. Hesap panelindeki kullanım uyarısını kontrol et."
+      },
+      {
+            "q": "NextDNS ücretsiz planında neler var?",
+            "a": "Ücretsiz plan temel DNS filtreleme ve kontrol paneli özelliklerini belirli bir aylık sorgu kotasıyla sunar. Güncel sınırlar NextDNS’in planlar sayfasında yer alır."
+      },
+      {
+            "q": "NextDNS Pro ile ücretsiz planın farkı nedir?",
+            "a": "Ücretli planlar daha yüksek veya sınırsız sorgu kullanımı gibi ek haklar sunabilir. Güncel özellik ve fiyat karşılaştırması için NextDNS’in resmî planlar sayfasına bak."
+      },
+      {
+            "q": "Bir yapılandırmayı başka cihaza nasıl taşırım?",
+            "a": "Yeni cihazda NextDNS Kurulum sayfasını açıp aynı yapılandırma kimliğini kullan. İstersen cihazı ayrıca adlandır."
+      },
+      {
+            "q": "Yedek DNS sunucusu eklemeli miyim?",
+            "a": "Filtrelemeyi korumak istiyorsan rastgele bir DNS sunucusunu yedek olarak ekleme; cihaz başarısızlıkta ona geçerse NextDNS filtrelemesi atlanabilir."
+      },
+      {
+            "q": "IPv6 ile NextDNS kullanabilir miyim?",
+            "a": "Evet. NextDNS, Kurulum sayfasında IPv6 için desteklenen adresleri ve gerekli ayarları gösterir."
+      },
+      {
+            "q": "NextDNS gizliliğimi nasıl korur?",
+            "a": "DNS trafiğini şifreli protokollerle iletmene ve günlüklerin nasıl tutulacağını ayarlamana yardımcı olur. Gizlilik ayarlarını kontrol panelinden inceleyebilirsin."
+      },
+      {
+            "q": "NextDNS bağlantısını nasıl test ederim?",
+            "a": "Tarayıcıdan test.nextdns.io adresini aç. Sonuçta NextDNS kullanımı ve bağlantı protokolüyle ilgili durum bilgisi gösterilir."
+      }
+];
 
     function renderFaq(filter = '') {
       const query = filter.trim().toLocaleLowerCase('tr');
-      const matches = faqQuestions.filter(question =>
-        question.toLocaleLowerCase('tr').includes(query)
+      const matches = faqQuestions.filter(entry =>
+        entry.q.toLocaleLowerCase('tr').includes(query)
       );
       faqPanel.replaceChildren();
 
@@ -380,18 +530,20 @@
         return;
       }
 
-      matches.forEach((question, index) => {
+      matches.forEach((entry) => {
         const item = document.createElement('button');
         item.type = 'button';
         item.setAttribute('role', 'option');
-        item.textContent = question;
+        item.textContent = entry.q;
         item.style.cssText = 'display:block;width:100%;padding:10px 12px;text-align:left;background:transparent;color:#e4e4e7;font-size:12px;line-height:1.4;border:0;border-bottom:1px solid #27272a;cursor:pointer';
         item.addEventListener('mouseenter', () => item.style.background = '#27272a');
         item.addEventListener('mouseleave', () => item.style.background = 'transparent');
         item.addEventListener('click', () => {
-          input.value = question;
           faqPanel.hidden = true;
-          input.focus();
+          input.value = '';
+          bubble(entry.q, 'user');
+          bubble(entry.a, 'assistant');
+          setStatus(getLang().ready);
         });
         faqPanel.appendChild(item);
       });
