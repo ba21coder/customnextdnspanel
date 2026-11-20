@@ -37,7 +37,7 @@ private val parentalServices=listOf("TikTok","Instagram","YouTube","Roblox","Min
 data class Profile(val id:String,val name:String)
 data class Rule(val id:String)
 data class LogEntry(val domain:String,val device:String,val status:String,val protocol:String,val time:String)
-data class Stats(val total:Long=0,val blocked:Long=0,val devices:List<Pair<String,Long>>=emptyList(),val domains:List<Pair<String,Long>>=emptyList()){val ratio get()=if(total==0L)"0%" else "%.1f%%".format(blocked*100.0/total)}
+data class Stats(val total:Long=0,val blocked:Long=0,val devices:List<Pair<String,Long>>=emptyList(),val domains:List<Pair<String,Long>> = emptyList()){val ratio get()=if(total==0L)"0%" else "%.1f%%".format(blocked*100.0/total)}
 
 class MainActivity:ComponentActivity(){override fun onCreate(savedInstanceState:Bundle?){super.onCreate(savedInstanceState);window.statusBarColor=android.graphics.Color.rgb(8,14,24);window.navigationBarColor=android.graphics.Color.rgb(8,14,24);setContent{TvApp()}}}
 
@@ -82,7 +82,7 @@ class MainActivity:ComponentActivity(){override fun onCreate(savedInstanceState:
        Column{Text(tab,fontSize=26.sp,fontWeight=FontWeight.Bold);Text(selected?.name.orEmpty(),color=Muted,fontSize=12.sp)}
        Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
         if(profiles.size>1){var expanded by remember{mutableStateOf(false)};Box{Button(onClick={expanded=true}){Text("Profil seç")};DropdownMenu(expanded,{expanded=false}){profiles.forEach{p->DropdownMenuItem(text={Text(p.name)},onClick={expanded=false;selected=p;runTask{refresh(p)}})}}}}
-        Button(onClick={selected?.let{p->{runTask{refresh(p)}}} ?: {}}){Text("Yenile")}
+        Button(onClick={val p=selected;if(p!=null)runTask{refresh(p)}){Text("Yenile")}
        }
       }
       Spacer(Modifier.height(14.dp));if(loading)Text("Yükleniyor…",color=Muted);if(error.isNotBlank())Text(error,color=Color(0xFFFF7777),fontSize=12.sp)
