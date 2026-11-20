@@ -550,14 +550,20 @@ async function apiFetch(endpoint, options = {}) {
     if (readOnlyStatsMode && method !== 'GET') {
         throw new Error('Salt okunur modda değişiklik yapılamaz.');
     }
-    const res = await fetch(`${PROXY_URL}${endpoint}`, {
-        ...options,
-        headers: {
-            'X-Api-Key': apiKey,
-            'Content-Type': 'application/json',
-            ...(options.headers || {})
-        }
-    });
+    let res;
+    try {
+        res = await fetch(`${PROXY_URL}${endpoint}`, {
+            ...options,
+            headers: {
+                'X-Api-Key': apiKey,
+                'Content-Type': 'application/json',
+                ...(options.headers || {})
+            }
+        });
+    } catch (error) {
+        if (error instanceof TypeError || !navigator.onLine) updateNetworkStatus(false);
+        throw error;
+    }
     if (!res.ok) throw new Error(`API Hatası: ${res.status}`);
     if (res.status === 204) return null;
     return res.json();
