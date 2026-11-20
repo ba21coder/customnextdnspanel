@@ -1,0 +1,47 @@
+name: Build NextDNS PRO Windows Setup
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "desktop-app/**"
+      - ".github/workflows/windows-desktop.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: desktop-app/package-lock.json
+      - name: Install dependencies
+        working-directory: desktop-app
+        run: npm install
+      - name: Build 64-bit and 32-bit installers
+        working-directory: desktop-app
+        run: npm run dist:win
+      - name: Upload setup files
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextdns-pro-windows-installers
+          path: desktop-app/dist/*.exe
+          if-no-files-found: error
+      - name: Publish Windows installers
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: windows-latest
+          name: NextDNS PRO Windows - Latest
+          make_latest: false
+          files: |
+            desktop-app/dist/NextDNS-PRO-Setup-x64.exe
+            desktop-app/dist/NextDNS-PRO-Setup-ia32.exe
+          overwrite_files: true
