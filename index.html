@@ -39,6 +39,14 @@
                     <input type="password" id="api-key-input" placeholder="API anahtarınızı yapıştırın..." 
                         class="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition font-mono">
                 </div>
+                <section id="login-saved-profiles-section" class="hidden space-y-2 rounded-xl border border-zinc-800 bg-zinc-950/70 p-3">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xs font-semibold text-zinc-200">Kayıtlı profiller</h2>
+                        <span class="text-[10px] text-zinc-500">Hızlı giriş</span>
+                    </div>
+                    <div id="login-saved-profiles" class="flex flex-wrap gap-3" aria-label="Kayıtlı API profilleri"></div>
+                    <p class="text-[10px] text-zinc-500">Bir profile dokunarak kayıtlı hesabını seçebilirsin. Güvenlik nedeniyle API anahtarları yalnızca mevcut oturumda saklanır.</p>
+                </section>
                 <details class="border-t border-zinc-800 pt-3">
                     <summary class="cursor-pointer text-xs text-zinc-400 hover:text-zinc-200">Gelişmiş: Profil ID ile salt okunur görüntüleme</summary>
                     <div class="pt-3 space-y-2">
