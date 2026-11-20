@@ -4,6 +4,7 @@ const PROXY_URL = 'https://nextdns-proxy.batuhan-gulsen15.workers.dev';
 let apiKey = sessionStorage.getItem('nextdns_api_key') || '';
 let apiProfiles = JSON.parse(localStorage.getItem('nextdns_profiles') || '[]');
 let activeApiProfileId = sessionStorage.getItem('nextdns_active_profile') || '';
+let selectedLoginAvatar = '🌐';
 // Migrate the old persistent key once, then remove it from localStorage.
 const legacyApiKey = localStorage.getItem('nextdns_api_key');
 if (!apiKey && legacyApiKey) {
@@ -379,6 +380,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     renderLoginSavedProfiles();
+    document.getElementById('login-avatar-presets')?.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-avatar-preset]');
+        if (!button) return;
+        selectedLoginAvatar = button.dataset.avatarPreset;
+        document.getElementById('login-avatar-status').textContent = 'Seçilen simge: ' + selectedLoginAvatar;
+    });
+    document.getElementById('login-avatar-upload')?.addEventListener('change', (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            showError('Lütfen bir resim dosyası seçin.');
+            event.target.value = '';
+            return;
+        }
+        if (file.size > 1024 * 1024) {
+            showError('Profil resmi en fazla 1 MB olabilir.');
+            event.target.value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+            selectedLoginAvatar = String(reader.result || '');
+            document.getElementById('login-avatar-status').textContent = 'Kendi resmin seçildi.';
+        };
+        reader.onerror = () => showError('Resim okunamadı. Tekrar deneyin.');
+        reader.readAsDataURL(file);
+    });
     document.getElementById('login-btn').addEventListener('click', () => {
         const key = document.getElementById('api-key-input').value.trim();
         const profileName = document.getElementById('login-profile-name').value.trim();
@@ -523,9 +551,10 @@ async function checkLogin(key, options = {}) {
             const existing = apiProfiles.find(item => item.id === activeApiProfileId);
             if (existing) {
                 existing.name = options.profileName || existing.name || 'NextDNS hesabım';
+                existing.avatar = selectedLoginAvatar;
             } else {
                 activeApiProfileId = 'api-' + Date.now().toString(36);
-                apiProfiles.push({ id: activeApiProfileId, name: options.profileName || ('NextDNS hesabı ' + (apiProfiles.length + 1)) });
+                apiProfiles.push({ id: activeApiProfileId, name: options.profileName || ('NextDNS hesabı ' + (apiProfiles.length + 1)), avatar: selectedLoginAvatar });
             }
             sessionStorage.setItem('nd_api_key_' + activeApiProfileId, apiKey);
             sessionStorage.setItem('nextdns_active_profile', activeApiProfileId);
@@ -631,9 +660,12 @@ function renderLoginSavedProfiles() {
     container.innerHTML = apiProfiles.map((profile, index) => {
         const ready = Boolean(sessionStorage.getItem('nd_api_key_' + profile.id));
         const initials = escapeHtml((profile.name || 'ND').trim().slice(0, 2).toUpperCase());
+        const avatar = typeof profile.avatar === 'string' && profile.avatar.startsWith('data:image/')
+            ? '<img src="' + profile.avatar + '" alt="" class="w-full h-full rounded-full object-cover">'
+            : '<span>' + escapeHtml(profile.avatar || initials) + '</span>';
         const selected = profile.id === activeApiProfileId;
         return `<button type="button" data-login-profile="${escapeHtml(profile.id)}" title="${escapeHtml(profile.name)}" class="w-14 flex flex-col items-center gap-1.5 group">
-            <span class="w-12 h-12 rounded-full flex items-center justify-center border text-sm font-bold transition ${selected ? 'border-blue-400 bg-blue-500/20 text-blue-300 ring-2 ring-blue-500/30' : 'border-zinc-700 bg-zinc-900 text-zinc-200 group-hover:border-blue-500'}">${initials}</span>
+            <span class="w-12 h-12 overflow-hidden rounded-full flex items-center justify-center border text-xl font-bold transition ${selected ? 'border-blue-400 bg-blue-500/20 text-blue-300 ring-2 ring-blue-500/30' : 'border-zinc-700 bg-zinc-900 text-zinc-200 group-hover:border-blue-500'}">${avatar}</span>
             <span class="w-full text-[10px] text-center text-zinc-400 truncate">${escapeHtml(profile.name)}</span>
             <span class="text-[9px] ${ready ? 'text-emerald-400' : 'text-amber-400'}">${ready ? 'Hazır' : 'Anahtar gerekli'}</span>
         </button>`;
