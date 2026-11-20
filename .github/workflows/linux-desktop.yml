@@ -6,6 +6,13 @@ on:
     paths:
       - "desktop-app/**"
       - ".github/workflows/linux-desktop.yml"
+      - "index.html"
+      - "app.js"
+      - "style.css"
+      - "pro-features.js"
+      - "wireguard.js"
+      - "ai-assistant.js"
+      - "ai-worker.js"
   workflow_dispatch:
 
 permissions:
