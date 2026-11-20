@@ -4,7 +4,7 @@ const PROXY_URL = 'https://nextdns-proxy.batuhan-gulsen15.workers.dev';
 let apiKey = sessionStorage.getItem('nextdns_api_key') || '';
 let apiProfiles = JSON.parse(localStorage.getItem('nextdns_profiles') || '[]');
 let activeApiProfileId = sessionStorage.getItem('nextdns_active_profile') || '';
-let selectedLoginAvatar = '🌐';
+let selectedLoginAvatar = 'icon:globe';
 // Migrate the old persistent key once, then remove it from localStorage.
 const legacyApiKey = localStorage.getItem('nextdns_api_key');
 if (!apiKey && legacyApiKey) {
@@ -383,8 +383,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('login-avatar-presets')?.addEventListener('click', (event) => {
         const button = event.target.closest('[data-avatar-preset]');
         if (!button) return;
-        selectedLoginAvatar = button.dataset.avatarPreset;
-        document.getElementById('login-avatar-status').textContent = 'Seçilen simge: ' + selectedLoginAvatar;
+        selectedLoginAvatar = 'icon:' + button.dataset.avatarPreset;
+        document.querySelectorAll('#login-avatar-presets [data-avatar-preset]').forEach(item => {
+            item.classList.toggle('ring-2', item === button);
+            item.classList.toggle('ring-blue-400', item === button);
+            item.classList.toggle('border-blue-400', item === button);
+        });
+        document.getElementById('login-avatar-status').textContent = 'Hazır ikon seçildi.';
     });
     document.getElementById('login-avatar-upload')?.addEventListener('change', (event) => {
         const file = event.target.files?.[0];
@@ -402,6 +407,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader();
         reader.onload = () => {
             selectedLoginAvatar = String(reader.result || '');
+            document.querySelectorAll('#login-avatar-presets [data-avatar-preset]').forEach(item => {
+                item.classList.remove('ring-2', 'ring-blue-400', 'border-blue-400');
+            });
             document.getElementById('login-avatar-status').textContent = 'Kendi resmin seçildi.';
         };
         reader.onerror = () => showError('Resim okunamadı. Tekrar deneyin.');
@@ -662,7 +670,9 @@ function renderLoginSavedProfiles() {
         const initials = escapeHtml((profile.name || 'ND').trim().slice(0, 2).toUpperCase());
         const avatar = typeof profile.avatar === 'string' && profile.avatar.startsWith('data:image/')
             ? '<img src="' + profile.avatar + '" alt="" class="w-full h-full rounded-full object-cover">'
-            : '<span>' + escapeHtml(profile.avatar || initials) + '</span>';
+            : (typeof profile.avatar === 'string' && profile.avatar.startsWith('icon:')
+                ? '<i data-lucide="' + escapeHtml(profile.avatar.slice(5)) + '" class="w-5 h-5"></i>'
+                : '<span>' + escapeHtml(profile.avatar || initials) + '</span>');
         const selected = profile.id === activeApiProfileId;
         return `<button type="button" data-login-profile="${escapeHtml(profile.id)}" title="${escapeHtml(profile.name)}" class="w-14 flex flex-col items-center gap-1.5 group">
             <span class="w-12 h-12 overflow-hidden rounded-full flex items-center justify-center border text-xl font-bold transition ${selected ? 'border-blue-400 bg-blue-500/20 text-blue-300 ring-2 ring-blue-500/30' : 'border-zinc-700 bg-zinc-900 text-zinc-200 group-hover:border-blue-500'}">${avatar}</span>
@@ -670,6 +680,7 @@ function renderLoginSavedProfiles() {
             <span class="text-[9px] ${ready ? 'text-emerald-400' : 'text-amber-400'}">${ready ? 'Hazır' : 'Anahtar gerekli'}</span>
         </button>`;
     }).join('');
+    if (window.lucide) lucide.createIcons();
 }
 
 function renderApiProfiles() {
