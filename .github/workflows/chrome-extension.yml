@@ -1,0 +1,29 @@
+name: Chrome Extension
+on:
+  push:
+    paths:
+      - "chrome-extension/**"
+      - ".github/workflows/chrome-extension.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Depoyu indir
+        uses: actions/checkout@v4
+      - name: Eklenti ZIP dosyasını hazırla
+        run: |
+          cd chrome-extension
+          zip -r ../NextDNS-PRO-Chrome.zip .
+      - name: GitHub Releases dosyasını yayımla
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="chrome-extension-latest"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" NextDNS-PRO-Chrome.zip --clobber
+          else
+            gh release create "$TAG" NextDNS-PRO-Chrome.zip --title "NextDNS PRO Chrome Eklentisi" --notes "NextDNS PRO Chrome eklentisi. ZIP dosyasını çıkarıp chrome://extensions üzerinden Paketlenmemiş öğe yükle ile klasörü seçin."
+          fi
