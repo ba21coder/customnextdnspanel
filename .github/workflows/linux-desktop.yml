@@ -1,0 +1,51 @@
+name: Build NextDNS PRO Linux App
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "desktop-app/**"
+      - ".github/workflows/linux-desktop.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuse2
+      - name: Install dependencies
+        working-directory: desktop-app
+        run: npm install
+      - name: Build Linux packages
+        working-directory: desktop-app
+        run: npm run dist:linux
+      - name: Upload Linux installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextdns-pro-linux-x64
+          path: |
+            desktop-app/dist/NextDNS-PRO-Linux-x64.AppImage
+            desktop-app/dist/NextDNS-PRO-Linux-x64.deb
+          if-no-files-found: error
+      - name: Publish Linux installers
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: linux-latest
+          name: NextDNS PRO Linux - Latest
+          make_latest: false
+          files: |
+            desktop-app/dist/NextDNS-PRO-Linux-x64.AppImage
+            desktop-app/dist/NextDNS-PRO-Linux-x64.deb
+          overwrite_files: true
