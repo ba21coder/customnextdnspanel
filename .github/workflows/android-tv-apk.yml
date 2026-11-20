@@ -34,16 +34,18 @@ jobs:
           gradle-version: "8.9"
       - name: Build Android TV APK
         run: gradle assembleDebug
+      - name: Rename APK for download
+        run: cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/NextDNS-PRO-TV.apk
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: nextdns-tv-apk
-          path: android-tv/app/build/outputs/apk/debug/app-debug.apk
+          path: android-tv/app/build/outputs/apk/debug/NextDNS-PRO-TV.apk
       - name: Publish latest Android TV APK
         uses: softprops/action-gh-release@v2
         with:
           tag_name: tv-latest
           name: NextDNS PRO TV - Latest
           make_latest: true
-          files: android-tv/app/build/outputs/apk/debug/app-debug.apk
+          files: android-tv/app/build/outputs/apk/debug/NextDNS-PRO-TV.apk
           overwrite_files: true
