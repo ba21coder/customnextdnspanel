@@ -27,6 +27,9 @@ jobs:
       - name: Build universal macOS DMG
         working-directory: desktop-app
         run: npm run dist:mac
+      - name: Normalize installer filename
+        working-directory: desktop-app
+        run: mv "dist/NextDNS PRO-1.0.0-universal.dmg" "dist/NextDNS-PRO-macOS-universal.dmg"
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
