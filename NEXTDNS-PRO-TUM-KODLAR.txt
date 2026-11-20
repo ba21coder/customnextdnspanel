@@ -1131,3 +1131,266 @@ DOSYA: ai-assistant.js
   }
 
 })();
+
+
+========================================================================================
+DOSYA: ai-worker.js
+========================================================================================
+
+const corsHeaders = (origin, allowed) => ({
+  "Access-Control-Allow-Origin": allowed,
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Vary": "Origin"
+});
+
+export default {
+  async fetch(request, env) {
+    const allowedOrigin = env.ALLOWED_ORIGIN || "https://bthn1.github.io";
+    const origin = request.headers.get("Origin") || "";
+    const cors = corsHeaders(origin, allowedOrigin);
+
+    if (request.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: cors });
+    }
+
+    if (origin && origin !== allowedOrigin) {
+      return Response.json({ error: "Origin not allowed" }, { status: 403, headers: cors });
+    }
+
+    const url = new URL(request.url);
+    if (url.pathname !== "/chat" || request.method !== "POST") {
+      return Response.json({ error: "Not found. Send POST requests to /chat." }, { status: 404, headers: cors });
+    }
+
+    if (!env.OPENAI_API_KEY) {
+      return Response.json({ error: "AI service is not configured. Add OPENAI_API_KEY as a Worker Secret." }, { status: 503, headers: cors });
+    }
+
+    try {
+      const body = await request.json();
+      const messages = Array.isArray(body.messages) ? body.messages.slice(-12) : [];
+      if (
+        !messages.length ||
+        messages.some(m =>
+          !m || !["user", "assistant"].includes(m.role) ||
+          typeof m.content !== "string" || m.content.length > 2000
+        )
+      ) {
+        return Response.json({ error: "Invalid messages" }, { status: 400, headers: cors });
+      }
+
+      const language = String(body.language || "tr").slice(0, 8);
+      const instructions =
+        "You are NextDNS Panel's helpful technical assistant. Answer in the user's selected language (" +
+        language +
+        "). Explain NextDNS, DNS, privacy, dashboard navigation and troubleshooting clearly. " +
+        "Never claim you can see or change the user's live NextDNS account. Never ask for API keys, " +
+        "passwords, WireGuard private keys, or other secrets. Do not request or expose personal DNS logs. " +
+        "For changes to DNS settings, explain the steps and ask the user to perform them in the panel. " +
+        "Be concise and age-appropriate.";
+
+      const upstream = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + env.OPENAI_API_KEY,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: env.OPENAI_MODEL || "gpt-4.1-mini",
+          instructions,
+          input: messages.map(m => ({
+            role: m.role,
+            content: [{ type: "input_text", text: m.content }]
+          })),
+          max_output_tokens: 700
+        })
+      });
+
+      const result = await upstream.json();
+      if (!upstream.ok) {
+        return Response.json(
+          { error: "OpenAI request failed", detail: result.error?.message || "Upstream error" },
+          { status: 502, headers: cors }
+        );
+      }
+
+      const reply = (result.output || [])
+        .flatMap(item => item.content || [])
+        .filter(part => part.type === "output_text")
+        .map(part => part.text)
+        .join("\n");
+
+      return Response.json(
+        { reply },
+        { headers: { ...cors, "Cache-Control": "no-store" } }
+      );
+    } catch {
+      return Response.json({ error: "Invalid request" }, { status: 400, headers: cors });
+    }
+  }
+};
+
+
+========================================================================================
+DOSYA: android-mobile/app/build.gradle.kts
+========================================================================================
+
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+}
+android {
+    namespace = "com.bthn1.nextdnsmobile"
+    compileSdk = 35
+    defaultConfig {
+        applicationId = "com.bthn1.nextdnsmobile"
+        minSdk = 23
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0.0"
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions { jvmTarget = "17" }
+}
+
+
+========================================================================================
+DOSYA: android-mobile/app/src/main/AndroidManifest.xml
+========================================================================================
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application
+        android:allowBackup="false"
+        android:usesCleartextTraffic="false"
+        android:label="NextDNS PRO"
+        android:theme="@android:style/Theme.Material.Light.NoActionBar">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|keyboardHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+
+
+========================================================================================
+DOSYA: android-mobile/app/src/main/java/com/bthn1/nextdnsmobile/MainActivity.kt
+========================================================================================
+
+package com.bthn1.nextdnsmobile
+
+import android.app.Activity
+import android.os.Bundle
+import android.graphics.Color
+import android.view.View
+import android.view.ViewGroup
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.widget.FrameLayout
+import android.widget.ProgressBar
+
+class MainActivity : Activity() {
+    private lateinit var webView: WebView
+    private lateinit var loadingBar: ProgressBar
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        window.statusBarColor = Color.rgb(9, 9, 11)
+        window.navigationBarColor = Color.rgb(9, 9, 11)
+        window.decorView.systemUiVisibility = 0
+
+        val root = FrameLayout(this).apply { setBackgroundColor(Color.rgb(9, 9, 11)) }
+        loadingBar = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
+            max = 100
+            progressTintList = android.content.res.ColorStateList.valueOf(Color.rgb(59, 130, 246))
+            progressBackgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(39, 39, 42))
+        }
+        webView = WebView(this).apply {
+            setBackgroundColor(Color.rgb(9, 9, 11))
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.databaseEnabled = true
+            settings.loadsImagesAutomatically = true
+            settings.javaScriptCanOpenWindowsAutomatically = false
+            settings.allowFileAccess = false
+            settings.allowContentAccess = false
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                    val url = request?.url ?: return false
+                    return url.scheme != "https" && url.scheme != "http"
+                }
+            }
+            webChromeClient = object : WebChromeClient() {
+                override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                    loadingBar.progress = newProgress
+                    loadingBar.visibility = if (newProgress >= 100) View.GONE else View.VISIBLE
+                }
+            }
+        }
+        root.addView(webView, FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+        ))
+        root.addView(loadingBar, FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(3)
+        ))
+        setContentView(root)
+        if (savedInstanceState == null) {
+            webView.loadUrl("https://bthn1.github.io/dnspanel/")
+        } else {
+            webView.restoreState(savedInstanceState)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        webView.saveState(outState)
+        super.onSaveInstanceState(outState)
+    }
+
+    @Deprecated("Deprecated in Android")
+    override fun onBackPressed() {
+        if (::webView.isInitialized && webView.canGoBack()) webView.goBack()
+        else super.onBackPressed()
+    }
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
+}
+
+
+========================================================================================
+DOSYA: android-mobile/build.gradle.kts
+========================================================================================
+
+plugins {
+    id("com.android.application") version "8.7.3" apply false
+    id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+}
+
+
+========================================================================================
+DOSYA: android-mobile/gradle.properties
+========================================================================================
+
+org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8
+android.useAndroidX=true
+kotlin.code.style=official
+
+
+========================================================================================
+DOSYA: android-mobile/settings.gradle.kts
+========================================================================================
+
+pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
+rootProject.name = "NextDNS-Mobile"
+include(":app")
