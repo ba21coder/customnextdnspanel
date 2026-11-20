@@ -14,7 +14,7 @@ import android.widget.ProgressBar
 
 class MainActivity : Activity() {
     private lateinit var webView: WebView
-    private lateinit var progress: ProgressBar
+    private lateinit var loadingBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +23,11 @@ class MainActivity : Activity() {
         window.decorView.systemUiVisibility = 0
 
         val root = FrameLayout(this).apply { setBackgroundColor(Color.rgb(9, 9, 11)) }
+        loadingBar = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
+            max = 100
+            progressTintList = android.content.res.ColorStateList.valueOf(Color.rgb(59, 130, 246))
+            progressBackgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(39, 39, 42))
+        }
         webView = WebView(this).apply {
             setBackgroundColor(Color.rgb(9, 9, 11))
             settings.javaScriptEnabled = true
@@ -40,20 +45,15 @@ class MainActivity : Activity() {
             }
             webChromeClient = object : WebChromeClient() {
                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                    progress.progress = newProgress
-                    progress.visibility = if (newProgress >= 100) View.GONE else View.VISIBLE
+                    loadingBar.progress = newProgress
+                    loadingBar.visibility = if (newProgress >= 100) View.GONE else View.VISIBLE
                 }
             }
-        }
-        progress = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
-            max = 100
-            progressTintList = android.content.res.ColorStateList.valueOf(Color.rgb(59, 130, 246))
-            progressBackgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(39, 39, 42))
         }
         root.addView(webView, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         ))
-        root.addView(progress, FrameLayout.LayoutParams(
+        root.addView(loadingBar, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, dp(3)
         ))
         setContentView(root)
