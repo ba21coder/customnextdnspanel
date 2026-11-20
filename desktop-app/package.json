@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "NextDNS PRO desktop panel",
   "main": "main.cjs",
-  "author": "NextDNS PRO",
+  "author": {
+    "name": "NextDNS PRO",
+    "email": "noreply@github.com"
+  },
   "license": "UNLICENSED",
   "scripts": {
     "dist:win": "electron-builder --win nsis --x64 --ia32",
@@ -42,7 +45,10 @@
         "AppImage",
         "deb"
       ],
-      "artifactName": "NextDNS-PRO-Linux-${arch}.${ext}"
+      "artifactName": "NextDNS-PRO-Linux-${arch}.${ext}",
+      "category": "Utility",
+      "maintainer": "NextDNS PRO <noreply@github.com>"
     }
-  }
+  },
+  "homepage": "https://bthn1.github.io/dnspanel/"
 }
