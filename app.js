@@ -536,6 +536,15 @@ function updateLanguageTexts(lang) {
     });
 }
 
+function updateNetworkStatus(isOnline) {
+    const banner = document.getElementById('network-status');
+    if (!banner) return;
+    banner.classList.toggle('hidden', Boolean(isOnline));
+}
+
+window.addEventListener('offline', () => updateNetworkStatus(false));
+window.addEventListener('online', () => updateNetworkStatus(true));
+
 async function apiFetch(endpoint, options = {}) {
     const method = (options.method || 'GET').toUpperCase();
     if (readOnlyStatsMode && method !== 'GET') {
