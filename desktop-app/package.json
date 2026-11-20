@@ -1,0 +1,32 @@
+{
+  "name": "nextdns-pro-desktop",
+  "version": "1.0.0",
+  "description": "NextDNS PRO desktop panel",
+  "main": "main.cjs",
+  "author": "NextDNS PRO",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dist:win": "electron-builder --win nsis --x64 --ia32"
+  },
+  "devDependencies": {
+    "electron": "28.3.3",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.bthn1.nextdnspro",
+    "productName": "NextDNS PRO",
+    "directories": { "output": "dist" },
+    "files": ["main.cjs", "package.json"],
+    "win": {
+      "target": ["nsis"],
+      "artifactName": "NextDNS-PRO-Setup-${arch}.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "NextDNS PRO"
+    }
+  }
+}
