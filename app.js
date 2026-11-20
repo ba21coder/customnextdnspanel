@@ -5,6 +5,7 @@ let apiKey = sessionStorage.getItem('nextdns_api_key') || '';
 let apiProfiles = JSON.parse(localStorage.getItem('nextdns_profiles') || '[]');
 let activeApiProfileId = sessionStorage.getItem('nextdns_active_profile') || '';
 let selectedLoginAvatar = 'icon:globe';
+let rememberedLoginTimer = null;
 // Migrate the old persistent key once, then remove it from localStorage.
 const legacyApiKey = localStorage.getItem('nextdns_api_key');
 if (!apiKey && legacyApiKey) {
@@ -369,14 +370,24 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('lang-select').addEventListener('change', (e) => changeLanguage(e.target.value));
     document.getElementById('lang-select-login').addEventListener('change', (e) => changeLanguage(e.target.value));
 
-    if (apiKey) {
-        document.getElementById('api-key-input').value = apiKey;
+    if (apiKey || activeApiProfileId) {
         const rememberedAccount = activeApiProfileId;
-        if (rememberedAccount) {
-            const accountKey = sessionStorage.getItem('nd_api_key_' + rememberedAccount);
-            if (accountKey) apiKey = accountKey;
+        const rememberedKey = rememberedAccount
+            ? (sessionStorage.getItem('nd_api_key_' + rememberedAccount) || apiKey)
+            : apiKey;
+        if (rememberedKey) {
+            document.getElementById('api-key-input').value = rememberedKey;
+            // Keep the login screen visible; reconnect to the most recently used profile after 5 minutes.
+            rememberedLoginTimer = setTimeout(() => {
+                const loginScreen = document.getElementById('login-screen');
+                if (!loginScreen || loginScreen.classList.contains('hidden')) return;
+                const latestId = sessionStorage.getItem('nextdns_active_profile') || activeApiProfileId;
+                const latestKey = (latestId && sessionStorage.getItem('nd_api_key_' + latestId)) || rememberedKey;
+                if (latestId) activeApiProfileId = latestId;
+                document.getElementById('api-key-input').value = latestKey;
+                checkLogin(latestKey, { skipAccountSave: Boolean(latestId) });
+            }, 5 * 60 * 1000);
         }
-        checkLogin(apiKey, { skipAccountSave: Boolean(activeApiProfileId) });
     }
 
     renderLoginSavedProfiles();
@@ -416,6 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsDataURL(file);
     });
     document.getElementById('login-btn').addEventListener('click', () => {
+        if (rememberedLoginTimer) { clearTimeout(rememberedLoginTimer); rememberedLoginTimer = null; }
         const key = document.getElementById('api-key-input').value.trim();
         const profileName = document.getElementById('login-profile-name').value.trim();
         if (!key) return showError('Lütfen geçerli bir API anahtarı girin.');
@@ -435,6 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('login-saved-profiles')?.addEventListener('click', async (event) => {
         const button = event.target.closest('[data-login-profile]');
         if (!button) return;
+        if (rememberedLoginTimer) { clearTimeout(rememberedLoginTimer); rememberedLoginTimer = null; }
         const id = button.dataset.loginProfile;
         const key = sessionStorage.getItem('nd_api_key_' + id);
         if (!key) {
