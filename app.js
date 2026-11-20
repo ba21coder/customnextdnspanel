@@ -429,9 +429,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('login-btn').addEventListener('click', () => {
         if (rememberedLoginTimer) { clearTimeout(rememberedLoginTimer); rememberedLoginTimer = null; }
         const key = document.getElementById('api-key-input').value.trim();
-        const profileName = document.getElementById('login-profile-name').value.trim();
         if (!key) return showError('Lütfen geçerli bir API anahtarı girin.');
-        checkLogin(key, { profileName });
+        checkLogin(key);
     });
 
     document.getElementById('login-manage-profiles-btn')?.addEventListener('click', openApiProfiles);
