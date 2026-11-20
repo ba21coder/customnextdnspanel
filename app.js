@@ -73,7 +73,7 @@ const translations = {
         blockBtn: "Engelle",
         active: "Aktif",
         blocked: "Engelli",
-        open: "Açık"
+        open: "Açık",
         offlineWarning: "İnternet bağlantısı yok. Lütfen bağlantınızı kontrol edin.",
         apiAccounts: "API Hesapları",
         monthlyUsage: "Bu Ay NextDNS Sorgu Kullanımı",
@@ -154,7 +154,7 @@ const translations = {
         blockBtn: "Block",
         active: "Active",
         blocked: "Blocked",
-        open: "Open"
+        open: "Open",
         offlineWarning: "No internet connection. Please check your connection.",
         apiAccounts: "API Accounts",
         monthlyUsage: "NextDNS Query Usage This Month",
@@ -235,7 +235,7 @@ const translations = {
         blockBtn: "Bloquear",
         active: "Activo",
         blocked: "Bloqueado",
-        open: "Abierto"
+        open: "Abierto",
         offlineWarning: "No hay conexión a Internet. Comprueba tu conexión.",
         apiAccounts: "Cuentas API",
         monthlyUsage: "Uso de consultas de NextDNS este mes",
@@ -316,7 +316,7 @@ const translations = {
         blockBtn: "拦截",
         active: "活跃",
         blocked: "已拦截",
-        open: "开启"
+        open: "开启",
         offlineWarning: "没有互联网连接。请检查网络连接。",
         apiAccounts: "API 账户",
         monthlyUsage: "本月 NextDNS 查询用量",
@@ -397,7 +397,7 @@ const translations = {
         blockBtn: "Blockieren",
         active: "Aktiv",
         blocked: "Blockiert",
-        open: "Offen"
+        open: "Offen",
         offlineWarning: "Keine Internetverbindung. Bitte überprüfe deine Verbindung.",
         apiAccounts: "API-Konten",
         monthlyUsage: "NextDNS-Abfragen in diesem Monat",
