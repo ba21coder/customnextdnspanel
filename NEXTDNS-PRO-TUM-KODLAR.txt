@@ -1,0 +1,368 @@
+NEXTDNS PRO — REPO KAYNAK KODLARI
+Kaynak: https://github.com/bthn1/dnspanel
+Oluşturulma: 2026-11-20
+Bu belge repoda izlenen metin/kaynak dosyalarını dosya başlıklarıyla birleştirir.
+
+
+================================================================================
+FILE: .github/workflows/android-mobile-apk.yml
+================================================================================
+
+name: Build NextDNS Mobile APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "android-mobile/**"
+      - ".github/workflows/android-mobile-apk.yml"
+      - "index.html"
+      - "app.js"
+      - "style.css"
+      - "pro-features.js"
+      - "wireguard.js"
+      - "ai-assistant.js"
+      - "ai-worker.js"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android-mobile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+      - name: Build mobile APK
+        run: gradle assembleDebug
+      - name: Rename APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/NextDNS-PRO-Mobile.apk
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextdns-mobile-apk
+          path: android-mobile/app/build/outputs/apk/debug/NextDNS-PRO-Mobile.apk
+      - name: Publish latest mobile APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: mobile-latest
+          name: NextDNS PRO Mobile - Latest
+          files: android-mobile/app/build/outputs/apk/debug/NextDNS-PRO-Mobile.apk
+          overwrite_files: true
+
+
+================================================================================
+FILE: .github/workflows/android-tv-apk.yml
+================================================================================
+
+name: Build NextDNS TV APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "android-tv/**"
+      - ".github/workflows/android-tv-apk.yml"
+      - "index.html"
+      - "app.js"
+      - "style.css"
+      - "pro-features.js"
+      - "wireguard.js"
+      - "ai-assistant.js"
+      - "ai-worker.js"
+  create:
+    tags:
+      - "tv-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android-tv
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+      - name: Build Android TV APK
+        run: gradle assembleDebug
+      - name: Rename APK for download
+        run: cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/NextDNS-PRO-TV.apk
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextdns-tv-apk
+          path: android-tv/app/build/outputs/apk/debug/NextDNS-PRO-TV.apk
+      - name: Publish latest Android TV APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: tv-latest
+          name: NextDNS PRO TV - Latest
+          make_latest: true
+          files: android-tv/app/build/outputs/apk/debug/NextDNS-PRO-TV.apk
+          overwrite_files: true
+
+
+================================================================================
+FILE: .github/workflows/chrome-extension.yml
+================================================================================
+
+name: Chrome Extension
+on:
+  push:
+    paths:
+      - "chrome-extension/**"
+      - ".github/workflows/chrome-extension.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Depoyu indir
+        uses: actions/checkout@v4
+      - name: Eklenti ZIP dosyasını hazırla
+        run: |
+          cd chrome-extension
+          zip -r ../NextDNS-PRO-Chrome.zip .
+      - name: GitHub Releases dosyasını yayımla
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="chrome-extension-latest"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" NextDNS-PRO-Chrome.zip --clobber
+          else
+            gh release create "$TAG" NextDNS-PRO-Chrome.zip --title "NextDNS PRO Chrome Eklentisi" --notes "NextDNS PRO Chrome eklentisi. ZIP dosyasını çıkarıp chrome://extensions üzerinden Paketlenmemiş öğe yükle ile klasörü seçin."
+          fi
+
+
+================================================================================
+FILE: .github/workflows/linux-desktop.yml
+================================================================================
+
+name: Build NextDNS PRO Linux App
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "desktop-app/**"
+      - ".github/workflows/linux-desktop.yml"
+      - "index.html"
+      - "app.js"
+      - "style.css"
+      - "pro-features.js"
+      - "wireguard.js"
+      - "ai-assistant.js"
+      - "ai-worker.js"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuse2
+      - name: Install dependencies
+        working-directory: desktop-app
+        run: npm install
+      - name: Build Linux packages
+        working-directory: desktop-app
+        run: npm run dist:linux
+      - name: Upload Linux installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextdns-pro-linux-x64
+          path: |
+            desktop-app/dist/NextDNS-PRO-Linux-x86_64.AppImage
+            desktop-app/dist/NextDNS-PRO-Linux-amd64.deb
+          if-no-files-found: error
+      - name: Publish Linux installers
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: linux-latest
+          name: NextDNS PRO Linux - Latest
+          make_latest: false
+          files: |
+            desktop-app/dist/NextDNS-PRO-Linux-x86_64.AppImage
+            desktop-app/dist/NextDNS-PRO-Linux-amd64.deb
+          overwrite_files: true
+
+
+================================================================================
+FILE: .github/workflows/macos-desktop.yml
+================================================================================
+
+name: Build NextDNS PRO macOS App
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "desktop-app/**"
+      - ".github/workflows/macos-desktop.yml"
+      - "index.html"
+      - "app.js"
+      - "style.css"
+      - "pro-features.js"
+      - "wireguard.js"
+      - "ai-assistant.js"
+      - "ai-worker.js"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        working-directory: desktop-app
+        run: npm install
+      - name: Build universal macOS DMG
+        working-directory: desktop-app
+        run: npm run dist:mac
+      - name: Normalize installer filename
+        working-directory: desktop-app
+        run: mv "dist/NextDNS PRO-1.0.0-universal.dmg" "dist/NextDNS-PRO-macOS-universal.dmg"
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextdns-pro-macos-universal
+          path: desktop-app/dist/NextDNS-PRO-macOS-universal.dmg
+          if-no-files-found: error
+      - name: Publish macOS installer
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: macos-latest
+          name: NextDNS PRO macOS - Latest
+          make_latest: false
+          files: desktop-app/dist/NextDNS-PRO-macOS-universal.dmg
+          overwrite_files: true
+
+
+================================================================================
+FILE: .github/workflows/windows-desktop.yml
+================================================================================
+
+name: Build NextDNS PRO Windows Setup
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "desktop-app/**"
+      - ".github/workflows/windows-desktop.yml"
+      - "index.html"
+      - "app.js"
+      - "style.css"
+      - "pro-features.js"
+      - "wireguard.js"
+      - "ai-assistant.js"
+      - "ai-worker.js"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        working-directory: desktop-app
+        run: npm install
+      - name: Build 64-bit and 32-bit installers
+        working-directory: desktop-app
+        run: npm run dist:win
+      - name: Upload setup files
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextdns-pro-windows-installers
+          path: desktop-app/dist/*.exe
+          if-no-files-found: error
+      - name: Publish Windows installers
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: windows-latest
+          name: NextDNS PRO Windows - Latest
+          make_latest: false
+          files: |
+            desktop-app/dist/NextDNS-PRO-Setup-x64.exe
+            desktop-app/dist/NextDNS-PRO-Setup-ia32.exe
+          overwrite_files: true
+
+
+================================================================================
+FILE: AI_SETUP.md
+================================================================================
+
+# NextDNS Panel – Tarayıcıda çalışan AI
+
+Bu sürüm yalnızca GitHub Pages ile çalışacak şekilde tasarlanmıştır. Cloudflare Worker, sunucu veya API anahtarı gerekmez.
+
+## Nasıl çalışır?
+
+- Sohbet asistanı, Hugging Face Transformers.js kitaplığını CDN üzerinden yükler.
+- Qwen2.5-0.5B-Instruct modeli kullanıcının tarayıcısında çalışır.
+- Model ilk kullanımda internet üzerinden indirilir ve tarayıcı önbelleğinde saklanabilir.
+- WebGPU destekleniyorsa GPU kullanılır; başarısız olursa WASM ile denenir.
+- NextDNS API anahtarı sohbet modeline gönderilmez.
+
+## Bilinen sınırlamalar
+
+- Model dosyaları büyük olabilir; ilk açılış ve ilk yanıt zaman alabilir.
+- Performans cihazın RAM, işlemci/GPU ve tarayıcı desteğine bağlıdır.
+- Bu küçük yerel model, bulut tabanlı büyük modeller kadar güçlü olmayabilir.
+- GitHub Pages statik barındırma sunduğundan, API anahtarı gizleyerek OpenAI gibi bulut modellerini doğrudan çağırmak mümkün değildir. Bu nedenle bu sürüm bulut OpenAI API'sini kullanmaz.
