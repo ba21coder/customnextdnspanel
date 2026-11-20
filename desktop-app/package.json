@@ -6,7 +6,8 @@
   "author": "NextDNS PRO",
   "license": "UNLICENSED",
   "scripts": {
-    "dist:win": "electron-builder --win nsis --x64 --ia32"
+    "dist:win": "electron-builder --win nsis --x64 --ia32",
+    "dist:mac": "electron-builder --mac dmg --universal"
   },
   "devDependencies": {
     "electron": "28.3.3",
@@ -15,10 +16,17 @@
   "build": {
     "appId": "com.bthn1.nextdnspro",
     "productName": "NextDNS PRO",
-    "directories": { "output": "dist" },
-    "files": ["main.cjs", "package.json"],
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.cjs",
+      "package.json"
+    ],
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "artifactName": "NextDNS-PRO-Setup-${arch}.exe"
     },
     "nsis": {
