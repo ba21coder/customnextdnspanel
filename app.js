@@ -362,6 +362,7 @@ document.addEventListener('keydown', (e) => {
 
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
+    updateNetworkStatus(navigator.onLine);
 
     document.getElementById('lang-select').value = currentLang;
     document.getElementById('lang-select-login').value = currentLang;
