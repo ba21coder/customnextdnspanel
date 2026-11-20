@@ -378,10 +378,39 @@ document.addEventListener('DOMContentLoaded', () => {
         checkLogin(apiKey, { skipAccountSave: Boolean(activeApiProfileId) });
     }
 
+    renderLoginSavedProfiles();
     document.getElementById('login-btn').addEventListener('click', () => {
         const key = document.getElementById('api-key-input').value.trim();
+        const profileName = document.getElementById('login-profile-name').value.trim();
         if (!key) return showError('Lütfen geçerli bir API anahtarı girin.');
-        checkLogin(key);
+        checkLogin(key, { profileName });
+    });
+
+    document.getElementById('login-manage-profiles-btn')?.addEventListener('click', openApiProfiles);
+    document.getElementById('manage-api-profiles-btn')?.addEventListener('click', openApiProfiles);
+    document.getElementById('close-api-profiles-btn')?.addEventListener('click', closeApiProfiles);
+    document.getElementById('add-api-profile-btn')?.addEventListener('click', addApiProfile);
+    document.getElementById('api-profiles-list')?.addEventListener('click', async (event) => {
+        const switchButton = event.target.closest('[data-switch-api]');
+        const removeButton = event.target.closest('[data-remove-api]');
+        if (switchButton) await switchApiProfile(switchButton.dataset.switchApi);
+        if (removeButton) removeApiProfile(removeButton.dataset.removeApi);
+    });
+    document.getElementById('login-saved-profiles')?.addEventListener('click', async (event) => {
+        const button = event.target.closest('[data-login-profile]');
+        if (!button) return;
+        const id = button.dataset.loginProfile;
+        const key = sessionStorage.getItem('nd_api_key_' + id);
+        if (!key) {
+            showError('Bu profilin API anahtarı bu tarayıcı oturumunda bulunmuyor. API anahtarını yeniden girip aynı profil adıyla kaydedebilirsin.');
+            document.getElementById('api-key-input').focus();
+            return;
+        }
+        activeApiProfileId = id;
+        sessionStorage.setItem('nextdns_active_profile', id);
+        sessionStorage.setItem('nextdns_api_key', key);
+        document.getElementById('api-key-input').value = key;
+        await checkLogin(key, { skipAccountSave: true });
     });
 
     document.getElementById('readonly-stats-btn').addEventListener('click', () => {
@@ -493,11 +522,12 @@ async function checkLogin(key, options = {}) {
         if (!options.skipAccountSave) {
             const existing = apiProfiles.find(item => item.id === activeApiProfileId);
             if (existing) {
-                existing.name = existing.name || 'NextDNS hesabım';
+                existing.name = options.profileName || existing.name || 'NextDNS hesabım';
             } else {
                 activeApiProfileId = 'api-' + Date.now().toString(36);
-                apiProfiles.push({ id: activeApiProfileId, name: 'NextDNS hesabım' });
+                apiProfiles.push({ id: activeApiProfileId, name: options.profileName || ('NextDNS hesabı ' + (apiProfiles.length + 1)) });
             }
+            sessionStorage.setItem('nd_api_key_' + activeApiProfileId, apiKey);
             sessionStorage.setItem('nextdns_active_profile', activeApiProfileId);
             localStorage.setItem('nextdns_profiles', JSON.stringify(apiProfiles));
         }
@@ -591,6 +621,23 @@ function openApiProfiles() {
 function closeApiProfiles() {
     document.getElementById('api-profiles-modal')?.classList.add('hidden');
     setTimeout(initTvNavigation, 100);
+}
+
+function renderLoginSavedProfiles() {
+    const container = document.getElementById('login-saved-profiles');
+    const section = document.getElementById('login-saved-profiles-section');
+    if (!container || !section) return;
+    section.classList.toggle('hidden', !apiProfiles.length);
+    container.innerHTML = apiProfiles.map((profile, index) => {
+        const ready = Boolean(sessionStorage.getItem('nd_api_key_' + profile.id));
+        const initials = escapeHtml((profile.name || 'ND').trim().slice(0, 2).toUpperCase());
+        const selected = profile.id === activeApiProfileId;
+        return `<button type="button" data-login-profile="${escapeHtml(profile.id)}" title="${escapeHtml(profile.name)}" class="w-14 flex flex-col items-center gap-1.5 group">
+            <span class="w-12 h-12 rounded-full flex items-center justify-center border text-sm font-bold transition ${selected ? 'border-blue-400 bg-blue-500/20 text-blue-300 ring-2 ring-blue-500/30' : 'border-zinc-700 bg-zinc-900 text-zinc-200 group-hover:border-blue-500'}">${initials}</span>
+            <span class="w-full text-[10px] text-center text-zinc-400 truncate">${escapeHtml(profile.name)}</span>
+            <span class="text-[9px] ${ready ? 'text-emerald-400' : 'text-amber-400'}">${ready ? 'Hazır' : 'Anahtar gerekli'}</span>
+        </button>`;
+    }).join('');
 }
 
 function renderApiProfiles() {
