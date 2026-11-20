@@ -36,8 +36,8 @@ jobs:
         with:
           name: nextdns-pro-linux-x64
           path: |
-            desktop-app/dist/NextDNS-PRO-Linux-x64.AppImage
-            desktop-app/dist/NextDNS-PRO-Linux-x64.deb
+            desktop-app/dist/NextDNS-PRO-Linux-x86_64.AppImage
+            desktop-app/dist/NextDNS-PRO-Linux-amd64.deb
           if-no-files-found: error
       - name: Publish Linux installers
         uses: softprops/action-gh-release@v2
