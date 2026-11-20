@@ -38,75 +38,30 @@
                     <input type="password" id="api-key-input" placeholder="API anahtarınızı yapıştırın..." 
                         class="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition font-mono">
                 </div>
-                <div>
-                    <label for="login-profile-name" class="block text-xs font-medium text-zinc-400 mb-1.5">Bu hesabı kaydet (profil adı)</label>
-                    <input id="login-profile-name" type="text" maxlength="32" placeholder="Örn. Ev, Aile, Kişisel"
-                        class="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition">
-                </div>
-                <div class="space-y-2">
-                    <label class="block text-xs font-medium text-zinc-400">Profil resmi</label>
-                    <div id="login-avatar-presets" class="grid grid-cols-6 sm:grid-cols-10 gap-2">
-                        <button type="button" data-avatar-preset="globe" aria-label="Dünya" title="Dünya" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="globe" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="house" aria-label="Ev" title="Ev" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="house" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="shield" aria-label="Kalkan" title="Kalkan" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="shield" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="rocket" aria-label="Roket" title="Roket" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="rocket" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="gamepad-2" aria-label="Oyun" title="Oyun" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="gamepad-2" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="paw-print" aria-label="Pati" title="Pati" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="paw-print" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="cat" aria-label="Kedi" title="Kedi" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="cat" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="dog" aria-label="Köpek" title="Köpek" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="dog" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="bird" aria-label="Kuş" title="Kuş" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="bird" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="fish" aria-label="Balık" title="Balık" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="fish" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="cloud" aria-label="Bulut" title="Bulut" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="cloud" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="wifi" aria-label="Wi-Fi" title="Wi-Fi" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="wifi" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="lock" aria-label="Kilit" title="Kilit" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="lock" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="key-round" aria-label="Anahtar" title="Anahtar" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="key-round" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="fingerprint" aria-label="Parmak izi" title="Parmak izi" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="fingerprint" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="user-round" aria-label="Kullanıcı" title="Kullanıcı" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="user-round" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="users-round" aria-label="Grup" title="Grup" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="users-round" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="laptop" aria-label="Dizüstü" title="Dizüstü" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="laptop" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="smartphone" aria-label="Telefon" title="Telefon" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="smartphone" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="monitor" aria-label="Ekran" title="Ekran" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="monitor" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="headphones" aria-label="Kulaklık" title="Kulaklık" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="headphones" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="zap" aria-label="Enerji" title="Enerji" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="zap" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="leaf" aria-label="Yaprak" title="Yaprak" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="leaf" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="flower-2" aria-label="Çiçek" title="Çiçek" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="flower-2" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="mountain" aria-label="Dağ" title="Dağ" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="mountain" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="sun" aria-label="Güneş" title="Güneş" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="sun" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="moon" aria-label="Ay" title="Ay" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="moon" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="star" aria-label="Yıldız" title="Yıldız" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="star" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="gem" aria-label="Mücevher" title="Mücevher" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="gem" class="w-5 h-5"></i></button>
-                        <button type="button" data-avatar-preset="crown" aria-label="Taç" title="Taç" class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center justify-center hover:border-blue-400 hover:bg-blue-500/10 transition"><i data-lucide="crown" class="w-5 h-5"></i></button>
+                <details class="border-t border-zinc-800 pt-3">
+                    <summary class="cursor-pointer text-xs text-zinc-400 hover:text-zinc-200">Gelişmiş: Profil ID ile salt okunur görüntüleme</summary>
+                    <div class="pt-3 space-y-2">
+                                <div class="space-y-2">
+                            <label for="readonly-profile-id" class="block text-xs font-medium text-zinc-400">Profil ID ile sadece istatistikleri görüntüle</label>
+                            <input type="text" id="readonly-profile-id" maxlength="64" autocomplete="off" placeholder="NextDNS Profil ID"
+                                class="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition font-mono">
+                            <button id="readonly-stats-btn" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white font-medium rounded-xl text-sm transition">
+                                Sadece istatistikleri görüntüle
+                            </button>
+                            <p class="text-[10px] leading-relaxed text-zinc-500">Bu modda yalnızca istatistikler okunur. Profil ID tek başına yeterli değildir; yukarıdaki API anahtarı da gerekir. Hiçbir ayar değiştirilmez.</p>
+                                </div>
+
                     </div>
-                    <div class="flex items-center gap-3">
-                        <label for="login-avatar-upload" class="cursor-pointer px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs text-zinc-200">Resim yükle</label>
-                        <input id="login-avatar-upload" type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden">
-                        <span id="login-avatar-status" class="text-[10px] text-zinc-500">30 hazır ikon arasından seç veya kendi resmini yükle (1 MB'a kadar).</span>
-                    </div>
-                </div>
-                <div id="login-saved-profiles-section" class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <label class="text-xs font-medium text-zinc-400">Kayıtlı profiller</label>
-                        <span class="text-[10px] text-zinc-500">Hızlı seçim</span>
-                    </div>
-                    <div id="login-saved-profiles" class="flex flex-wrap gap-3"></div>
-                </div>
-                <div class="pt-3 border-t border-zinc-800 space-y-2">
-                    <label for="readonly-profile-id" class="block text-xs font-medium text-zinc-400">Profil ID ile sadece istatistikleri görüntüle</label>
-                    <input type="text" id="readonly-profile-id" maxlength="64" autocomplete="off" placeholder="NextDNS Profil ID"
-                        class="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition font-mono">
-                    <button id="readonly-stats-btn" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white font-medium rounded-xl text-sm transition">
-                        Sadece istatistikleri görüntüle
-                    </button>
-                    <p class="text-[10px] leading-relaxed text-zinc-500">Bu modda yalnızca istatistikler okunur. Profil ID tek başına yeterli değildir; yukarıdaki API anahtarı da gerekir. Hiçbir ayar değiştirilmez.</p>
-                </div>
+                </details>
                 <p id="login-error" class="text-xs text-red-400 hidden"></p>
                 <button id="login-btn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl text-sm transition shadow-lg shadow-blue-600/20" data-i18n="connectBtn">
                     Panele Bağlan
                 </button>
-                <button id="login-manage-profiles-btn" class="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-medium rounded-xl text-sm transition">Kayıtlı API hesapları</button>
                 <a href="https://my.nextdns.io/account" target="_blank" rel="noopener noreferrer" class="block text-center text-xs text-blue-400 hover:text-blue-300">NextDNS hesabına giriş yap / API anahtarını al</a>
                 <p class="text-[10px] leading-relaxed text-zinc-500">Hesabına NextDNS’in resmî sayfasından giriş yap. API anahtarını buraya ekleyerek hesabını bağla. Bu panel NextDNS veya Gmail şifreni istemez; API anahtarı yalnızca bu tarayıcı oturumunda tutulur.</p>
-            <div class="pt-4 border-t border-zinc-800 space-y-3">
+            <details class="pt-4 border-t border-zinc-800">
+                <summary class="cursor-pointer text-sm font-semibold text-zinc-100">Uygulamaları İndir</summary>
+                <div class="pt-3 space-y-3">
                 <div class="flex items-center justify-between gap-2">
                     <h2 class="text-sm font-semibold text-zinc-100">Uygulamaları İndir</h2>
                     <span class="text-[10px] text-zinc-500">NextDNS PRO</span>
@@ -144,10 +99,15 @@
                     </div>
                 </div>
                 <p class="text-[10px] text-zinc-500">İndirme bağlantıları GitHub Releases üzerinden açılır. Bazı sürümlerin derlemesi henüz tamamlanmamış olabilir.</p>
-            </div>
+                </div>
+            </details>
             </div>
         </div>
     </div>
+    <button id="login-manage-profiles-btn" type="button" class="fixed bottom-5 left-5 z-40 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-700 bg-zinc-900/95 hover:bg-zinc-800 text-sm text-zinc-200 shadow-xl">
+        <i data-lucide="user-round-plus" class="w-4 h-4"></i>
+        Profil ekle
+    </button>
 
     <!-- Ana Dashboard Ekranı -->
     <div id="dashboard-screen" class="hidden min-h-screen flex flex-col">
