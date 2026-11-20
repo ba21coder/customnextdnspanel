@@ -1,0 +1,43 @@
+name: Build NextDNS PRO macOS App
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "desktop-app/**"
+      - ".github/workflows/macos-desktop.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        working-directory: desktop-app
+        run: npm install
+      - name: Build universal macOS DMG
+        working-directory: desktop-app
+        run: npm run dist:mac
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextdns-pro-macos-universal
+          path: desktop-app/dist/NextDNS-PRO-macOS-universal.dmg
+          if-no-files-found: error
+      - name: Publish macOS installer
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: macos-latest
+          name: NextDNS PRO macOS - Latest
+          make_latest: false
+          files: desktop-app/dist/NextDNS-PRO-macOS-universal.dmg
+          overwrite_files: true
