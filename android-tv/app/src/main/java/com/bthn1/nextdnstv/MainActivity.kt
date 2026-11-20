@@ -82,7 +82,7 @@ class MainActivity:ComponentActivity(){override fun onCreate(savedInstanceState:
        Column{Text(tab,fontSize=26.sp,fontWeight=FontWeight.Bold);Text(selected?.name.orEmpty(),color=Muted,fontSize=12.sp)}
        Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
         if(profiles.size>1){var expanded by remember{mutableStateOf(false)};Box{Button(onClick={expanded=true}){Text("Profil seç")};DropdownMenu(expanded,{expanded=false}){profiles.forEach{p->DropdownMenuItem(text={Text(p.name)},onClick={expanded=false;selected=p;runTask{refresh(p)}})}}}}
-        Button(onClick={selected?.let{p->{runTask{refresh(p)}}}){Text("Yenile")}
+        Button(onClick={selected?.let{p->{runTask{refresh(p)}}} ?: {}}){Text("Yenile")}
        }
       }
       Spacer(Modifier.height(14.dp));if(loading)Text("Yükleniyor…",color=Muted);if(error.isNotBlank())Text(error,color=Color(0xFFFF7777),fontSize=12.sp)
@@ -102,7 +102,7 @@ class MainActivity:ComponentActivity(){override fun onCreate(savedInstanceState:
        "Kara & Beyaz Liste"->{
         TvInput(domain,{domain=it},false,"ornek.com")
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){Button(onClick={runTask{NextDnsApi(key).addRule(selected!!.id,"denylist",domain);domain="";refresh(selected!!)}}){Text("Kara listeye ekle")};Button(onClick={runTask{NextDnsApi(key).addRule(selected!!.id,"allowlist",domain);domain="";refresh(selected!!)}}){Text("Beyaz listeye ekle")}}
-        Spacer(Modifier.height(10.dp));Row(Modifier.weight(1f),horizontalArrangement=Arrangement.spacedBy(10.dp)){RuleList("KARA LİSTE",deny){r->runTask{NextDnsApi(key).removeRule(selected!!.id,"denylist",r.id);refresh(selected!!)}};RuleList("BEYAZ LİSTE",allow){r->runTask{NextDnsApi(key).removeRule(selected!!.id,"allowlist",r.id);refresh(selected!!)}}}
+        Spacer(Modifier.height(10.dp));Row(Modifier.weight(1f),horizontalArrangement=Arrangement.spacedBy(10.dp)){RuleList("KARA LİSTE",deny,Modifier.weight(1f)){r->runTask{NextDnsApi(key).removeRule(selected!!.id,"denylist",r.id);refresh(selected!!)}};RuleList("BEYAZ LİSTE",allow,Modifier.weight(1f)){r->runTask{NextDnsApi(key).removeRule(selected!!.id,"allowlist",r.id);refresh(selected!!)}}}
        }
        "Ebeveyn Kontrolü"->LazyColumn(verticalArrangement=Arrangement.spacedBy(7.dp)){items(parentalServices){name->val id=serviceId(name);val active=parental.contains(id);Row(Modifier.fillMaxWidth().background(Panel,RoundedCornerShape(9.dp)).padding(12.dp),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically){Text(name,fontSize=15.sp);Button(onClick={runTask{NextDnsApi(key).toggleService(selected!!.id,id,active);parental=NextDnsApi(key).parental(selected!!.id)}}){Text(if(active)"Engeli kaldır" else "Engelle")}}}}
        "Gizlilik & Filtreler"->{
@@ -130,9 +130,9 @@ class MainActivity:ComponentActivity(){override fun onCreate(savedInstanceState:
 }
 @Composable private fun Metric(title:String,value:String,modifier:Modifier){Column(modifier.height(105.dp).background(Panel,RoundedCornerShape(12.dp)).padding(14.dp),verticalArrangement=Arrangement.SpaceBetween){Text(title,color=Muted,fontSize=11.sp);Text(value,fontSize=24.sp,fontWeight=FontWeight.Bold)}}
 @Composable private fun Info(title:String,value:String){Column(Modifier.fillMaxWidth().background(Panel,RoundedCornerShape(9.dp)).padding(12.dp)){Text(title,fontSize=13.sp,fontWeight=FontWeight.Medium);Text(value,color=Muted,fontSize=11.sp)}}
-@Composable private fun RuleList(title:String,rules:List<Rule>,remove:(Rule)->Unit){Column(Modifier.weight(1f).fillMaxHeight()){Text("$title (${rules.size})",fontWeight=FontWeight.Bold);LazyColumn(verticalArrangement=Arrangement.spacedBy(5.dp)){items(rules){r->Row(Modifier.fillMaxWidth().background(Panel,RoundedCornerShape(8.dp)).padding(8.dp),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically){Text(r.id,fontSize=11.sp);Button(onClick={remove(r)}){Text("Sil")}}}}}}
+@Composable private fun RuleList(title:String,rules:List<Rule>,modifier:Modifier,remove:(Rule)->Unit){Column(modifier.fillMaxHeight()){Text("$title (${rules.size})",fontWeight=FontWeight.Bold);LazyColumn(verticalArrangement=Arrangement.spacedBy(5.dp)){items(rules){r->Row(Modifier.fillMaxWidth().background(Panel,RoundedCornerShape(8.dp)).padding(8.dp),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically){Text(r.id,fontSize=11.sp);Button(onClick={remove(r)}){Text("Sil")}}}}}}
 private fun serviceId(name:String)=when(name){"Twitter"->"twitter";else->name.lowercase()}
-private fun JSONArray.strings(key:String):List<String>=(0 until length()).mapNotNull{optJSONObject(it)?.optString(key)?.takeIf{s->s.isNotBlank()}}
+private fun JSONArray.strings(key:String): List<String> =(0 until length()).mapNotNull{optJSONObject(it)?.optString(key)?.takeIf{s->s.isNotBlank()}}
 
 private class NextDnsApi(private val apiKey:String){
  private val client=OkHttpClient.Builder().callTimeout(25,TimeUnit.SECONDS).build()
