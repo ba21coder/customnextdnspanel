@@ -136,7 +136,7 @@ class MainActivity:ComponentActivity(){override fun onCreate(savedInstanceState:
       Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically){
        Column{Text(tab,fontSize=26.sp,fontWeight=FontWeight.Bold);Text(selected?.name.orEmpty(),color=Muted,fontSize=12.sp)}
        Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
-        if (profiles.size > 1) { var expanded by remember { mutableStateOf(false) }; Box { Button(onClick = { expanded = true }) { Text("Profil seç") }; DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) { profiles.forEach { p -> DropdownMenuItem(text = { Text(p.name) }, onClick = { expanded = false; selected = p; runTask { refresh(p) } }) } } } }
+        if (profiles.size > 1) { var expanded by remember { mutableStateOf(false) }; Box { Button(onClick = { expanded = true }) { Text("Profil seç") }; DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) { profiles.forEach { p -> DropdownMenuItem(text = { Text(p.name) }, onClick = { expanded = false; selected = p; profileText = p.id; prefs.edit().putString("profile_id", p.id).putString("profile_name", p.name).apply(); runTask { refresh(p) } }) } } } }
         Button(onClick = { selected?.let { p -> runTask { refresh(p) } } }) { Text("Yenile") }
        }
       }
