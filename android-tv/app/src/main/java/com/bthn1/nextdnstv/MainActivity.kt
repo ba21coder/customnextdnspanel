@@ -1,6 +1,7 @@
 package com.bthn1.nextdnstv
 
 import android.os.Bundle
+import android.content.SharedPreferences
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -57,7 +58,24 @@ class MainActivity:ComponentActivity(){override fun onCreate(savedInstanceState:
    delay(2500)
   }
  }
- var key by remember{mutableStateOf("")};var profileText by remember{mutableStateOf("")};var profiles by remember{mutableStateOf(emptyList<Profile>())};var selected by remember{mutableStateOf<Profile?>(null)}
+ val prefs = remember { context.getSharedPreferences("nextdns_tv_profiles", Context.MODE_PRIVATE) }
+ var key by remember{mutableStateOf(prefs.getString("api_key", "") ?: "")}
+ var profileText by remember{mutableStateOf(prefs.getString("profile_id", "") ?: "")}
+ var profiles by remember{mutableStateOf(emptyList<Profile>())}
+ var selected by remember{mutableStateOf<Profile?>(null)}
+ var profilesLoaded by remember{mutableStateOf(false)}
+ var profileMenu by remember{mutableStateOf(false)}
+ var profileName by remember{mutableStateOf(prefs.getString("profile_name", "") ?: "")}
+ LaunchedEffect(Unit) {
+  if (key.isNotBlank()) {
+   try {
+    val saved = NextDnsApi(key).profiles()
+    profiles = saved
+    profilesLoaded = true
+    selected = saved.firstOrNull { it.id == profileText } ?: saved.firstOrNull()
+   } catch (_: Exception) { profilesLoaded = false }
+  }
+ }
  var stats by remember{mutableStateOf(Stats())};var logs by remember{mutableStateOf(emptyList<LogEntry>())};var deny by remember{mutableStateOf(emptyList<Rule>())};var allow by remember{mutableStateOf(emptyList<Rule>())};var parental by remember{mutableStateOf(emptySet<String>())};var privacy by remember{mutableStateOf(emptyList<String>())}
  var doh by remember{mutableStateOf("")};var dot by remember{mutableStateOf("")};var ipv6 by remember{mutableStateOf("")};var linkedIp by remember{mutableStateOf("")}
  var tab by remember{mutableStateOf("Genel Bakış")};var connected by remember{mutableStateOf(false)};var loading by remember{mutableStateOf(false)};var error by remember{mutableStateOf("")}
@@ -72,15 +90,38 @@ class MainActivity:ComponentActivity(){override fun onCreate(savedInstanceState:
  MaterialTheme(colorScheme=darkColorScheme(background=Bg,surface=Panel,primary=Accent,onBackground=Color.White,onSurface=Color.White)){
   Surface(Modifier.fillMaxSize(),color=Bg){
    if(!connected){
-    Column(Modifier.fillMaxSize().padding(40.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.Center){
-     Text("NextDNS PRO",fontSize=36.sp,fontWeight=FontWeight.Bold);Text("ANDROID TV • KUMANDA İLE KONTROL",color=Accent,fontSize=12.sp)
-     Spacer(Modifier.height(22.dp))
-     Column(Modifier.width(520.dp).background(Panel,RoundedCornerShape(18.dp)).padding(24.dp),verticalArrangement=Arrangement.spacedBy(13.dp)){
-      Text("NextDNS API anahtarı",color=Muted);TvInput(key,{key=it},true,"API anahtarını gir")
-      Text("Profil ID (isteğe bağlı)",color=Muted);TvInput(profileText,{profileText=it},false,"Boş bırak: ilk profil")
-      if(error.isNotBlank())Text(error,color=Color(0xFFFF7777))
-      Button(onClick={runTask{val found=NextDnsApi(key).profiles();if(found.isEmpty())throw Exception("Bu anahtarda profil bulunamadı.");profiles=found;selected=found.firstOrNull{it.id==profileText}?:found.first();refresh(selected!!);connected=true}},enabled=key.isNotBlank()&&!loading,modifier=Modifier.fillMaxWidth().height(54.dp)){Text(if(loading)"Bağlanıyor…" else "Panele bağlan")}
-      Text("API anahtarı kalıcı olarak kaydedilmez; uygulama belleğinde tutulur.",color=Muted,fontSize=11.sp)
+    Row(Modifier.fillMaxSize().background(Bg).padding(horizontal=54.dp, vertical=34.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(42.dp)){
+     Column(Modifier.weight(0.9f),verticalArrangement=Arrangement.spacedBy(15.dp)){
+      Text("N",fontSize=54.sp,fontWeight=FontWeight.Black,color=Accent)
+      Text("NextDNS PRO",fontSize=38.sp,fontWeight=FontWeight.ExtraBold)
+      Text("TV KONTROL MERKEZİ",fontSize=14.sp,color=Accent,fontWeight=FontWeight.Bold)
+      Text("Ağını tek ekrandan yönet. Kayıtlı API hesabını ve profilini seçerek devam et.",fontSize=17.sp,color=Muted,lineHeight=25.sp)
+      Spacer(Modifier.height(12.dp))
+      Row(horizontalArrangement=Arrangement.spacedBy(9.dp)){
+       listOf("Gizlilik","Canlı trafik","Ebeveyn kontrolü").forEach { label -> Surface(color=Panel,shape=RoundedCornerShape(30.dp)){Text(label,Modifier.padding(horizontal=13.dp,vertical=8.dp),fontSize=11.sp,color=Muted)} }
+      }
+     }
+     Column(Modifier.weight(1.1f).background(Panel,RoundedCornerShape(24.dp)).border(1.dp,Color(0xFF263A56),RoundedCornerShape(24.dp)).padding(26.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){
+      Text("HESABINA GİRİŞ YAP",fontSize=12.sp,color=Accent,fontWeight=FontWeight.Bold)
+      Text("API anahtarı",fontSize=14.sp,color=Muted);TvInput(key,{key=it},true,"NextDNS API anahtarını gir")
+      Button(onClick={runTask{val found=NextDnsApi(key).profiles();if(found.isEmpty())throw Exception("Bu anahtarda profil bulunamadı.");profiles=found;profilesLoaded=true;selected=found.firstOrNull{it.id==profileText}?:found.first()}},enabled=key.isNotBlank()&&!loading,modifier=Modifier.fillMaxWidth().height(48.dp)){Text(if(loading)"Profiller yükleniyor…" else "Profilleri getir")}
+      if(profilesLoaded){
+       Text("PROFİLİNİ SEÇ",fontSize=12.sp,color=Muted,fontWeight=FontWeight.Bold)
+       Box {
+        Button(onClick={profileMenu=true},modifier=Modifier.fillMaxWidth().height(48.dp),colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF1B2B42))){Text(selected?.name ?: "Profil seç",modifier=Modifier.weight(1f));Text("⌄")}
+        DropdownMenu(expanded=profileMenu,onDismissRequest={profileMenu=false}){profiles.forEach{p->DropdownMenuItem(text={Text(p.name)},onClick={profileMenu=false;selected=p;profileText=p.id})}}
+       }
+       profiles.forEach { p ->
+        Row(Modifier.fillMaxWidth().background(if(selected?.id==p.id)Color(0xFF19365B) else Color(0xFF0B1422),RoundedCornerShape(12.dp)).border(1.dp,if(selected?.id==p.id)Accent else Color(0xFF27374B),RoundedCornerShape(12.dp)).padding(11.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(10.dp)){
+         Surface(color=if(selected?.id==p.id)Accent else Color(0xFF263A56),shape=RoundedCornerShape(50)){Text(p.name.trim().take(1).uppercase(),Modifier.padding(horizontal=13.dp,vertical=8.dp),fontSize=15.sp,fontWeight=FontWeight.Bold)}
+         Column(Modifier.weight(1f)){Text(p.name,fontSize=14.sp,fontWeight=FontWeight.SemiBold);Text("ID: "+p.id,fontSize=10.sp,color=Muted)}
+         RadioButton(selected=selected?.id==p.id,onClick={selected=p;profileText=p.id})
+        }
+       }
+      }
+      if(error.isNotBlank())Text(error,color=Color(0xFFFF7777),fontSize=12.sp)
+      Button(onClick={runTask{val p=selected?:throw Exception("Önce profilini seç.");prefs.edit().putString("api_key",key).putString("profile_id",p.id).putString("profile_name",profileName.ifBlank{p.name}).apply();refresh(p);connected=true}},enabled=key.isNotBlank()&&profilesLoaded&&selected!=null&&!loading,modifier=Modifier.fillMaxWidth().height(54.dp)){Text(if(loading)"Bağlanıyor…" else "Seçili profille devam et")}
+      Text("Kayıtlı hesap bilgileri yalnızca bu cihazdaki uygulama alanında tutulur.",color=Muted,fontSize=10.sp)
      }
     }
    }else{
