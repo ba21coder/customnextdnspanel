@@ -192,9 +192,9 @@ private fun Overview(stats: TvStats, loading: Boolean, error: String) {
     if (loading) Text("Veriler yükleniyor…", color = Muted)
     if (error.isNotBlank()) Text(error, color = Color(0xFFFF7777))
     Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-        StatCard("Toplam sorgu", stats.total.toString())
-        StatCard("Engellenen", stats.blocked.toString())
-        StatCard("Engelleme oranı", stats.ratio)
+        StatCard("Toplam sorgu", stats.total.toString(), Modifier.weight(1f))
+        StatCard("Engellenen", stats.blocked.toString(), Modifier.weight(1f))
+        StatCard("Engelleme oranı", stats.ratio, Modifier.weight(1f))
     }
     Spacer(Modifier.height(24.dp))
     Text("Son 30 günün cihazları", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
@@ -208,8 +208,8 @@ private fun Overview(stats: TvStats, loading: Boolean, error: String) {
 }
 
 @Composable
-private fun StatCard(title: String, value: String) {
-    Column(Modifier.weight(1f).height(120.dp).background(Panel, RoundedCornerShape(14.dp)).padding(18.dp), verticalArrangement = Arrangement.SpaceBetween) {
+private fun StatCard(title: String, value: String, modifier: Modifier = Modifier) {
+    Column(modifier.height(120.dp).background(Panel, RoundedCornerShape(14.dp)).padding(18.dp), verticalArrangement = Arrangement.SpaceBetween) {
         Text(title, color = Muted, fontSize = 13.sp)
         Text(value, fontSize = 27.sp, fontWeight = FontWeight.Bold)
     }
