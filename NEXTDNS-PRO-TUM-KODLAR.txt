@@ -3053,3 +3053,707 @@ FILE: chrome-extension/manifest.json
     "default_popup": "popup.html"
   }
 }
+
+
+================================================================================
+FILE: chrome-extension/popup.css
+================================================================================
+
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:#09090b;color:#f4f4f5}*{box-sizing:border-box}body{margin:0;width:360px;min-height:420px;background:radial-gradient(ellipse at top right,#172554 0,transparent 45%),#09090b}.app{padding:17px}.top,.brand,.profile-row,.section-title,footer{display:flex;align-items:center;justify-content:space-between;gap:10px}.top{margin-bottom:17px}.brand{justify-content:flex-start}.logo{display:grid;place-items:center;width:37px;height:37px;border-radius:12px;background:#2563eb;font-weight:900;font-size:20px;box-shadow:0 5px 22px #2563eb55}.brand strong{display:block;font-size:14px}.brand strong b{color:#60a5fa}.brand small{display:block;color:#a1a1aa;font-size:10px;margin-top:2px}.pill{font-size:10px;padding:5px 8px;border-radius:99px;border:1px solid #3f3f46}.pill.ok{color:#86efac;border-color:#166534;background:#14532d33}.pill.muted{color:#a1a1aa;background:#27272a66}.panel{background:#18181b;border:1px solid #27272a;border-radius:14px;padding:14px;margin-bottom:11px}.panel h1{font-size:17px;margin:0 0 7px}.panel h2{font-size:12px;margin:0}.panel p{font-size:11px;line-height:1.55;color:#a1a1aa;margin:7px 0 11px}label{display:block;color:#a1a1aa;font-size:11px;margin:0 0 6px}input,select{width:100%;min-width:0;background:#09090b;color:#f4f4f5;border:1px solid #3f3f46;border-radius:9px;padding:10px;font-size:12px;outline:none}input:focus,select:focus{border-color:#3b82f6}.key-row{display:flex;gap:6px}.key-row input{flex:1}.icon-btn{border:1px solid #3f3f46;background:#27272a;color:#e4e4e7;border-radius:9px;padding:8px 10px;font-size:11px;cursor:pointer}.primary{width:100%;margin-top:10px;border:0;border-radius:9px;background:#2563eb;color:white;padding:10px;font-weight:700;font-size:12px;cursor:pointer}.primary:hover{background:#1d4ed8}.hint{font-size:10px!important;margin-bottom:7px!important}.panel a{font-size:11px;color:#60a5fa;text-decoration:none}.profile-row{margin:0 0 11px}.profile-row label{margin:0;white-space:nowrap}.profile-row select{flex:1}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:11px}.stat{padding:12px 9px;border:1px solid #27272a;background:#18181b;border-radius:12px;min-width:0}.stat span{display:block;font-size:10px;color:#a1a1aa;min-height:25px}.stat strong{display:block;font-size:17px;margin-top:5px;white-space:nowrap}.tracker>strong{display:block;font-size:22px;color:#93c5fd;margin-top:8px}.tracker p{margin-bottom:0}.devices{display:grid;gap:9px}.device{display:flex;justify-content:space-between;gap:10px;font-size:11px}.device span{color:#d4d4d8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.device b{color:#93c5fd;white-space:nowrap}.empty{margin:0!important}footer{font-size:10px;color:#71717a;margin:12px 2px 0}.text-btn{padding:0;border:0;background:none;color:#f87171;font-size:10px;cursor:pointer}.message{min-height:15px;margin:8px 2px 0;font-size:11px;color:#fca5a5;line-height:1.4}.message.success{color:#86efac}[hidden]{display:none!important}
+
+================================================================================
+FILE: chrome-extension/popup.html
+================================================================================
+
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NextDNS PRO</title><link rel="stylesheet" href="popup.css"></head>
+<body><main class="app"><header class="top"><div class="brand"><span class="logo">N</span><div><strong>NextDNS <b>PRO</b></strong><small>Chrome eklentisi</small></div></div><span id="connection" class="pill muted">Bağlı değil</span></header>
+<section id="login" class="panel"><h1>Hesabını bağla</h1><p>NextDNS API anahtarını gir. Anahtar yalnızca bu Chrome profilinin yerel depolamasında tutulur.</p><label for="apiKey">API anahtarı</label><div class="key-row"><input id="apiKey" type="password" placeholder="NextDNS API anahtarı" autocomplete="off"><button id="toggleKey" class="icon-btn" type="button">Göster</button></div><button id="connect" class="primary">Bağlan</button><p class="hint">API anahtarı yalnızca doğrudan api.nextdns.io adresine gönderilir.</p><a href="https://my.nextdns.io/account" target="_blank" rel="noreferrer">NextDNS hesap sayfası ↗</a></section>
+<section id="dashboard" hidden><div class="profile-row"><label for="profile">Profil</label><select id="profile"></select><button id="refresh" class="icon-btn" title="Yenile">↻</button></div><div class="stats"><article class="stat"><span>Bu ay sorgu</span><strong id="total">—</strong></article><article class="stat"><span>Engellenen</span><strong id="blocked">—</strong></article><article class="stat"><span>Engelleme oranı</span><strong id="ratio">—</strong></article></div>
+<article class="panel tracker"><div class="section-title"><h2>Reklam ve izleyici engelleme</h2><span id="filterState" class="pill muted">Veri bekleniyor</span></div><strong id="trackerCount">—</strong><p>Son 30 gündeki reklam/izleyici listeleriyle ilişkilendirilen engellenmiş sorguların tahmini toplamı.</p></article><article class="panel"><div class="section-title"><h2>En çok sorgu yapan cihazlar</h2></div><div id="devices" class="devices"><p class="empty">Henüz veri yok.</p></div></article><footer><button id="disconnect" class="text-btn">Hesap bağlantısını kaldır</button><span id="updated">—</span></footer></section><p id="message" class="message" role="status" aria-live="polite"></p></main><script src="popup.js"></script></body></html>
+
+================================================================================
+FILE: chrome-extension/popup.js
+================================================================================
+
+const API="https://api.nextdns.io";const $=id=>document.getElementById(id);let apiKey="",profiles=[],selectedProfile="";
+function number(v){return new Intl.NumberFormat("tr-TR").format(Number(v)||0)}
+function setMessage(m,ok=false){$("message").textContent=m||"";$("message").className=ok?"message success":"message"}
+async function api(path){const r=await fetch(API+path,{headers:{"X-Api-Key":apiKey,"Accept":"application/json"}});let b={};try{b=await r.json()}catch{}if(!r.ok||b.errors?.length)throw new Error(b.errors?.[0]?.detail||b.errors?.[0]?.message||"NextDNS API hatası ("+r.status+")");return b.data}
+function monthStart(){const n=new Date();return new Date(Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),1)).toISOString()}
+async function connect(){const entered=$("apiKey").value.trim();if(!entered)return setMessage("Lütfen API anahtarını gir.");apiKey=entered;$("connect").disabled=true;$("connect").textContent="Bağlanıyor…";try{profiles=await api("/profiles");if(!Array.isArray(profiles)||!profiles.length)throw new Error("Bu API hesabında profil bulunamadı.");await chrome.storage.local.set({nextdnsApiKey:apiKey,nextdnsProfiles:profiles});selectedProfile=profiles[0].id;await chrome.storage.local.set({nextdnsSelectedProfile:selectedProfile});showDashboard();await loadStats();setMessage("NextDNS hesabı bağlandı.",true)}catch(e){apiKey="";setMessage(e.message||"Bağlantı kurulamadı. API anahtarını kontrol et.")}finally{$("connect").disabled=false;$("connect").textContent="Bağlan"}}
+function showDashboard(){$("login").hidden=true;$("dashboard").hidden=false;$("connection").textContent="Bağlı";$("connection").className="pill ok";$("profile").innerHTML="";profiles.forEach(p=>{const o=document.createElement("option");o.value=p.id;o.textContent=p.name||p.id;$("profile").appendChild(o)});$("profile").value=selectedProfile}
+function showLogin(){$("login").hidden=false;$("dashboard").hidden=true;$("connection").textContent="Bağlı değil";$("connection").className="pill muted"}
+async function loadStats(){if(!selectedProfile)return;$("refresh").disabled=true;setMessage("");const id=encodeURIComponent(selectedProfile),from=encodeURIComponent(monthStart());try{const [status,devices,reasons]=await Promise.all([api("/profiles/"+id+"/analytics/status?from="+from+"&limit=20"),api("/profiles/"+id+"/analytics/devices?from=-30d&limit=5"),api("/profiles/"+id+"/analytics/reasons?from=-30d&limit=500")]);const rows=Array.isArray(status)?status:[],total=rows.reduce((s,r)=>s+(Number(r.queries)||0),0),blocked=rows.filter(r=>r.status==="blocked").reduce((s,r)=>s+(Number(r.queries)||0),0);$("total").textContent=number(total);$("blocked").textContent=number(blocked);$("ratio").textContent=total?(blocked/total*100).toLocaleString("tr-TR",{maximumFractionDigits:1})+"%":"0%";const rr=Array.isArray(reasons)?reasons:[],ad=rr.filter(r=>/blocklist|tracker|advert|ad[s& -]/i.test(String(r.id||"")+" "+String(r.name||""))).reduce((s,r)=>s+(Number(r.queries)||0),0);$("trackerCount").textContent=number(ad);$("filterState").textContent=ad>0?"Engelleme verisi var":"Eşleşme bulunamadı";$("filterState").className=ad>0?"pill ok":"pill muted";const ds=Array.isArray(devices)?devices.slice(0,5):[];$("devices").innerHTML="";if(!ds.length){$("devices").innerHTML='<p class="empty">Cihaz verisi bulunamadı.</p>'}else ds.forEach(d=>{const row=document.createElement("div");row.className="device";const name=document.createElement("span");name.textContent=d.name||d.model||d.id||"Bilinmeyen cihaz";const count=document.createElement("b");count.textContent=number(d.queries);row.append(name,count);$("devices").appendChild(row)});$("updated").textContent="Güncellendi: "+new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})}catch(e){setMessage(e.message||"İstatistikler yüklenemedi.")}finally{$("refresh").disabled=false}}
+async function disconnect(){await chrome.storage.local.remove(["nextdnsApiKey","nextdnsProfiles","nextdnsSelectedProfile"]);apiKey="";profiles=[];selectedProfile="";$("apiKey").value="";showLogin();setMessage("Hesap bağlantısı bu Chrome profilinden kaldırıldı.",true)}
+$("connect").addEventListener("click",connect);$("apiKey").addEventListener("keydown",e=>{if(e.key==="Enter")connect()});$("toggleKey").addEventListener("click",()=>{const i=$("apiKey");i.type=i.type==="password"?"text":"password";$("toggleKey").textContent=i.type==="password"?"Göster":"Gizle"});$("refresh").addEventListener("click",loadStats);$("profile").addEventListener("change",async()=>{selectedProfile=$("profile").value;await chrome.storage.local.set({nextdnsSelectedProfile:selectedProfile});await loadStats()});$("disconnect").addEventListener("click",disconnect);
+(async function init(){const s=await chrome.storage.local.get(["nextdnsApiKey","nextdnsProfiles","nextdnsSelectedProfile"]);apiKey=s.nextdnsApiKey||"";profiles=s.nextdnsProfiles||[];selectedProfile=s.nextdnsSelectedProfile||"";if(!apiKey)return showLogin();try{const fresh=await api("/profiles");profiles=Array.isArray(fresh)?fresh:[];if(!profiles.length)throw new Error("Profil bulunamadı.");if(!profiles.some(p=>p.id===selectedProfile))selectedProfile=profiles[0].id;await chrome.storage.local.set({nextdnsProfiles:profiles,nextdnsSelectedProfile:selectedProfile});showDashboard();await loadStats()}catch(e){showLogin();setMessage("Kayıtlı bağlantı doğrulanamadı. Tekrar API anahtarı gir: "+e.message)}})();
+
+================================================================================
+FILE: desktop-app/main.cjs
+================================================================================
+
+const { app, BrowserWindow, shell } = require("electron");
+
+function createWindow() {
+  const win = new BrowserWindow({
+    width: 1440,
+    height: 920,
+    minWidth: 980,
+    minHeight: 680,
+    title: "NextDNS PRO",
+    autoHideMenuBar: true,
+    backgroundColor: "#09090b",
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true
+    }
+  });
+
+  win.loadURL("https://bthn1.github.io/dnspanel/");
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith("https://") || url.startsWith("http://")) shell.openExternal(url);
+    return { action: "deny" };
+  });
+}
+
+app.whenReady().then(() => {
+  createWindow();
+  app.on("activate", () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") app.quit();
+});
+
+================================================================================
+FILE: desktop-app/package.json
+================================================================================
+
+{
+  "name": "nextdns-pro-desktop",
+  "version": "1.0.0",
+  "description": "NextDNS PRO desktop panel",
+  "main": "main.cjs",
+  "author": {
+    "name": "NextDNS PRO",
+    "email": "noreply@github.com"
+  },
+  "license": "UNLICENSED",
+  "scripts": {
+    "dist:win": "electron-builder --win nsis --x64 --ia32",
+    "dist:mac": "electron-builder --mac dmg --universal",
+    "dist:linux": "electron-builder --linux AppImage deb --x64"
+  },
+  "devDependencies": {
+    "electron": "28.3.3",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.bthn1.nextdnspro",
+    "productName": "NextDNS PRO",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.cjs",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "NextDNS-PRO-Setup-${arch}.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "NextDNS PRO"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "artifactName": "NextDNS-PRO-Linux-${arch}.${ext}",
+      "category": "Utility",
+      "maintainer": "NextDNS PRO <noreply@github.com>"
+    }
+  },
+  "homepage": "https://bthn1.github.io/dnspanel/"
+}
+
+
+================================================================================
+FILE: index.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextDNS Kontrol Merkezi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-sans antialiased selection:bg-blue-500/30 selection:text-blue-200">
+    <div id="network-status" data-i18n="offlineWarning" role="status" aria-live="polite" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#b91c1c;color:#fff;text-align:center;padding:12px;font-size:14px;font-weight:700;box-shadow:0 4px 14px #0008">İnternet bağlantısı yok. Lütfen bağlantınızı kontrol edin.</div>
+
+    <!-- Giriş Ekranı -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md glass-card p-8 space-y-6 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight">NextDNS Panel</h1>
+                        <p class="text-xs text-zinc-400" data-i18n="loginSub">Gelişmiş Ağ & DNS Yönetim Merkezi</p>
+                    </div>
+                </div>
+                <select id="lang-select-login" class="bg-zinc-950 border border-zinc-800 text-xs rounded-lg px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-blue-500">
+                    <option value="tr">🇹🇷 TR</option>
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="de">🇩🇪 DE</option>
+                </select>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1.5" data-i18n="apiKeyLabel">NextDNS API Anahtarı</label>
+                    <input type="password" id="api-key-input" placeholder="API anahtarınızı yapıştırın..." 
+                        class="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition font-mono">
+                </div>
+                <details class="border-t border-zinc-800 pt-3">
+                    <summary class="cursor-pointer text-xs text-zinc-400 hover:text-zinc-200">Gelişmiş: Profil ID ile salt okunur görüntüleme</summary>
+                    <div class="pt-3 space-y-2">
+                                <div class="space-y-2">
+                            <label for="readonly-profile-id" class="block text-xs font-medium text-zinc-400">Profil ID ile sadece istatistikleri görüntüle</label>
+                            <input type="text" id="readonly-profile-id" maxlength="64" autocomplete="off" placeholder="NextDNS Profil ID"
+                                class="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition font-mono">
+                            <button id="readonly-stats-btn" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white font-medium rounded-xl text-sm transition">
+                                Sadece istatistikleri görüntüle
+                            </button>
+                            <p class="text-[10px] leading-relaxed text-zinc-500">Bu modda yalnızca istatistikler okunur. Profil ID tek başına yeterli değildir; yukarıdaki API anahtarı da gerekir. Hiçbir ayar değiştirilmez.</p>
+                                </div>
+
+                    </div>
+                </details>
+                <p id="login-error" class="text-xs text-red-400 hidden"></p>
+                <button id="login-btn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl text-sm transition shadow-lg shadow-blue-600/20" data-i18n="connectBtn">
+                    Panele Bağlan
+                </button>
+                <a href="https://my.nextdns.io/account" target="_blank" rel="noopener noreferrer" class="block text-center text-xs text-blue-400 hover:text-blue-300">NextDNS hesabına giriş yap / API anahtarını al</a>
+                <p class="text-[10px] leading-relaxed text-zinc-500">Hesabına NextDNS’in resmî sayfasından giriş yap. API anahtarını buraya ekleyerek hesabını bağla. Bu panel NextDNS veya Gmail şifreni istemez; API anahtarı yalnızca bu tarayıcı oturumunda tutulur.</p>
+            <details class="pt-4 border-t border-zinc-800">
+                <summary class="cursor-pointer text-sm font-semibold text-zinc-100">Uygulamaları İndir</summary>
+                <div class="pt-3 space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                    <h2 class="text-sm font-semibold text-zinc-100">Uygulamaları İndir</h2>
+                    <span class="text-[10px] text-zinc-500">NextDNS PRO</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <a href="https://github.com/bthn1/dnspanel/releases/download/mobile-latest/NextDNS-PRO-Mobile.apk" class="p-3 rounded-xl border border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 transition text-center">
+                        <i data-lucide="smartphone" class="w-5 h-5 text-blue-400 mx-auto mb-1"></i>
+                        <span class="block text-xs font-semibold text-zinc-100">Android Mobil</span>
+                        <span class="block text-[10px] text-zinc-500 mt-0.5">APK indir</span>
+                    </a>
+                    <a href="https://github.com/bthn1/dnspanel/releases/download/tv-latest/NextDNS-PRO-TV.apk" class="p-3 rounded-xl border border-zinc-800 bg-zinc-900/70 hover:bg-zinc-800 transition text-center">
+                        <i data-lucide="tv" class="w-5 h-5 text-emerald-400 mx-auto mb-1"></i>
+                        <span class="block text-xs font-semibold text-zinc-100">Android TV</span>
+                        <span class="block text-[10px] text-zinc-500 mt-0.5">APK indir</span>
+                    </a>
+                    <a href="https://github.com/bthn1/dnspanel/releases/download/windows-latest/NextDNS-PRO-Setup-x64.exe" class="p-3 rounded-xl border border-zinc-800 bg-zinc-900/70 hover:bg-zinc-800 transition text-center">
+                        <i data-lucide="monitor" class="w-5 h-5 text-sky-400 mx-auto mb-1"></i>
+                        <span class="block text-xs font-semibold text-zinc-100">Windows 64-bit</span>
+                        <span class="block text-[10px] text-zinc-500 mt-0.5">Setup indir</span>
+                    </a>
+                    <a href="https://github.com/bthn1/dnspanel/releases/download/windows-latest/NextDNS-PRO-Setup-ia32.exe" class="p-3 rounded-xl border border-zinc-800 bg-zinc-900/70 hover:bg-zinc-800 transition text-center">
+                        <i data-lucide="monitor" class="w-5 h-5 text-sky-400 mx-auto mb-1"></i>
+                        <span class="block text-xs font-semibold text-zinc-100">Windows 32-bit</span>
+                        <span class="block text-[10px] text-zinc-500 mt-0.5">Setup indir</span>
+                    </a>
+                    <a href="https://github.com/bthn1/dnspanel/releases/download/macos-latest/NextDNS-PRO-macOS-universal.dmg" class="p-3 rounded-xl border border-zinc-800 bg-zinc-900/70 hover:bg-zinc-800 transition text-center">
+                        <i data-lucide="laptop" class="w-5 h-5 text-zinc-300 mx-auto mb-1"></i>
+                        <span class="block text-xs font-semibold text-zinc-100">macOS</span>
+                        <span class="block text-[10px] text-zinc-500 mt-0.5">DMG indir</span>
+                    </a>
+                    <div class="p-3 rounded-xl border border-zinc-800 bg-zinc-900/70 text-center">
+                        <i data-lucide="monitor" class="w-5 h-5 text-orange-400 mx-auto mb-1"></i>
+                        <span class="block text-xs font-semibold text-zinc-100">Linux</span>
+                        <span class="block text-[10px] text-zinc-500 mt-0.5"><a class="text-blue-400 hover:text-blue-300" href="https://github.com/bthn1/dnspanel/releases/download/linux-latest/NextDNS-PRO-Linux-x86_64.AppImage">AppImage</a> · <a class="text-blue-400 hover:text-blue-300" href="https://github.com/bthn1/dnspanel/releases/download/linux-latest/NextDNS-PRO-Linux-amd64.deb">DEB</a></span>
+                    </div>
+                    <a href="https://github.com/bthn1/dnspanel/releases/download/chrome-extension-latest/NextDNS-PRO-Chrome.zip" class="p-3 rounded-xl border border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 transition text-center">
+                        <i data-lucide="chrome" class="w-5 h-5 text-blue-400 mx-auto mb-1"></i>
+                        <span class="block text-xs font-semibold text-zinc-100">Chrome Eklentisi</span>
+                        <span class="block text-[10px] text-zinc-500 mt-0.5">ZIP indir</span>
+                    </a>
+                </div>
+                <p class="text-[10px] text-zinc-500">İndirme bağlantıları GitHub Releases üzerinden açılır. Bazı sürümlerin derlemesi henüz tamamlanmamış olabilir.</p>
+                </div>
+            </details>
+            </div>
+        </div>
+        <button id="login-manage-profiles-btn" type="button" class="fixed bottom-5 left-5 z-40 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-700 bg-zinc-900/95 hover:bg-zinc-800 text-sm text-zinc-200 shadow-xl">
+            <i data-lucide="user-round-plus" class="w-4 h-4"></i>
+            Profil ekle
+        </button>
+    </div>
+
+    <!-- Ana Dashboard Ekranı -->
+    <div id="dashboard-screen" class="hidden min-h-screen flex flex-col">
+        <header class="sticky top-0 z-30 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/80 px-6 py-3.5">
+            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                        <i data-lucide="activity" class="w-4 h-4"></i>
+                    </div>
+                    <span class="font-bold text-sm tracking-wide">NextDNS<span class="text-blue-500">PRO</span></span>
+                    <span class="text-zinc-700">|</span>
+                    <select id="profile-select" class="bg-zinc-900 border border-zinc-800 text-xs rounded-lg px-3 py-1.5 text-zinc-200 focus:outline-none focus:border-blue-500"></select>
+                    <span id="readonly-profile-label" class="hidden text-xs text-emerald-300 border border-emerald-500/30 bg-emerald-500/10 rounded-lg px-3 py-1.5"></span>
+                    <button id="manage-api-profiles-btn" data-i18n="apiAccounts" class="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-[11px] text-zinc-200">API Hesapları</button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <select id="lang-select" class="bg-zinc-900 border border-zinc-800 text-xs rounded-lg px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-blue-500">
+                        <option value="tr">🇹🇷 TR</option>
+                        <option value="en">🇬🇧 EN</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="zh">🇨🇳 中文</option>
+                        <option value="de">🇩🇪 DE</option>
+                    </select>
+                    <button id="refresh-btn" class="p-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-zinc-400 hover:text-white transition" title="Yenile">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    </button>
+                    <button id="logout-btn" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-lg text-xs font-medium transition" data-i18n="logoutBtn">
+                        Çıkış
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <nav class="bg-zinc-900/40 border-b border-zinc-800/80 px-6 overflow-x-auto">
+            <div class="max-w-7xl mx-auto flex items-center gap-1" id="nav-tabs">
+                <button data-tab="overview" class="tab-btn active px-4 py-3 text-xs font-medium border-b-2 border-blue-500 text-blue-400 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> <span data-i18n="tabOverview">Genel Bakış</span>
+                </button>
+                <button data-tab="logs" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="list-filter" class="w-3.5 h-3.5"></i> <span data-i18n="tabLogs">Canlı Cihaz Trafiği</span>
+                </button>
+                <button data-tab="lists" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="shield-ban" class="w-3.5 h-3.5"></i> <span data-i18n="tabLists">Kara & Beyaz Liste</span>
+                </button>
+                <button data-tab="parental" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="lock" class="w-3.5 h-3.5"></i> <span data-i18n="tabParental">Ebeveyn Kontrolü</span>
+                </button>
+                <button data-tab="privacy" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="eye-off" class="w-3.5 h-3.5"></i> <span data-i18n="tabPrivacy">Gizlilik & Filtreler</span>
+                </button>
+                <button data-tab="vpn" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="shield" class="w-3.5 h-3.5"></i> WireGuard VPN
+                </button>
+                <button data-tab="setup" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="terminal" class="w-3.5 h-3.5"></i> <span data-i18n="tabSetup">Kurulum</span>
+                </button>
+            </div>
+        </nav>
+
+        <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+            <!-- 1. GENEL BAKIŞ -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass-card p-5">
+                        <div class="flex items-center justify-between text-zinc-400 text-xs mb-2">
+                            <span data-i18n="statTotalQueries">Toplam DNS Sorgusu</span>
+                            <i data-lucide="globe" class="w-4 h-4 text-blue-400"></i>
+                        </div>
+                        <div id="stat-total" class="text-2xl font-bold font-mono">--</div>
+                    </div>
+                    <div class="glass-card p-5">
+                        <div class="flex items-center justify-between text-zinc-400 text-xs mb-2">
+                            <span data-i18n="statBlockedQueries">Engellenen Sorgular</span>
+                            <i data-lucide="shield-alert" class="w-4 h-4 text-red-400"></i>
+                        </div>
+                        <div id="stat-blocked" class="text-2xl font-bold font-mono text-red-400">--</div>
+                    </div>
+                    <div class="glass-card p-5">
+                        <div class="flex items-center justify-between text-zinc-400 text-xs mb-2">
+                            <span data-i18n="statBlockRatio">Engelleme Oranı</span>
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-400"></i>
+                        </div>
+                        <div id="stat-ratio" class="text-2xl font-bold font-mono text-emerald-400">--%</div>
+                    </div>
+                </div>
+
+                                <section id="monthly-query-card" class="glass-card p-5 border border-zinc-800/60 space-y-2">
+                    <div class="flex items-center justify-between gap-3">
+                        <h3 class="text-sm font-semibold text-zinc-100" data-i18n="monthlyUsage">Bu Ay NextDNS Sorgu Kullanımı</h3>
+                        <span class="text-[10px] text-zinc-500" data-i18n="monthlyLimit">300.000 aylık ücretsiz sınır</span>
+                    </div>
+                    <div id="monthly-query-count" class="text-2xl font-bold font-mono text-zinc-200">-- / 300.000</div>
+                    <p id="monthly-query-message" data-i18n="usageLoading" class="text-xs text-zinc-400">Kullanım verisi yükleniyor...</p>
+                    <p class="text-[10px] text-zinc-500">Tahmini değer: API analiz verileri toplanır. NextDNS'in hesap sayacında bazı sorgular tekilleştirilebildiği için resmi kota sayısıyla birebir aynı olmayabilir.</p>
+                </section>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-card p-5">
+                        <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+                            <i data-lucide="smartphone" class="w-4 h-4 text-blue-400"></i> <span data-i18n="topDevices">En Çok DNS Sorgusu Yapan Cihazlar</span>
+                        </h3>
+                        <div id="devices-list" class="space-y-2.5 text-xs text-zinc-400">Yükleniyor...</div>
+                    </div>
+                    <div class="glass-card p-5">
+                        <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+                            <i data-lucide="flame" class="w-4 h-4 text-orange-400"></i> <span data-i18n="topBlockedDomains">En Çok Engellenen Alan Adları</span>
+                        </h3>
+                        <div id="top-blocked-list" class="space-y-2.5 text-xs text-zinc-400">Yükleniyor...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. CANLI CİHAZ TRAFİĞİ -->
+            <div id="tab-logs" class="tab-content hidden space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 glass-card p-4">
+                    <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                        <i data-lucide="search" class="w-4 h-4 text-zinc-500"></i>
+                        <input type="text" id="log-search" data-i18n-placeholder="searchPlaceholder" placeholder="Cihaz adı veya alan adı ara..." class="bg-transparent text-xs w-full focus:outline-none">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="log-filter" class="bg-zinc-950 border border-zinc-800 text-xs rounded-lg px-3 py-1.5">
+                            <option value="all" data-i18n="filterAll">Tüm Trafik</option>
+                            <option value="blocked" data-i18n="filterBlocked">Sadece Engellenenler</option>
+                            <option value="allowed" data-i18n="filterAllowed">Sadece İzin Verilenler</option>
+                        </select>
+                        <button id="reload-logs-btn" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-lg transition" data-i18n="refreshBtn">Yenile</button>
+                    </div>
+                </div>
+
+                <div class="glass-card overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-zinc-800/80 text-[11px] uppercase tracking-wider text-zinc-500 bg-zinc-950/40">
+                                    <th class="px-5 py-3" data-i18n="thTime">Saat</th>
+                                    <th class="px-5 py-3" data-i18n="thDomain">Ziyaret Edilen / Talep Edilen Adres</th>
+                                    <th class="px-5 py-3" data-i18n="thDevice">Bağlı Cihaz</th>
+                                    <th class="px-5 py-3" data-i18n="thStatus">Trafik Durumu</th>
+                                    <th class="px-5 py-3" data-i18n="thProtocol">Protokol</th>
+                                    <th class="px-5 py-3 text-right" data-i18n="thAction">Hızlı İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-table-body" class="divide-y divide-zinc-800/50 text-xs">
+                                <tr><td colspan="6" class="px-6 py-8 text-center text-zinc-500">Trafik yükleniyor...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. KARA & BEYAZ LİSTE -->
+            <div id="tab-lists" class="tab-content hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card p-5 space-y-4">
+                    <h3 class="text-sm font-semibold text-red-400 flex items-center gap-2">
+                        <i data-lucide="ban" class="w-4 h-4"></i> <span data-i18n="denylistTitle">Kara Liste (Denylist)</span>
+                    </h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="deny-input" placeholder="örn: tiktok.com" class="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-red-500">
+                        <button onclick="addDomainRule('denylist')" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition" data-i18n="btnBlock">Engelle</button>
+                    </div>
+                    <div id="denylist-items" class="space-y-2 max-h-96 overflow-y-auto text-xs">Yükleniyor...</div>
+                </div>
+
+                <div class="glass-card p-5 space-y-4">
+                    <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i> <span data-i18n="allowlistTitle">Beyaz Liste (Allowlist)</span>
+                    </h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="allow-input" placeholder="örn: example.com" class="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-emerald-500">
+                        <button onclick="addDomainRule('allowlist')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition" data-i18n="btnAllow">İzin Ver</button>
+                    </div>
+                    <div id="allowlist-items" class="space-y-2 max-h-96 overflow-y-auto text-xs">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <!-- 4. EBEVEYN KONTROLÜ -->
+            <div id="tab-parental" class="tab-content hidden space-y-6">
+                <div class="glass-card p-5">
+                    <h3 class="text-sm font-semibold mb-1" data-i18n="parentalHeader">Uygulama & Oyun Engelleme (GAMAF / Servisler)</h3>
+                    <p class="text-xs text-zinc-400 mb-4" data-i18n="parentalSub">Tek tıkla popüler sosyal medya, oyun ve platformların DNS erişimini kesin.</p>
+                    <div id="parental-services-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <!-- 5. GİZLİLİK -->
+            <div id="tab-privacy" class="tab-content hidden space-y-6">
+                <div class="glass-card p-5">
+                    <h3 class="text-sm font-semibold mb-1" data-i18n="privacyHeader">Aktif Reklam & İzleyici Engelleyici Listeler</h3>
+                    <p class="text-xs text-zinc-400 mb-4" data-i18n="privacySub">Profilinizde aktif olan DNS filtre listeleri.</p>
+                    <div id="privacy-lists" class="space-y-2 text-xs">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <!-- WireGuard VPN: cihaz başına yerel yapılandırma içe aktarma -->
+            <div id="tab-vpn" class="tab-content hidden space-y-6">
+                <section class="glass-card p-6 space-y-4">
+                    <div class="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-wider text-blue-300 font-semibold" data-i18n="vpnDeviceOnly">Cihaza özel VPN</p>
+                            <h2 class="text-lg font-bold mt-1" data-i18n="addWireguard">WireGuard yapılandırması ekle</h2>
+                            <p class="text-xs text-zinc-400 mt-1 max-w-2xl" data-i18n="vpnPrivacy">Her cihazın .conf dosyası yalnızca bu tarayıcı sekmesinde okunur; sunucuya gönderilmez ve kaydedilmez.</p>
+                        </div>
+                        <span class="text-[10px] px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-200" data-i18n="vpnAppNotice">Bağlantı uygulamada açılır</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="block space-y-1.5">
+                            <span class="text-xs text-zinc-300" data-i18n="deviceName">Cihaz adı</span>
+                            <input id="wg-device-name" type="text" maxlength="40" placeholder="Örn. Benim bilgisayarım" class="w-full px-3 py-2.5 text-xs">
+                        </label>
+                        <label class="block space-y-1.5">
+                            <span class="text-xs text-zinc-300" data-i18n="wireguardFile">WireGuard .conf dosyası</span>
+                            <input id="wg-config-file" type="file" accept=".conf,text/plain" class="w-full px-3 py-2.5 text-xs">
+                        </label>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="wg-import-btn" data-i18n="addConfig" type="button" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-semibold text-white">Cihaza yapılandırma ekle</button>
+                        <a href="https://www.wireguard.com/install/" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 border border-zinc-700 hover:bg-zinc-800 rounded-lg text-xs text-zinc-200" data-i18n="getWireguard">WireGuard uygulamasını edin</a>
+                    </div>
+                    <p id="wg-message" data-i18n="configHint" class="text-xs text-zinc-400" role="status" aria-live="polite">Yapılandırma dosyanı seç. Özel anahtarın ekranda gösterilmez.</p>
+                    <div class="rounded-lg border border-zinc-800 bg-zinc-950/70 p-3 text-[11px] leading-relaxed text-zinc-400">
+                        <strong class="text-zinc-200" data-i18n="security">Güvenlik:</strong> <span data-i18n="securityNotice">Yalnızca kullanma iznin olan yapılandırmayı ekle. Özel anahtarını kimseyle paylaşma.</span>
+                    </div>
+                </section>
+                <section class="glass-card p-5 space-y-3">
+                    <div class="flex items-center justify-between gap-3">
+                        <h3 class="text-sm font-semibold" data-i18n="addedDevices">Eklenen cihazlar</h3>
+                        <span id="wg-device-count" class="text-[10px] text-zinc-500">0 cihaz</span>
+                    </div>
+                    <div id="wg-device-list" data-i18n="noConfigs" class="space-y-2 text-xs text-zinc-400">
+                        Henüz yapılandırma eklenmedi.
+                    </div>
+                </section>
+                <p class="text-[11px] text-zinc-500 leading-relaxed" data-i18n="vpnNote">Not: Web sitesi VPN tünelini başlatamaz veya bağlantının aktif olduğunu doğrulayamaz. Dosyayı indirip WireGuard uygulamasına aktararak bağlantıyı oradan açmalısın.</p>
+            </div>
+
+            <!-- 6. KURULUM & MASAÜSTÜ / TV İNDİRME MERKEZİ -->
+            <div id="tab-setup" class="tab-content hidden space-y-6">
+                <div class="glass-card p-6 space-y-5">
+                    <div>
+                        <h3 class="text-base font-bold text-white" data-i18n="setupHeader">Cihaz Kurulum Bilgileri</h3>
+                        <p class="text-xs text-zinc-400 mt-1" data-i18n="setupSub">Seçili profili cihazlarınıza bağlamak için aşağıdaki uç noktaları kullanın.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2">
+                            <span class="text-[11px] uppercase tracking-wider text-blue-400 font-semibold">DNS-over-HTTPS (DoH)</span>
+                            <div class="flex items-center justify-between bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-800">
+                                <code id="setup-doh" class="text-xs text-zinc-200 select-all">https://dns.nextdns.io/------</code>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2">
+                            <span class="text-[11px] uppercase tracking-wider text-purple-400 font-semibold">DNS-over-TLS / QUIC</span>
+                            <div class="flex items-center justify-between bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-800">
+                                <code id="setup-dot" class="text-xs text-zinc-200 select-all">------.dns.nextdns.io</code>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2">
+                            <span class="text-[11px] uppercase tracking-wider text-emerald-400 font-semibold">IPv6</span>
+                            <div class="bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-800 font-mono text-xs text-zinc-300 space-y-1" id="setup-ipv6">Yükleniyor...</div>
+                        </div>
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2">
+                            <span class="text-[11px] uppercase tracking-wider text-amber-400 font-semibold">Linked IP</span>
+                            <div class="bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-800 text-xs text-zinc-300" id="setup-linked-ip">Yükleniyor...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Masaüstü & TV İndirme Merkezi -->
+                <div class="glass-card p-6 space-y-5 border-blue-500/20">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                            <i data-lucide="monitor-down" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white" data-i18n="desktopHeader">Masaüstü & TV Uygulama İndirme Merkezi</h3>
+                            <p class="text-xs text-zinc-400" data-i18n="desktopSub">Windows için NextDNS PRO panel uygulaması; ayrıca macOS ve Android TV indirmeleri.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold text-zinc-100">NextDNS PRO Windows</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">.msi / .exe</span>
+                                </div>
+                                <p class="text-[11px] text-zinc-400">NextDNS PRO panelini Windows masaüstü uygulaması olarak kullan. 32-bit ve 64-bit kurulum seçenekleri.</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="https://github.com/bthn1/dnspanel/releases/download/windows-latest/NextDNS-PRO-Setup-x64.exe" download="NextDNS-PRO-Setup-x64.exe"
+                                   class="w-full py-2 px-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i> 64-bit
+                                </a>
+                                <a href="https://github.com/bthn1/dnspanel/releases/download/windows-latest/NextDNS-PRO-Setup-ia32.exe" download="NextDNS-PRO-Setup-ia32.exe"
+                                   class="w-full py-2 px-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i> 32-bit
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold text-zinc-100">NextDNS PRO macOS</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-zinc-800 text-zinc-300 border border-zinc-700">Apple Silicon / Intel</span>
+                                </div>
+                                <p class="text-[11px] text-zinc-400">NextDNS PRO panel uygulaması. Apple Silicon ve Intel Mac'ler için universal sürüm.</p>
+                            </div>
+                            <a href="https://github.com/bthn1/dnspanel/releases/download/macos-latest/NextDNS-PRO-macOS-universal.dmg" download="NextDNS-PRO-macOS-universal.dmg"
+                               class="w-full py-2 px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i> macOS DMG indir
+                            </a>
+                        </div>
+
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold text-zinc-100">NextDNS PRO Linux</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Ubuntu / Debian</span>
+                                </div>
+                                <p class="text-[11px] text-zinc-400">Linux masaüstü uygulaması. AppImage ile kurulum yapmadan çalıştırabilir veya .deb paketini yükleyebilirsin. x64.</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="https://github.com/bthn1/dnspanel/releases/download/linux-latest/NextDNS-PRO-Linux-x86_64.AppImage" download="NextDNS-PRO-Linux-x86_64.AppImage"
+                                   class="w-full py-2 px-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i> AppImage
+                                </a>
+                                <a href="https://github.com/bthn1/dnspanel/releases/download/linux-latest/NextDNS-PRO-Linux-amd64.deb" download="NextDNS-PRO-Linux-amd64.deb"
+                                   class="w-full py-2 px-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i> .deb
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold text-zinc-100">NextDNS PRO TV</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Android TV</span>
+                                </div>
+                                <p class="text-[11px] text-zinc-400" data-i18n="apkManagerDesc">NextDNS PRO panelinin sıfırdan yazılmış, yalnızca Android TV kumandasıyla kullanılabilen yerel uygulaması.</p>
+                            </div>
+                            <a href="https://github.com/bthn1/dnspanel/releases/download/tv-latest/NextDNS-PRO-TV.apk" download="NextDNS-PRO-TV.apk" 
+                               class="w-full py-2 px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i> <span data-i18n="downloadApkBtn">Android TV APK indir</span>
+                            </a>
+                        </div>
+                        
+                        <div class="p-4 bg-zinc-950 border border-blue-500/30 rounded-xl flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold text-zinc-100">NextDNS PRO Mobil</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">Android Telefon / Tablet</span>
+                                </div>
+                                <p class="text-[11px] text-zinc-400">NextDNS PRO panelini dokunmatik ekrana uygun mobil uygulama olarak kullan.</p>
+                            </div>
+                            <a href="https://github.com/bthn1/dnspanel/releases/download/mobile-latest/NextDNS-PRO-Mobile.apk" download="NextDNS-PRO-Mobile.apk"
+                               class="w-full py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i> Android Mobil APK indir
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Tarayıcıdan NextDNS PRO'yu masaüstü uygulaması gibi yükleme rehberi -->
+                <section class="glass-card p-6 space-y-5 browser-install-guide">
+                    <div class="browser-guide-heading">
+                        <div class="browser-guide-icon"><i data-lucide="app-window" class="w-5 h-5"></i></div>
+                        <div>
+                            <p class="browser-guide-eyebrow" data-i18n="desktopAccess">MASAÜSTÜ ERİŞİMİ</p>
+                            <h3 class="text-base font-bold text-white" data-i18n="installWebApp">NextDNS PRO'yu bilgisayarına uygulama olarak yükle</h3>
+                            <p class="text-xs text-zinc-400 mt-1" data-i18n="installWebAppDesc">Siteyi ayrı bir pencerede açabilir ve Başlat menüsüne veya görev çubuğuna sabitleyebilirsin. Kurulum ücretsizdir.</p>
+                        </div>
+                    </div>
+                    <div class="browser-guide-note">
+                        <i data-lucide="info" class="w-4 h-4"></i>
+                        <p data-i18n="installWebAppNote">Bu işlem web panelini uygulama penceresi olarak ekler; ayrı bir EXE indirmez. İnternet bağlantısı gerekir.</p>
+                    </div>
+                    <div class="browser-guide-grid">
+                        <details class="browser-guide-card" open>
+                            <summary><span class="browser-guide-brand chrome">C</span><span><strong>Google Chrome</strong><small>Windows 10 / 11</small></span><i data-lucide="chevron-down"></i></summary>
+                            <ol><li>Chrome'da yayınlanmış NextDNS PRO adresini aç.</li><li>Sağ üstteki <b>⋮</b> menüsüne tıkla.</li><li><b>Yayınla, kaydet ve paylaş</b> bölümünü aç.</li><li><b>Sayfayı uygulama olarak yükle</b> seçeneğine tıkla.</li><li>Uygulama adını kontrol edip <b>Yükle</b> de.</li></ol>
+                            <p class="browser-guide-tip">Adres çubuğunda yükleme simgesi görünüyorsa doğrudan ona da tıklayabilirsin.</p>
+                        </details>
+                        <details class="browser-guide-card">
+                            <summary><span class="browser-guide-brand edge">e</span><span><strong>Microsoft Edge</strong><small>Windows 10 / 11</small></span><i data-lucide="chevron-down"></i></summary>
+                            <ol><li>Edge ile NextDNS PRO sitesini aç.</li><li>Sağ üstteki <b>…</b> menüsüne tıkla.</li><li><b>Diğer araçlar → Uygulamalar</b> bölümüne gir.</li><li><b>Bu siteyi uygulama olarak yükle</b> seçeneğini seç.</li><li><b>Yükle</b> dedikten sonra masaüstü kısayolu veya görev çubuğuna sabitleme seçeneklerini işaretle.</li></ol>
+                        </details>
+                        <details class="browser-guide-card">
+                            <summary><span class="browser-guide-brand brave">B</span><span><strong>Brave</strong><small>Windows</small></span><i data-lucide="chevron-down"></i></summary>
+                            <ol><li>Brave'de NextDNS PRO sitesini aç.</li><li>Sağ üstteki <b>☰</b> menüsüne tıkla.</li><li><b>Diğer araçlar → Kısayol oluştur</b> veya menüde görünüyorsa <b>Uygulamayı yükle</b> seçeneğini aç.</li><li>Seçenek sunulursa <b>Pencere olarak aç</b> kutusunu işaretle ve oluştur/yükle.</li></ol>
+                            <p class="browser-guide-tip">Menüde yükleme seçeneği görünmüyorsa adres çubuğundaki yükleme simgesini kontrol et.</p>
+                        </details>
+                        <details class="browser-guide-card">
+                            <summary><span class="browser-guide-brand opera">O</span><span><strong>Opera / diğer Chromium tarayıcıları</strong><small>Windows</small></span><i data-lucide="chevron-down"></i></summary>
+                            <ol><li>NextDNS PRO sitesini tarayıcıda aç.</li><li>Tarayıcının ana menüsünde <b>Uygulama olarak yükle</b>, <b>Sayfayı yükle</b> veya <b>Kısayol oluştur</b> seçeneğini ara.</li><li>Yükleme seçeneği varsa onayla; kısayol seçeneği varsa pencere olarak açma tercihini etkinleştir.</li></ol>
+                            <p class="browser-guide-tip">Menü adları tarayıcı sürümüne göre değişebilir. Bu seçenekler yoksa Chrome veya Edge kullanabilirsin.</p>
+                        </details>
+                        <details class="browser-guide-card">
+                            <summary><span class="browser-guide-brand firefox">F</span><span><strong>Mozilla Firefox</strong><small>Windows</small></span><i data-lucide="chevron-down"></i></summary>
+                            <ol><li>Firefox masaüstünde PWA'yı doğrudan uygulama olarak yükleme özelliği sunmaz.</li><li>İstersen Windows masaüstüne sağ tıkla ve <b>Yeni → Kısayol</b> seç.</li><li>NextDNS PRO web adresini konum olarak gir, <b>İleri</b> de ve kısayola bir ad ver.</li><li><b>Son</b> ile tamamla. Kısayol siteyi Firefox sekmesinde açar; bağımsız uygulama penceresi oluşturmaz.</li></ol>
+                        </details>
+                        <details class="browser-guide-card">
+                            <summary><span class="browser-guide-brand safari">S</span><span><strong>Safari</strong><small>macOS Sonoma 14 ve sonrası</small></span><i data-lucide="chevron-down"></i></summary>
+                            <ol><li>Safari'de NextDNS PRO sitesini aç.</li><li>Üst menüden <b>Dosya → Dock'a Ekle</b> seçeneğine tıkla.</li><li>Uygulama adını kontrol et ve <b>Ekle</b> de.</li><li>Uygulamayı Dock'tan açabilirsin.</li></ol>
+                            <p class="browser-guide-tip">Bu özellik macOS Sonoma (14) ve daha yeni sürümlerde bulunur.</p>
+                        </details>
+                    </div>
+                    <div class="browser-guide-bottom">
+                        <span><i data-lucide="check-circle-2" class="w-4 h-4"></i> Kurulumdan sonra uygulama Başlat menüsünde veya uygulama listende görünür.</span>
+                        <span>İstediğin zaman tarayıcının uygulama yönetimi bölümünden kaldırabilirsin.</span>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- API hesap yöneticisi --> 
+    <div id="api-profiles-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <section class="glass-card w-full max-w-lg p-5 space-y-4 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="api-profiles-title">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <h2 id="api-profiles-title" class="text-base font-bold">API Hesapları & Hızlı Geçiş</h2>
+                    <p class="text-[11px] text-zinc-400 mt-1">NextDNS hesabına resmî sayfadan giriş yaptıktan sonra API anahtarını ekleyerek hesaplarını bağlayabilir ve aralarında geçiş yapabilirsin.</p>
+                </div>
+                <button id="close-api-profiles-btn" class="px-3 py-1.5 rounded-lg bg-zinc-800 text-xs">Kapat</button>
+            </div>
+            <div id="api-profiles-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
+            <div class="border-t border-zinc-800 pt-4 space-y-3">
+                <h3 class="text-xs font-semibold text-zinc-200">Yeni API hesabı ekle</h3>
+                <input id="api-profile-name" type="text" maxlength="40" placeholder="Hesap adı (ör. Ev / Aile)" class="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs">
+                <input id="api-profile-key" type="password" autocomplete="off" placeholder="NextDNS API anahtarı" class="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs font-mono">
+                <p id="api-profile-error" class="text-xs text-red-400" aria-live="polite"></p>
+                <button id="add-api-profile-btn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-semibold text-white">Anahtarı doğrula ve hesabı ekle</button>
+                <a href="https://my.nextdns.io/account" target="_blank" rel="noopener noreferrer" class="block text-center text-xs text-blue-400">NextDNS hesabına giriş yap / API anahtarını al</a>
+                <p class="text-[10px] leading-relaxed text-zinc-500">NextDNS'in yayımladığı API belgelerinde OAuth ile hesap girişi bulunmuyor; bu nedenle panel NextDNS parolanızı istemez. Bağlantı API anahtarıyla doğrulanır. Anahtarlar localStorage yerine sessionStorage içinde tutulur.</p>
+            </div>
+        </section>
+    </div>
+    <script src="app.js"></script>
+    <script src="pro-features.js"></script>
+    <script src="wireguard.js"></script>
+    <script src="ai-assistant.js"></script>
+</body>
+</html>
