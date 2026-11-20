@@ -1,6 +1,9 @@
 package com.bthn1.nextdnstv
 
 import android.os.Bundle
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -12,6 +15,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.Modifier
@@ -44,6 +49,14 @@ class MainActivity:ComponentActivity(){override fun onCreate(savedInstanceState:
 
 @Composable private fun TvApp(){
  val scope= rememberCoroutineScope()
+ val context=LocalContext.current
+ var hasInternet by remember { mutableStateOf(checkInternet(context)) }
+ LaunchedEffect(Unit) {
+  while (true) {
+   hasInternet = checkInternet(context)
+   delay(2500)
+  }
+ }
  var key by remember{mutableStateOf("")};var profileText by remember{mutableStateOf("")};var profiles by remember{mutableStateOf(emptyList<Profile>())};var selected by remember{mutableStateOf<Profile?>(null)}
  var stats by remember{mutableStateOf(Stats())};var logs by remember{mutableStateOf(emptyList<LogEntry>())};var deny by remember{mutableStateOf(emptyList<Rule>())};var allow by remember{mutableStateOf(emptyList<Rule>())};var parental by remember{mutableStateOf(emptySet<String>())};var privacy by remember{mutableStateOf(emptyList<String>())}
  var doh by remember{mutableStateOf("")};var dot by remember{mutableStateOf("")};var ipv6 by remember{mutableStateOf("")};var linkedIp by remember{mutableStateOf("")}
@@ -86,7 +99,7 @@ class MainActivity:ComponentActivity(){override fun onCreate(savedInstanceState:
         Button(onClick = { selected?.let { p -> runTask { refresh(p) } } }) { Text("Yenile") }
        }
       }
-      Spacer(Modifier.height(14.dp));if(loading)Text("Yükleniyor…",color=Muted);if(error.isNotBlank())Text(error,color=Color(0xFFFF7777),fontSize=12.sp)
+      Spacer(Modifier.height(14.dp));if(!hasInternet)Text("İNTERNET BAĞLANTISI YOK • Ağ bağlantınızı kontrol edin",color=Color(0xFFFF7777),fontSize=14.sp,fontWeight=FontWeight.Bold);if(loading)Text("Yükleniyor…",color=Muted);if(error.isNotBlank())Text(error,color=Color(0xFFFF7777),fontSize=12.sp)
       when(tab){
        "Genel Bakış"->Overview(stats)
        "Canlı Trafik"->{
@@ -117,6 +130,13 @@ class MainActivity:ComponentActivity(){override fun onCreate(savedInstanceState:
    }
   }
  }
+}
+
+private fun checkInternet(context:Context):Boolean {
+ val manager=context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+ val network=manager.activeNetwork ?: return false
+ val capabilities=manager.getNetworkCapabilities(network) ?: return false
+ return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 }
 
 @Composable private fun TvInput(value:String,onValue:(String)->Unit,secret:Boolean=false,hint:String){
