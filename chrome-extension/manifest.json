@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "NextDNS PRO",
+  "short_name": "NextDNS PRO",
+  "description": "NextDNS profillerini ve DNS analizlerini Chrome'dan görüntüle.",
+  "version": "1.0.0",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://api.nextdns.io/*"
+  ],
+  "action": {
+    "default_title": "NextDNS PRO",
+    "default_popup": "popup.html"
+  }
+}
