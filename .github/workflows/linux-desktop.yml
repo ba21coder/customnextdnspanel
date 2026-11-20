@@ -46,6 +46,6 @@ jobs:
           name: NextDNS PRO Linux - Latest
           make_latest: false
           files: |
-            desktop-app/dist/NextDNS-PRO-Linux-x64.AppImage
-            desktop-app/dist/NextDNS-PRO-Linux-x64.deb
+            desktop-app/dist/NextDNS-PRO-Linux-x86_64.AppImage
+            desktop-app/dist/NextDNS-PRO-Linux-amd64.deb
           overwrite_files: true
