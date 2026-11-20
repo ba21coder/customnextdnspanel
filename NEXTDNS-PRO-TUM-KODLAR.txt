@@ -3128,3 +3128,1141 @@ app.whenReady().then(() => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
+
+========================================================================================
+DOSYA: desktop-app/package.json
+========================================================================================
+
+{
+  "name": "nextdns-pro-desktop",
+  "version": "1.0.0",
+  "description": "NextDNS PRO desktop panel",
+  "main": "main.cjs",
+  "author": {
+    "name": "NextDNS PRO",
+    "email": "noreply@github.com"
+  },
+  "license": "UNLICENSED",
+  "scripts": {
+    "dist:win": "electron-builder --win nsis --x64 --ia32",
+    "dist:mac": "electron-builder --mac dmg --universal",
+    "dist:linux": "electron-builder --linux AppImage deb --x64"
+  },
+  "devDependencies": {
+    "electron": "28.3.3",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.bthn1.nextdnspro",
+    "productName": "NextDNS PRO",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.cjs",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "NextDNS-PRO-Setup-${arch}.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "NextDNS PRO"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "artifactName": "NextDNS-PRO-Linux-${arch}.${ext}",
+      "category": "Utility",
+      "maintainer": "NextDNS PRO <noreply@github.com>"
+    }
+  },
+  "homepage": "https://bthn1.github.io/dnspanel/"
+}
+
+
+========================================================================================
+DOSYA: index.html
+========================================================================================
+
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextDNS Kontrol Merkezi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-sans antialiased selection:bg-blue-500/30 selection:text-blue-200">
+    <div id="network-status" data-i18n="offlineWarning" role="status" aria-live="polite" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#b91c1c;color:#fff;text-align:center;padding:12px;font-size:14px;font-weight:700;box-shadow:0 4px 14px #0008">İnternet bağlantısı yok. Lütfen bağlantınızı kontrol edin.</div>
+
+    <!-- Giriş Ekranı -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md glass-card p-8 space-y-6 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight">NextDNS Panel</h1>
+                        <p class="text-xs text-zinc-400" data-i18n="loginSub">Gelişmiş Ağ & DNS Yönetim Merkezi</p>
+                    </div>
+                </div>
+                <select id="lang-select-login" class="bg-zinc-950 border border-zinc-800 text-xs rounded-lg px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-blue-500">
+                    <option value="tr">🇹🇷 TR</option>
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="de">🇩🇪 DE</option>
+                </select>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1.5" data-i18n="apiKeyLabel">NextDNS API Anahtarı</label>
+                    <input type="password" id="api-key-input" placeholder="API anahtarınızı yapıştırın..." 
+                        class="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition font-mono">
+                </div>
+                <details class="border-t border-zinc-800 pt-3">
+                    <summary class="cursor-pointer text-xs text-zinc-400 hover:text-zinc-200">Gelişmiş: Profil ID ile salt okunur görüntüleme</summary>
+                    <div class="pt-3 space-y-2">
+                                <div class="space-y-2">
+                            <label for="readonly-profile-id" class="block text-xs font-medium text-zinc-400">Profil ID ile sadece istatistikleri görüntüle</label>
+                            <input type="text" id="readonly-profile-id" maxlength="64" autocomplete="off" placeholder="NextDNS Profil ID"
+                                class="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition font-mono">
+                            <button id="readonly-stats-btn" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white font-medium rounded-xl text-sm transition">
+                                Sadece istatistikleri görüntüle
+                            </button>
+                            <p class="text-[10px] leading-relaxed text-zinc-500">Bu modda yalnızca istatistikler okunur. Profil ID tek başına yeterli değildir; yukarıdaki API anahtarı da gerekir. Hiçbir ayar değiştirilmez.</p>
+                                </div>
+
+                    </div>
+                </details>
+                <p id="login-error" class="text-xs text-red-400 hidden"></p>
+                <button id="login-btn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl text-sm transition shadow-lg shadow-blue-600/20" data-i18n="connectBtn">
+                    Panele Bağlan
+                </button>
+                <a href="https://my.nextdns.io/account" target="_blank" rel="noopener noreferrer" class="block text-center text-xs text-blue-400 hover:text-blue-300">NextDNS hesabına giriş yap / API anahtarını al</a>
+                <p class="text-[10px] leading-relaxed text-zinc-500">Hesabına NextDNS’in resmî sayfasından giriş yap. API anahtarını buraya ekleyerek hesabını bağla. Bu panel NextDNS veya Gmail şifreni istemez; API anahtarı yalnızca bu tarayıcı oturumunda tutulur.</p>
+            <details class="pt-4 border-t border-zinc-800">
+                <summary class="cursor-pointer text-sm font-semibold text-zinc-100">Uygulamaları İndir</summary>
+                <div class="pt-3 space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                    <h2 class="text-sm font-semibold text-zinc-100">Uygulamaları İndir</h2>
+                    <span class="text-[10px] text-zinc-500">NextDNS PRO</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <a href="https://github.com/bthn1/dnspanel/releases/download/mobile-latest/NextDNS-PRO-Mobile.apk" class="p-3 rounded-xl border border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 transition text-center">
+                        <i data-lucide="smartphone" class="w-5 h-5 text-blue-400 mx-auto mb-1"></i>
+                        <span class="block text-xs font-semibold text-zinc-100">Android Mobil</span>
+                        <span class="block text-[10px] text-zinc-500 mt-0.5">APK indir</span>
+                    </a>
+                    <a href="https://github.com/bthn1/dnspanel/releases/download/tv-latest/NextDNS-PRO-TV.apk" class="p-3 rounded-xl border border-zinc-800 bg-zinc-900/70 hover:bg-zinc-800 transition text-center">
+                        <i data-lucide="tv" class="w-5 h-5 text-emerald-400 mx-auto mb-1"></i>
+                        <span class="block text-xs font-semibold text-zinc-100">Android TV</span>
+                        <span class="block text-[10px] text-zinc-500 mt-0.5">APK indir</span>
+                    </a>
+                    <a href="https://github.com/bthn1/dnspanel/releases/download/windows-latest/NextDNS-PRO-Setup-x64.exe" class="p-3 rounded-xl border border-zinc-800 bg-zinc-900/70 hover:bg-zinc-800 transition text-center">
+                        <i data-lucide="monitor" class="w-5 h-5 text-sky-400 mx-auto mb-1"></i>
+                        <span class="block text-xs font-semibold text-zinc-100">Windows 64-bit</span>
+                        <span class="block text-[10px] text-zinc-500 mt-0.5">Setup indir</span>
+                    </a>
+                    <a href="https://github.com/bthn1/dnspanel/releases/download/windows-latest/NextDNS-PRO-Setup-ia32.exe" class="p-3 rounded-xl border border-zinc-800 bg-zinc-900/70 hover:bg-zinc-800 transition text-center">
+                        <i data-lucide="monitor" class="w-5 h-5 text-sky-400 mx-auto mb-1"></i>
+                        <span class="block text-xs font-semibold text-zinc-100">Windows 32-bit</span>
+                        <span class="block text-[10px] text-zinc-500 mt-0.5">Setup indir</span>
+                    </a>
+                    <a href="https://github.com/bthn1/dnspanel/releases/download/macos-latest/NextDNS-PRO-macOS-universal.dmg" class="p-3 rounded-xl border border-zinc-800 bg-zinc-900/70 hover:bg-zinc-800 transition text-center">
+                        <i data-lucide="laptop" class="w-5 h-5 text-zinc-300 mx-auto mb-1"></i>
+                        <span class="block text-xs font-semibold text-zinc-100">macOS</span>
+                        <span class="block text-[10px] text-zinc-500 mt-0.5">DMG indir</span>
+                    </a>
+                    <div class="p-3 rounded-xl border border-zinc-800 bg-zinc-900/70 text-center">
+                        <i data-lucide="monitor" class="w-5 h-5 text-orange-400 mx-auto mb-1"></i>
+                        <span class="block text-xs font-semibold text-zinc-100">Linux</span>
+                        <span class="block text-[10px] text-zinc-500 mt-0.5"><a class="text-blue-400 hover:text-blue-300" href="https://github.com/bthn1/dnspanel/releases/download/linux-latest/NextDNS-PRO-Linux-x86_64.AppImage">AppImage</a> · <a class="text-blue-400 hover:text-blue-300" href="https://github.com/bthn1/dnspanel/releases/download/linux-latest/NextDNS-PRO-Linux-amd64.deb">DEB</a></span>
+                    </div>
+                    <a href="https://github.com/bthn1/dnspanel/releases/download/chrome-extension-latest/NextDNS-PRO-Chrome.zip" class="p-3 rounded-xl border border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 transition text-center">
+                        <i data-lucide="chrome" class="w-5 h-5 text-blue-400 mx-auto mb-1"></i>
+                        <span class="block text-xs font-semibold text-zinc-100">Chrome Eklentisi</span>
+                        <span class="block text-[10px] text-zinc-500 mt-0.5">ZIP indir</span>
+                    </a>
+                </div>
+                <p class="text-[10px] text-zinc-500">İndirme bağlantıları GitHub Releases üzerinden açılır. Bazı sürümlerin derlemesi henüz tamamlanmamış olabilir.</p>
+                </div>
+            </details>
+            </div>
+        </div>
+        <button id="login-manage-profiles-btn" type="button" class="fixed bottom-5 left-5 z-40 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-700 bg-zinc-900/95 hover:bg-zinc-800 text-sm text-zinc-200 shadow-xl">
+            <i data-lucide="user-round-plus" class="w-4 h-4"></i>
+            Profil ekle
+        </button>
+    </div>
+
+    <!-- Ana Dashboard Ekranı -->
+    <div id="dashboard-screen" class="hidden min-h-screen flex flex-col">
+        <header class="sticky top-0 z-30 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/80 px-6 py-3.5">
+            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                        <i data-lucide="activity" class="w-4 h-4"></i>
+                    </div>
+                    <span class="font-bold text-sm tracking-wide">NextDNS<span class="text-blue-500">PRO</span></span>
+                    <span class="text-zinc-700">|</span>
+                    <select id="profile-select" class="bg-zinc-900 border border-zinc-800 text-xs rounded-lg px-3 py-1.5 text-zinc-200 focus:outline-none focus:border-blue-500"></select>
+                    <span id="readonly-profile-label" class="hidden text-xs text-emerald-300 border border-emerald-500/30 bg-emerald-500/10 rounded-lg px-3 py-1.5"></span>
+                    <button id="manage-api-profiles-btn" data-i18n="apiAccounts" class="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-[11px] text-zinc-200">API Hesapları</button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <select id="lang-select" class="bg-zinc-900 border border-zinc-800 text-xs rounded-lg px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-blue-500">
+                        <option value="tr">🇹🇷 TR</option>
+                        <option value="en">🇬🇧 EN</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="zh">🇨🇳 中文</option>
+                        <option value="de">🇩🇪 DE</option>
+                    </select>
+                    <button id="refresh-btn" class="p-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-zinc-400 hover:text-white transition" title="Yenile">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    </button>
+                    <button id="logout-btn" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-lg text-xs font-medium transition" data-i18n="logoutBtn">
+                        Çıkış
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <nav class="bg-zinc-900/40 border-b border-zinc-800/80 px-6 overflow-x-auto">
+            <div class="max-w-7xl mx-auto flex items-center gap-1" id="nav-tabs">
+                <button data-tab="overview" class="tab-btn active px-4 py-3 text-xs font-medium border-b-2 border-blue-500 text-blue-400 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> <span data-i18n="tabOverview">Genel Bakış</span>
+                </button>
+                <button data-tab="logs" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="list-filter" class="w-3.5 h-3.5"></i> <span data-i18n="tabLogs">Canlı Cihaz Trafiği</span>
+                </button>
+                <button data-tab="lists" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="shield-ban" class="w-3.5 h-3.5"></i> <span data-i18n="tabLists">Kara & Beyaz Liste</span>
+                </button>
+                <button data-tab="parental" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="lock" class="w-3.5 h-3.5"></i> <span data-i18n="tabParental">Ebeveyn Kontrolü</span>
+                </button>
+                <button data-tab="privacy" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="eye-off" class="w-3.5 h-3.5"></i> <span data-i18n="tabPrivacy">Gizlilik & Filtreler</span>
+                </button>
+                <button data-tab="vpn" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="shield" class="w-3.5 h-3.5"></i> WireGuard VPN
+                </button>
+                <button data-tab="setup" class="tab-btn px-4 py-3 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="terminal" class="w-3.5 h-3.5"></i> <span data-i18n="tabSetup">Kurulum</span>
+                </button>
+            </div>
+        </nav>
+
+        <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+            <!-- 1. GENEL BAKIŞ -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass-card p-5">
+                        <div class="flex items-center justify-between text-zinc-400 text-xs mb-2">
+                            <span data-i18n="statTotalQueries">Toplam DNS Sorgusu</span>
+                            <i data-lucide="globe" class="w-4 h-4 text-blue-400"></i>
+                        </div>
+                        <div id="stat-total" class="text-2xl font-bold font-mono">--</div>
+                    </div>
+                    <div class="glass-card p-5">
+                        <div class="flex items-center justify-between text-zinc-400 text-xs mb-2">
+                            <span data-i18n="statBlockedQueries">Engellenen Sorgular</span>
+                            <i data-lucide="shield-alert" class="w-4 h-4 text-red-400"></i>
+                        </div>
+                        <div id="stat-blocked" class="text-2xl font-bold font-mono text-red-400">--</div>
+                    </div>
+                    <div class="glass-card p-5">
+                        <div class="flex items-center justify-between text-zinc-400 text-xs mb-2">
+                            <span data-i18n="statBlockRatio">Engelleme Oranı</span>
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-400"></i>
+                        </div>
+                        <div id="stat-ratio" class="text-2xl font-bold font-mono text-emerald-400">--%</div>
+                    </div>
+                </div>
+
+                                <section id="monthly-query-card" class="glass-card p-5 border border-zinc-800/60 space-y-2">
+                    <div class="flex items-center justify-between gap-3">
+                        <h3 class="text-sm font-semibold text-zinc-100" data-i18n="monthlyUsage">Bu Ay NextDNS Sorgu Kullanımı</h3>
+                        <span class="text-[10px] text-zinc-500" data-i18n="monthlyLimit">300.000 aylık ücretsiz sınır</span>
+                    </div>
+                    <div id="monthly-query-count" class="text-2xl font-bold font-mono text-zinc-200">-- / 300.000</div>
+                    <p id="monthly-query-message" data-i18n="usageLoading" class="text-xs text-zinc-400">Kullanım verisi yükleniyor...</p>
+                    <p class="text-[10px] text-zinc-500">Tahmini değer: API analiz verileri toplanır. NextDNS'in hesap sayacında bazı sorgular tekilleştirilebildiği için resmi kota sayısıyla birebir aynı olmayabilir.</p>
+                </section>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-card p-5">
+                        <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+                            <i data-lucide="smartphone" class="w-4 h-4 text-blue-400"></i> <span data-i18n="topDevices">En Çok DNS Sorgusu Yapan Cihazlar</span>
+                        </h3>
+                        <div id="devices-list" class="space-y-2.5 text-xs text-zinc-400">Yükleniyor...</div>
+                    </div>
+                    <div class="glass-card p-5">
+                        <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+                            <i data-lucide="flame" class="w-4 h-4 text-orange-400"></i> <span data-i18n="topBlockedDomains">En Çok Engellenen Alan Adları</span>
+                        </h3>
+                        <div id="top-blocked-list" class="space-y-2.5 text-xs text-zinc-400">Yükleniyor...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. CANLI CİHAZ TRAFİĞİ -->
+            <div id="tab-logs" class="tab-content hidden space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 glass-card p-4">
+                    <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                        <i data-lucide="search" class="w-4 h-4 text-zinc-500"></i>
+                        <input type="text" id="log-search" data-i18n-placeholder="searchPlaceholder" placeholder="Cihaz adı veya alan adı ara..." class="bg-transparent text-xs w-full focus:outline-none">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="log-filter" class="bg-zinc-950 border border-zinc-800 text-xs rounded-lg px-3 py-1.5">
+                            <option value="all" data-i18n="filterAll">Tüm Trafik</option>
+                            <option value="blocked" data-i18n="filterBlocked">Sadece Engellenenler</option>
+                            <option value="allowed" data-i18n="filterAllowed">Sadece İzin Verilenler</option>
+                        </select>
+                        <button id="reload-logs-btn" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-lg transition" data-i18n="refreshBtn">Yenile</button>
+                    </div>
+                </div>
+
+                <div class="glass-card overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-zinc-800/80 text-[11px] uppercase tracking-wider text-zinc-500 bg-zinc-950/40">
+                                    <th class="px-5 py-3" data-i18n="thTime">Saat</th>
+                                    <th class="px-5 py-3" data-i18n="thDomain">Ziyaret Edilen / Talep Edilen Adres</th>
+                                    <th class="px-5 py-3" data-i18n="thDevice">Bağlı Cihaz</th>
+                                    <th class="px-5 py-3" data-i18n="thStatus">Trafik Durumu</th>
+                                    <th class="px-5 py-3" data-i18n="thProtocol">Protokol</th>
+                                    <th class="px-5 py-3 text-right" data-i18n="thAction">Hızlı İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-table-body" class="divide-y divide-zinc-800/50 text-xs">
+                                <tr><td colspan="6" class="px-6 py-8 text-center text-zinc-500">Trafik yükleniyor...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. KARA & BEYAZ LİSTE -->
+            <div id="tab-lists" class="tab-content hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card p-5 space-y-4">
+                    <h3 class="text-sm font-semibold text-red-400 flex items-center gap-2">
+                        <i data-lucide="ban" class="w-4 h-4"></i> <span data-i18n="denylistTitle">Kara Liste (Denylist)</span>
+                    </h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="deny-input" placeholder="örn: tiktok.com" class="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-red-500">
+                        <button onclick="addDomainRule('denylist')" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition" data-i18n="btnBlock">Engelle</button>
+                    </div>
+                    <div id="denylist-items" class="space-y-2 max-h-96 overflow-y-auto text-xs">Yükleniyor...</div>
+                </div>
+
+                <div class="glass-card p-5 space-y-4">
+                    <h3 class="text-sm font-semibold text-emerald-400 flex items-center gap-2">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i> <span data-i18n="allowlistTitle">Beyaz Liste (Allowlist)</span>
+                    </h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="allow-input" placeholder="örn: example.com" class="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-emerald-500">
+                        <button onclick="addDomainRule('allowlist')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition" data-i18n="btnAllow">İzin Ver</button>
+                    </div>
+                    <div id="allowlist-items" class="space-y-2 max-h-96 overflow-y-auto text-xs">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <!-- 4. EBEVEYN KONTROLÜ -->
+            <div id="tab-parental" class="tab-content hidden space-y-6">
+                <div class="glass-card p-5">
+                    <h3 class="text-sm font-semibold mb-1" data-i18n="parentalHeader">Uygulama & Oyun Engelleme (GAMAF / Servisler)</h3>
+                    <p class="text-xs text-zinc-400 mb-4" data-i18n="parentalSub">Tek tıkla popüler sosyal medya, oyun ve platformların DNS erişimini kesin.</p>
+                    <div id="parental-services-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <!-- 5. GİZLİLİK -->
+            <div id="tab-privacy" class="tab-content hidden space-y-6">
+                <div class="glass-card p-5">
+                    <h3 class="text-sm font-semibold mb-1" data-i18n="privacyHeader">Aktif Reklam & İzleyici Engelleyici Listeler</h3>
+                    <p class="text-xs text-zinc-400 mb-4" data-i18n="privacySub">Profilinizde aktif olan DNS filtre listeleri.</p>
+                    <div id="privacy-lists" class="space-y-2 text-xs">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <!-- WireGuard VPN: cihaz başına yerel yapılandırma içe aktarma -->
+            <div id="tab-vpn" class="tab-content hidden space-y-6">
+                <section class="glass-card p-6 space-y-4">
+                    <div class="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-wider text-blue-300 font-semibold" data-i18n="vpnDeviceOnly">Cihaza özel VPN</p>
+                            <h2 class="text-lg font-bold mt-1" data-i18n="addWireguard">WireGuard yapılandırması ekle</h2>
+                            <p class="text-xs text-zinc-400 mt-1 max-w-2xl" data-i18n="vpnPrivacy">Her cihazın .conf dosyası yalnızca bu tarayıcı sekmesinde okunur; sunucuya gönderilmez ve kaydedilmez.</p>
+                        </div>
+                        <span class="text-[10px] px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-200" data-i18n="vpnAppNotice">Bağlantı uygulamada açılır</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="block space-y-1.5">
+                            <span class="text-xs text-zinc-300" data-i18n="deviceName">Cihaz adı</span>
+                            <input id="wg-device-name" type="text" maxlength="40" placeholder="Örn. Benim bilgisayarım" class="w-full px-3 py-2.5 text-xs">
+                        </label>
+                        <label class="block space-y-1.5">
+                            <span class="text-xs text-zinc-300" data-i18n="wireguardFile">WireGuard .conf dosyası</span>
+                            <input id="wg-config-file" type="file" accept=".conf,text/plain" class="w-full px-3 py-2.5 text-xs">
+                        </label>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="wg-import-btn" data-i18n="addConfig" type="button" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-semibold text-white">Cihaza yapılandırma ekle</button>
+                        <a href="https://www.wireguard.com/install/" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 border border-zinc-700 hover:bg-zinc-800 rounded-lg text-xs text-zinc-200" data-i18n="getWireguard">WireGuard uygulamasını edin</a>
+                    </div>
+                    <p id="wg-message" data-i18n="configHint" class="text-xs text-zinc-400" role="status" aria-live="polite">Yapılandırma dosyanı seç. Özel anahtarın ekranda gösterilmez.</p>
+                    <div class="rounded-lg border border-zinc-800 bg-zinc-950/70 p-3 text-[11px] leading-relaxed text-zinc-400">
+                        <strong class="text-zinc-200" data-i18n="security">Güvenlik:</strong> <span data-i18n="securityNotice">Yalnızca kullanma iznin olan yapılandırmayı ekle. Özel anahtarını kimseyle paylaşma.</span>
+                    </div>
+                </section>
+                <section class="glass-card p-5 space-y-3">
+                    <div class="flex items-center justify-between gap-3">
+                        <h3 class="text-sm font-semibold" data-i18n="addedDevices">Eklenen cihazlar</h3>
+                        <span id="wg-device-count" class="text-[10px] text-zinc-500">0 cihaz</span>
+                    </div>
+                    <div id="wg-device-list" data-i18n="noConfigs" class="space-y-2 text-xs text-zinc-400">
+                        Henüz yapılandırma eklenmedi.
+                    </div>
+                </section>
+                <p class="text-[11px] text-zinc-500 leading-relaxed" data-i18n="vpnNote">Not: Web sitesi VPN tünelini başlatamaz veya bağlantının aktif olduğunu doğrulayamaz. Dosyayı indirip WireGuard uygulamasına aktararak bağlantıyı oradan açmalısın.</p>
+            </div>
+
+            <!-- 6. KURULUM & MASAÜSTÜ / TV İNDİRME MERKEZİ -->
+            <div id="tab-setup" class="tab-content hidden space-y-6">
+                <div class="glass-card p-6 space-y-5">
+                    <div>
+                        <h3 class="text-base font-bold text-white" data-i18n="setupHeader">Cihaz Kurulum Bilgileri</h3>
+                        <p class="text-xs text-zinc-400 mt-1" data-i18n="setupSub">Seçili profili cihazlarınıza bağlamak için aşağıdaki uç noktaları kullanın.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2">
+                            <span class="text-[11px] uppercase tracking-wider text-blue-400 font-semibold">DNS-over-HTTPS (DoH)</span>
+                            <div class="flex items-center justify-between bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-800">
+                                <code id="setup-doh" class="text-xs text-zinc-200 select-all">https://dns.nextdns.io/------</code>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2">
+                            <span class="text-[11px] uppercase tracking-wider text-purple-400 font-semibold">DNS-over-TLS / QUIC</span>
+                            <div class="flex items-center justify-between bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-800">
+                                <code id="setup-dot" class="text-xs text-zinc-200 select-all">------.dns.nextdns.io</code>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2">
+                            <span class="text-[11px] uppercase tracking-wider text-emerald-400 font-semibold">IPv6</span>
+                            <div class="bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-800 font-mono text-xs text-zinc-300 space-y-1" id="setup-ipv6">Yükleniyor...</div>
+                        </div>
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2">
+                            <span class="text-[11px] uppercase tracking-wider text-amber-400 font-semibold">Linked IP</span>
+                            <div class="bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-800 text-xs text-zinc-300" id="setup-linked-ip">Yükleniyor...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Masaüstü & TV İndirme Merkezi -->
+                <div class="glass-card p-6 space-y-5 border-blue-500/20">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                            <i data-lucide="monitor-down" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white" data-i18n="desktopHeader">Masaüstü & TV Uygulama İndirme Merkezi</h3>
+                            <p class="text-xs text-zinc-400" data-i18n="desktopSub">Windows için NextDNS PRO panel uygulaması; ayrıca macOS ve Android TV indirmeleri.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold text-zinc-100">NextDNS PRO Windows</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">.msi / .exe</span>
+                                </div>
+                                <p class="text-[11px] text-zinc-400">NextDNS PRO panelini Windows masaüstü uygulaması olarak kullan. 32-bit ve 64-bit kurulum seçenekleri.</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="https://github.com/bthn1/dnspanel/releases/download/windows-latest/NextDNS-PRO-Setup-x64.exe" download="NextDNS-PRO-Setup-x64.exe"
+                                   class="w-full py-2 px-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i> 64-bit
+                                </a>
+                                <a href="https://github.com/bthn1/dnspanel/releases/download/windows-latest/NextDNS-PRO-Setup-ia32.exe" download="NextDNS-PRO-Setup-ia32.exe"
+                                   class="w-full py-2 px-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i> 32-bit
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold text-zinc-100">NextDNS PRO macOS</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-zinc-800 text-zinc-300 border border-zinc-700">Apple Silicon / Intel</span>
+                                </div>
+                                <p class="text-[11px] text-zinc-400">NextDNS PRO panel uygulaması. Apple Silicon ve Intel Mac'ler için universal sürüm.</p>
+                            </div>
+                            <a href="https://github.com/bthn1/dnspanel/releases/download/macos-latest/NextDNS-PRO-macOS-universal.dmg" download="NextDNS-PRO-macOS-universal.dmg"
+                               class="w-full py-2 px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i> macOS DMG indir
+                            </a>
+                        </div>
+
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold text-zinc-100">NextDNS PRO Linux</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Ubuntu / Debian</span>
+                                </div>
+                                <p class="text-[11px] text-zinc-400">Linux masaüstü uygulaması. AppImage ile kurulum yapmadan çalıştırabilir veya .deb paketini yükleyebilirsin. x64.</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="https://github.com/bthn1/dnspanel/releases/download/linux-latest/NextDNS-PRO-Linux-x86_64.AppImage" download="NextDNS-PRO-Linux-x86_64.AppImage"
+                                   class="w-full py-2 px-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i> AppImage
+                                </a>
+                                <a href="https://github.com/bthn1/dnspanel/releases/download/linux-latest/NextDNS-PRO-Linux-amd64.deb" download="NextDNS-PRO-Linux-amd64.deb"
+                                   class="w-full py-2 px-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i> .deb
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold text-zinc-100">NextDNS PRO TV</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Android TV</span>
+                                </div>
+                                <p class="text-[11px] text-zinc-400" data-i18n="apkManagerDesc">NextDNS PRO panelinin sıfırdan yazılmış, yalnızca Android TV kumandasıyla kullanılabilen yerel uygulaması.</p>
+                            </div>
+                            <a href="https://github.com/bthn1/dnspanel/releases/download/tv-latest/NextDNS-PRO-TV.apk" download="NextDNS-PRO-TV.apk" 
+                               class="w-full py-2 px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i> <span data-i18n="downloadApkBtn">Android TV APK indir</span>
+                            </a>
+                        </div>
+                        
+                        <div class="p-4 bg-zinc-950 border border-blue-500/30 rounded-xl flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold text-zinc-100">NextDNS PRO Mobil</span>
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">Android Telefon / Tablet</span>
+                                </div>
+                                <p class="text-[11px] text-zinc-400">NextDNS PRO panelini dokunmatik ekrana uygun mobil uygulama olarak kullan.</p>
+                            </div>
+                            <a href="https://github.com/bthn1/dnspanel/releases/download/mobile-latest/NextDNS-PRO-Mobile.apk" download="NextDNS-PRO-Mobile.apk"
+                               class="w-full py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg flex items-center justify-center gap-2 transition">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i> Android Mobil APK indir
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Tarayıcıdan NextDNS PRO'yu masaüstü uygulaması gibi yükleme rehberi -->
+                <section class="glass-card p-6 space-y-5 browser-install-guide">
+                    <div class="browser-guide-heading">
+                        <div class="browser-guide-icon"><i data-lucide="app-window" class="w-5 h-5"></i></div>
+                        <div>
+                            <p class="browser-guide-eyebrow" data-i18n="desktopAccess">MASAÜSTÜ ERİŞİMİ</p>
+                            <h3 class="text-base font-bold text-white" data-i18n="installWebApp">NextDNS PRO'yu bilgisayarına uygulama olarak yükle</h3>
+                            <p class="text-xs text-zinc-400 mt-1" data-i18n="installWebAppDesc">Siteyi ayrı bir pencerede açabilir ve Başlat menüsüne veya görev çubuğuna sabitleyebilirsin. Kurulum ücretsizdir.</p>
+                        </div>
+                    </div>
+                    <div class="browser-guide-note">
+                        <i data-lucide="info" class="w-4 h-4"></i>
+                        <p data-i18n="installWebAppNote">Bu işlem web panelini uygulama penceresi olarak ekler; ayrı bir EXE indirmez. İnternet bağlantısı gerekir.</p>
+                    </div>
+                    <div class="browser-guide-grid">
+                        <details class="browser-guide-card" open>
+                            <summary><span class="browser-guide-brand chrome">C</span><span><strong>Google Chrome</strong><small>Windows 10 / 11</small></span><i data-lucide="chevron-down"></i></summary>
+                            <ol><li>Chrome'da yayınlanmış NextDNS PRO adresini aç.</li><li>Sağ üstteki <b>⋮</b> menüsüne tıkla.</li><li><b>Yayınla, kaydet ve paylaş</b> bölümünü aç.</li><li><b>Sayfayı uygulama olarak yükle</b> seçeneğine tıkla.</li><li>Uygulama adını kontrol edip <b>Yükle</b> de.</li></ol>
+                            <p class="browser-guide-tip">Adres çubuğunda yükleme simgesi görünüyorsa doğrudan ona da tıklayabilirsin.</p>
+                        </details>
+                        <details class="browser-guide-card">
+                            <summary><span class="browser-guide-brand edge">e</span><span><strong>Microsoft Edge</strong><small>Windows 10 / 11</small></span><i data-lucide="chevron-down"></i></summary>
+                            <ol><li>Edge ile NextDNS PRO sitesini aç.</li><li>Sağ üstteki <b>…</b> menüsüne tıkla.</li><li><b>Diğer araçlar → Uygulamalar</b> bölümüne gir.</li><li><b>Bu siteyi uygulama olarak yükle</b> seçeneğini seç.</li><li><b>Yükle</b> dedikten sonra masaüstü kısayolu veya görev çubuğuna sabitleme seçeneklerini işaretle.</li></ol>
+                        </details>
+                        <details class="browser-guide-card">
+                            <summary><span class="browser-guide-brand brave">B</span><span><strong>Brave</strong><small>Windows</small></span><i data-lucide="chevron-down"></i></summary>
+                            <ol><li>Brave'de NextDNS PRO sitesini aç.</li><li>Sağ üstteki <b>☰</b> menüsüne tıkla.</li><li><b>Diğer araçlar → Kısayol oluştur</b> veya menüde görünüyorsa <b>Uygulamayı yükle</b> seçeneğini aç.</li><li>Seçenek sunulursa <b>Pencere olarak aç</b> kutusunu işaretle ve oluştur/yükle.</li></ol>
+                            <p class="browser-guide-tip">Menüde yükleme seçeneği görünmüyorsa adres çubuğundaki yükleme simgesini kontrol et.</p>
+                        </details>
+                        <details class="browser-guide-card">
+                            <summary><span class="browser-guide-brand opera">O</span><span><strong>Opera / diğer Chromium tarayıcıları</strong><small>Windows</small></span><i data-lucide="chevron-down"></i></summary>
+                            <ol><li>NextDNS PRO sitesini tarayıcıda aç.</li><li>Tarayıcının ana menüsünde <b>Uygulama olarak yükle</b>, <b>Sayfayı yükle</b> veya <b>Kısayol oluştur</b> seçeneğini ara.</li><li>Yükleme seçeneği varsa onayla; kısayol seçeneği varsa pencere olarak açma tercihini etkinleştir.</li></ol>
+                            <p class="browser-guide-tip">Menü adları tarayıcı sürümüne göre değişebilir. Bu seçenekler yoksa Chrome veya Edge kullanabilirsin.</p>
+                        </details>
+                        <details class="browser-guide-card">
+                            <summary><span class="browser-guide-brand firefox">F</span><span><strong>Mozilla Firefox</strong><small>Windows</small></span><i data-lucide="chevron-down"></i></summary>
+                            <ol><li>Firefox masaüstünde PWA'yı doğrudan uygulama olarak yükleme özelliği sunmaz.</li><li>İstersen Windows masaüstüne sağ tıkla ve <b>Yeni → Kısayol</b> seç.</li><li>NextDNS PRO web adresini konum olarak gir, <b>İleri</b> de ve kısayola bir ad ver.</li><li><b>Son</b> ile tamamla. Kısayol siteyi Firefox sekmesinde açar; bağımsız uygulama penceresi oluşturmaz.</li></ol>
+                        </details>
+                        <details class="browser-guide-card">
+                            <summary><span class="browser-guide-brand safari">S</span><span><strong>Safari</strong><small>macOS Sonoma 14 ve sonrası</small></span><i data-lucide="chevron-down"></i></summary>
+                            <ol><li>Safari'de NextDNS PRO sitesini aç.</li><li>Üst menüden <b>Dosya → Dock'a Ekle</b> seçeneğine tıkla.</li><li>Uygulama adını kontrol et ve <b>Ekle</b> de.</li><li>Uygulamayı Dock'tan açabilirsin.</li></ol>
+                            <p class="browser-guide-tip">Bu özellik macOS Sonoma (14) ve daha yeni sürümlerde bulunur.</p>
+                        </details>
+                    </div>
+                    <div class="browser-guide-bottom">
+                        <span><i data-lucide="check-circle-2" class="w-4 h-4"></i> Kurulumdan sonra uygulama Başlat menüsünde veya uygulama listende görünür.</span>
+                        <span>İstediğin zaman tarayıcının uygulama yönetimi bölümünden kaldırabilirsin.</span>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- API hesap yöneticisi --> 
+    <div id="api-profiles-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <section class="glass-card w-full max-w-lg p-5 space-y-4 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="api-profiles-title">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <h2 id="api-profiles-title" class="text-base font-bold">API Hesapları & Hızlı Geçiş</h2>
+                    <p class="text-[11px] text-zinc-400 mt-1">NextDNS hesabına resmî sayfadan giriş yaptıktan sonra API anahtarını ekleyerek hesaplarını bağlayabilir ve aralarında geçiş yapabilirsin.</p>
+                </div>
+                <button id="close-api-profiles-btn" class="px-3 py-1.5 rounded-lg bg-zinc-800 text-xs">Kapat</button>
+            </div>
+            <div id="api-profiles-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
+            <div class="border-t border-zinc-800 pt-4 space-y-3">
+                <h3 class="text-xs font-semibold text-zinc-200">Yeni API hesabı ekle</h3>
+                <input id="api-profile-name" type="text" maxlength="40" placeholder="Hesap adı (ör. Ev / Aile)" class="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs">
+                <input id="api-profile-key" type="password" autocomplete="off" placeholder="NextDNS API anahtarı" class="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs font-mono">
+                <p id="api-profile-error" class="text-xs text-red-400" aria-live="polite"></p>
+                <button id="add-api-profile-btn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-semibold text-white">Anahtarı doğrula ve hesabı ekle</button>
+                <a href="https://my.nextdns.io/account" target="_blank" rel="noopener noreferrer" class="block text-center text-xs text-blue-400">NextDNS hesabına giriş yap / API anahtarını al</a>
+                <p class="text-[10px] leading-relaxed text-zinc-500">NextDNS'in yayımladığı API belgelerinde OAuth ile hesap girişi bulunmuyor; bu nedenle panel NextDNS parolanızı istemez. Bağlantı API anahtarıyla doğrulanır. Anahtarlar localStorage yerine sessionStorage içinde tutulur.</p>
+            </div>
+        </section>
+    </div>
+    <script src="app.js"></script>
+    <script src="pro-features.js"></script>
+    <script src="wireguard.js"></script>
+    <script src="ai-assistant.js"></script>
+</body>
+</html>
+
+
+========================================================================================
+DOSYA: pro-features.js
+========================================================================================
+
+/* NextDNS PRO preferences workspace */
+(() => {
+  const groups=[["İstatistik Görünümü",["Toplam sorgu kartı","Engellenen sorgu kartı","Engelleme oranı kartı","Cihaz özeti","En çok engellenen alan adları","Günlük sorgu özeti","Engelleme eğilimi görünümü","Cihaz başına sorgu özeti","Alan adı yoğunluğu özeti","İstatistik kartlarını sabitle"]],["Trafik ve Loglar",["Canlı trafik tablosu","Engellenen trafik filtresi","İzin verilen trafik filtresi","Alan adına göre arama kısayolu","Cihaza göre arama kısayolu","Protokol görünümü","Saat bilgisi görünümü","Neden bilgisi görünümü","Log tablosu yoğun görünüm","Log arama geçmişi"]],["Alan Adı Araçları",["Alan adı kopyalama aracı","Alan adı biçim kontrolü","Alt alan adı notları","Kişisel alan adı listesi","Favori alan adları","Alan adı etiketleri","Alan adı açıklama notları","Alan adı karşılaştırma listesi","Alan adı arama şablonları","Alan adı dışa aktarma"]],["Profil ve Bağlantı",["Profil kimliği kopyalama","DoH adresi kopyalama","DoT adresi kopyalama","IPv6 adreslerini göster","Linked IP bilgisini göster","Profil bağlantı notları","Cihaz kurulum kontrol listesi","Kurulum komutu kopyalama","Profil hızlı yenileme","Profil bilgisi dışa aktarma"]],["Gizlilik Tercihleri",["Ekranda alan adlarını maskele","Cihaz adlarını maskele","Gizlilik görünümü","Yerel notları temizleme kısayolu","Oturum bilgisi uyarısı","Gizli metinleri seçilebilir yapma","Paylaşım öncesi veri uyarısı","Kişisel etiketleri gizle","Hassas alanları daralt","Gizlilik kontrol özeti"]],["Arayüz ve Erişilebilirlik",["Kompakt arayüz","Büyük yazı","Yüksek kontrast","Hareketleri azalt","Kartları tek sütun göster","Daha geniş içerik alanı","Klavye kısayolları","Odak çerçevesi","Arayüz yoğunluğu tercihi","Arayüz tercihlerini hatırla"]],["Bildirim ve İzleme",["Yüksek engelleme oranı uyarısı","Çok sorgu uyarısı","Boş log uyarısı","Bağlantı durumu göstergesi","Yenileme hatası uyarısı","Yerel hatırlatıcılar","İstatistik yenileme hatırlatıcısı","Günlük kontrol işareti","Bildirim tercihlerini sakla","Uyarı geçmişi"]],["Yerel Çalışma Alanı",["Kişisel not defteri","Hızlı not ekleme","Notları dışa aktarma","Notları içe aktarma","Favori paneller","Özel panel sıralaması","Kişisel etiket defteri","Görev kontrol listesi","Son kullanılan araçlar","Çalışma alanı yedeği"]],["Veri ve Dışa Aktarma",["İstatistikleri JSON dışa aktar","Görünen logları CSV dışa aktar","Görünen logları JSON dışa aktar","Profil kurulum bilgisi dışa aktar","Tercihleri JSON dışa aktar","Tercihleri içe aktar","Yerel ayar yedeği","Yedekten geri yükleme","Dışa aktarma geçmişi","Veri temizleme aracı"]],["Gelişmiş Kontroller",["Otomatik yenileme tercihi","Yenileme aralığı tercihi","Başlangıç paneli tercihi","Son açık sekmeyi hatırla","Arama filtrelerini hatırla","Tablo sıralama tercihi","Kart görünürlüğü tercihi","Hızlı işlem onayı","Geliştirici bilgi paneli","Özellik merkezi arama"]]];
+  const features=[{"id":"f1","group":"İstatistik Görünümü","name":"Toplam sorgu kartı"},{"id":"f2","group":"İstatistik Görünümü","name":"Engellenen sorgu kartı"},{"id":"f3","group":"İstatistik Görünümü","name":"Engelleme oranı kartı"},{"id":"f4","group":"İstatistik Görünümü","name":"Cihaz özeti"},{"id":"f5","group":"İstatistik Görünümü","name":"En çok engellenen alan adları"},{"id":"f6","group":"İstatistik Görünümü","name":"Günlük sorgu özeti"},{"id":"f7","group":"İstatistik Görünümü","name":"Engelleme eğilimi görünümü"},{"id":"f8","group":"İstatistik Görünümü","name":"Cihaz başına sorgu özeti"},{"id":"f9","group":"İstatistik Görünümü","name":"Alan adı yoğunluğu özeti"},{"id":"f10","group":"İstatistik Görünümü","name":"İstatistik kartlarını sabitle"},{"id":"f11","group":"Trafik ve Loglar","name":"Canlı trafik tablosu"},{"id":"f12","group":"Trafik ve Loglar","name":"Engellenen trafik filtresi"},{"id":"f13","group":"Trafik ve Loglar","name":"İzin verilen trafik filtresi"},{"id":"f14","group":"Trafik ve Loglar","name":"Alan adına göre arama kısayolu"},{"id":"f15","group":"Trafik ve Loglar","name":"Cihaza göre arama kısayolu"},{"id":"f16","group":"Trafik ve Loglar","name":"Protokol görünümü"},{"id":"f17","group":"Trafik ve Loglar","name":"Saat bilgisi görünümü"},{"id":"f18","group":"Trafik ve Loglar","name":"Neden bilgisi görünümü"},{"id":"f19","group":"Trafik ve Loglar","name":"Log tablosu yoğun görünüm"},{"id":"f20","group":"Trafik ve Loglar","name":"Log arama geçmişi"},{"id":"f21","group":"Alan Adı Araçları","name":"Alan adı kopyalama aracı"},{"id":"f22","group":"Alan Adı Araçları","name":"Alan adı biçim kontrolü"},{"id":"f23","group":"Alan Adı Araçları","name":"Alt alan adı notları"},{"id":"f24","group":"Alan Adı Araçları","name":"Kişisel alan adı listesi"},{"id":"f25","group":"Alan Adı Araçları","name":"Favori alan adları"},{"id":"f26","group":"Alan Adı Araçları","name":"Alan adı etiketleri"},{"id":"f27","group":"Alan Adı Araçları","name":"Alan adı açıklama notları"},{"id":"f28","group":"Alan Adı Araçları","name":"Alan adı karşılaştırma listesi"},{"id":"f29","group":"Alan Adı Araçları","name":"Alan adı arama şablonları"},{"id":"f30","group":"Alan Adı Araçları","name":"Alan adı dışa aktarma"},{"id":"f31","group":"Profil ve Bağlantı","name":"Profil kimliği kopyalama"},{"id":"f32","group":"Profil ve Bağlantı","name":"DoH adresi kopyalama"},{"id":"f33","group":"Profil ve Bağlantı","name":"DoT adresi kopyalama"},{"id":"f34","group":"Profil ve Bağlantı","name":"IPv6 adreslerini göster"},{"id":"f35","group":"Profil ve Bağlantı","name":"Linked IP bilgisini göster"},{"id":"f36","group":"Profil ve Bağlantı","name":"Profil bağlantı notları"},{"id":"f37","group":"Profil ve Bağlantı","name":"Cihaz kurulum kontrol listesi"},{"id":"f38","group":"Profil ve Bağlantı","name":"Kurulum komutu kopyalama"},{"id":"f39","group":"Profil ve Bağlantı","name":"Profil hızlı yenileme"},{"id":"f40","group":"Profil ve Bağlantı","name":"Profil bilgisi dışa aktarma"},{"id":"f41","group":"Gizlilik Tercihleri","name":"Ekranda alan adlarını maskele"},{"id":"f42","group":"Gizlilik Tercihleri","name":"Cihaz adlarını maskele"},{"id":"f43","group":"Gizlilik Tercihleri","name":"Gizlilik görünümü"},{"id":"f44","group":"Gizlilik Tercihleri","name":"Yerel notları temizleme kısayolu"},{"id":"f45","group":"Gizlilik Tercihleri","name":"Oturum bilgisi uyarısı"},{"id":"f46","group":"Gizlilik Tercihleri","name":"Gizli metinleri seçilebilir yapma"},{"id":"f47","group":"Gizlilik Tercihleri","name":"Paylaşım öncesi veri uyarısı"},{"id":"f48","group":"Gizlilik Tercihleri","name":"Kişisel etiketleri gizle"},{"id":"f49","group":"Gizlilik Tercihleri","name":"Hassas alanları daralt"},{"id":"f50","group":"Gizlilik Tercihleri","name":"Gizlilik kontrol özeti"},{"id":"f51","group":"Arayüz ve Erişilebilirlik","name":"Kompakt arayüz"},{"id":"f52","group":"Arayüz ve Erişilebilirlik","name":"Büyük yazı"},{"id":"f53","group":"Arayüz ve Erişilebilirlik","name":"Yüksek kontrast"},{"id":"f54","group":"Arayüz ve Erişilebilirlik","name":"Hareketleri azalt"},{"id":"f55","group":"Arayüz ve Erişilebilirlik","name":"Kartları tek sütun göster"},{"id":"f56","group":"Arayüz ve Erişilebilirlik","name":"Daha geniş içerik alanı"},{"id":"f57","group":"Arayüz ve Erişilebilirlik","name":"Klavye kısayolları"},{"id":"f58","group":"Arayüz ve Erişilebilirlik","name":"Odak çerçevesi"},{"id":"f59","group":"Arayüz ve Erişilebilirlik","name":"Arayüz yoğunluğu tercihi"},{"id":"f60","group":"Arayüz ve Erişilebilirlik","name":"Arayüz tercihlerini hatırla"},{"id":"f61","group":"Bildirim ve İzleme","name":"Yüksek engelleme oranı uyarısı"},{"id":"f62","group":"Bildirim ve İzleme","name":"Çok sorgu uyarısı"},{"id":"f63","group":"Bildirim ve İzleme","name":"Boş log uyarısı"},{"id":"f64","group":"Bildirim ve İzleme","name":"Bağlantı durumu göstergesi"},{"id":"f65","group":"Bildirim ve İzleme","name":"Yenileme hatası uyarısı"},{"id":"f66","group":"Bildirim ve İzleme","name":"Yerel hatırlatıcılar"},{"id":"f67","group":"Bildirim ve İzleme","name":"İstatistik yenileme hatırlatıcısı"},{"id":"f68","group":"Bildirim ve İzleme","name":"Günlük kontrol işareti"},{"id":"f69","group":"Bildirim ve İzleme","name":"Bildirim tercihlerini sakla"},{"id":"f70","group":"Bildirim ve İzleme","name":"Uyarı geçmişi"},{"id":"f71","group":"Yerel Çalışma Alanı","name":"Kişisel not defteri"},{"id":"f72","group":"Yerel Çalışma Alanı","name":"Hızlı not ekleme"},{"id":"f73","group":"Yerel Çalışma Alanı","name":"Notları dışa aktarma"},{"id":"f74","group":"Yerel Çalışma Alanı","name":"Notları içe aktarma"},{"id":"f75","group":"Yerel Çalışma Alanı","name":"Favori paneller"},{"id":"f76","group":"Yerel Çalışma Alanı","name":"Özel panel sıralaması"},{"id":"f77","group":"Yerel Çalışma Alanı","name":"Kişisel etiket defteri"},{"id":"f78","group":"Yerel Çalışma Alanı","name":"Görev kontrol listesi"},{"id":"f79","group":"Yerel Çalışma Alanı","name":"Son kullanılan araçlar"},{"id":"f80","group":"Yerel Çalışma Alanı","name":"Çalışma alanı yedeği"},{"id":"f81","group":"Veri ve Dışa Aktarma","name":"İstatistikleri JSON dışa aktar"},{"id":"f82","group":"Veri ve Dışa Aktarma","name":"Görünen logları CSV dışa aktar"},{"id":"f83","group":"Veri ve Dışa Aktarma","name":"Görünen logları JSON dışa aktar"},{"id":"f84","group":"Veri ve Dışa Aktarma","name":"Profil kurulum bilgisi dışa aktar"},{"id":"f85","group":"Veri ve Dışa Aktarma","name":"Tercihleri JSON dışa aktar"},{"id":"f86","group":"Veri ve Dışa Aktarma","name":"Tercihleri içe aktar"},{"id":"f87","group":"Veri ve Dışa Aktarma","name":"Yerel ayar yedeği"},{"id":"f88","group":"Veri ve Dışa Aktarma","name":"Yedekten geri yükleme"},{"id":"f89","group":"Veri ve Dışa Aktarma","name":"Dışa aktarma geçmişi"},{"id":"f90","group":"Veri ve Dışa Aktarma","name":"Veri temizleme aracı"},{"id":"f91","group":"Gelişmiş Kontroller","name":"Otomatik yenileme tercihi"},{"id":"f92","group":"Gelişmiş Kontroller","name":"Yenileme aralığı tercihi"},{"id":"f93","group":"Gelişmiş Kontroller","name":"Başlangıç paneli tercihi"},{"id":"f94","group":"Gelişmiş Kontroller","name":"Son açık sekmeyi hatırla"},{"id":"f95","group":"Gelişmiş Kontroller","name":"Arama filtrelerini hatırla"},{"id":"f96","group":"Gelişmiş Kontroller","name":"Tablo sıralama tercihi"},{"id":"f97","group":"Gelişmiş Kontroller","name":"Kart görünürlüğü tercihi"},{"id":"f98","group":"Gelişmiş Kontroller","name":"Hızlı işlem onayı"},{"id":"f99","group":"Gelişmiş Kontroller","name":"Geliştirici bilgi paneli"},{"id":"f100","group":"Gelişmiş Kontroller","name":"Özellik merkezi arama"}];
+  const STORE='nextdns_pro_feature_flags_v1';
+  let flags={}; try { flags=JSON.parse(localStorage.getItem(STORE)||'{}'); } catch {}
+  const save=()=>localStorage.setItem(STORE,JSON.stringify(flags));
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const download=(name,data,type='application/json')=>{
+    const url=URL.createObjectURL(new Blob([data],{type}));
+    const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1200);
+  };
+  function init(){
+    const nav=document.getElementById('nav-tabs'),main=document.querySelector('#dashboard-screen main');
+    if(!nav||!main||document.getElementById('tab-pro-features'))return;
+    const tab=document.createElement('button');
+    tab.className='tab-btn';tab.dataset.tab='pro-features';
+    tab.innerHTML='<i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i><span>Tercihler</span>';
+    nav.appendChild(tab);
+    const panel=document.createElement('section');
+    panel.id='tab-pro-features';panel.className='tab-content hidden';
+    panel.innerHTML=`
+      <div class="prefs-heading">
+        <div class="prefs-heading-copy">
+          <div class="prefs-kicker"><span class="prefs-kicker-dot"></span> ÇALIŞMA ALANI <span class="prefs-kicker-sep">/</span> KİŞİSELLEŞTİRME</div>
+          <h1>Panel tercihleri</h1>
+          <p>Görünümünü ve çalışma alanını kendi kullanımına göre düzenle.</p>
+        </div>
+        <div class="prefs-summary"><span class="prefs-summary-label">Seçili tercihler</span><strong id="prefs-active-count">0 <small>/ 100</small></strong><span class="prefs-summary-foot">Bu tarayıcıda saklanır</span></div>
+      </div>
+      <div class="prefs-toolbar">
+        <label class="prefs-search"><i data-lucide="search"></i><input id="prefs-search" type="search" placeholder="Tercihlerde ara..." autocomplete="off"><kbd>⌘ K</kbd></label>
+        <div class="prefs-toolbar-actions">
+          <button id="prefs-export" class="prefs-button"><i data-lucide="download"></i> Yedeği indir</button>
+          <button id="prefs-reset" class="prefs-button prefs-button-quiet">Sıfırla</button>
+        </div>
+      </div>
+      <div class="prefs-layout">
+        <aside class="prefs-sidebar">
+          <div class="prefs-sidebar-label">KATEGORİLER</div>
+          <div id="prefs-categories" class="prefs-category-list"></div>
+          <div class="prefs-sidebar-note"><i data-lucide="info"></i><span>Buradaki tercihler yalnızca bu tarayıcıda tutulur. NextDNS profil ayarlarını değiştirmez.</span></div>
+        </aside>
+        <div class="prefs-content">
+          <div class="prefs-content-top"><div><span class="prefs-overline">TERCİH GRUBU</span><h2 id="prefs-group-title">Tüm tercihler</h2></div><span id="prefs-visible-count" class="prefs-visible-count">100 öğe</span></div>
+          <div id="prefs-items" class="prefs-items"></div>
+          <div id="prefs-empty" class="prefs-empty hidden"><i data-lucide="search-x"></i><strong>Sonuç bulunamadı</strong><span>Başka bir kelime deneyebilirsin.</span></div>
+          <div class="prefs-footer"><span id="prefs-status">Değişiklikler otomatik kaydedilir.</span><span>LOCAL SETTINGS <span class="prefs-footer-dot"></span> V1.0</span></div>
+        </div>
+      </div>`;
+    main.appendChild(panel);
+    let activeGroup='Tümü',query='';
+    const categories=document.getElementById('prefs-categories');
+    const items=document.getElementById('prefs-items');
+    const render=()=>{
+      const chosen=features.filter(f=>flags[f.id]).length;
+      document.getElementById('prefs-active-count').innerHTML=chosen+' <small>/ 100</small>';
+      categories.innerHTML='<button class="prefs-category '+(activeGroup==='Tümü'?'selected':'')+'" data-group="Tümü"><span class="prefs-category-icon"><i data-lucide="layers"></i></span><span class="prefs-category-name">Tüm tercihler</span><span class="prefs-category-count">100</span></button>'+groups.map(g=>{
+        const n=features.filter(f=>f.group===g[0]).length;
+        const active=features.filter(f=>f.group===g[0]&&flags[f.id]).length;
+        return '<button class="prefs-category '+(activeGroup===g[0]?'selected':'')+'" data-group="'+esc(g[0])+'"><span class="prefs-category-icon"><i data-lucide="'+(['chart-no-axes-combined','activity','globe','network','shield-check','sliders-horizontal','bell','notebook-tabs','database','settings'][groups.findIndex(x=>x[0]===g[0])]||'circle')+'"></i></span><span class="prefs-category-name">'+esc(g[0])+'</span><span class="prefs-category-count">'+active+'/'+n+'</span></button>';
+      }).join('');
+      const visible=features.filter(f=>(activeGroup==='Tümü'||f.group===activeGroup)&&(!query||(f.name+' '+f.group).toLocaleLowerCase('tr').includes(query)));
+      document.getElementById('prefs-group-title').textContent=activeGroup==='Tümü'?'Tüm tercihler':activeGroup;
+      document.getElementById('prefs-visible-count').textContent=visible.length+' öğe';
+      items.innerHTML=visible.map(f=>'<label class="prefs-item"><span class="prefs-item-copy"><strong>'+esc(f.name)+'</strong><small>'+esc(f.group)+'</small></span><span class="prefs-switch"><input type="checkbox" data-pref="'+f.id+'" '+(flags[f.id]?'checked':'')+'><span class="prefs-switch-track"></span></span></label>').join('');
+      document.getElementById('prefs-empty').classList.toggle('hidden',visible.length!==0);
+      items.classList.toggle('hidden',visible.length===0);
+      if(window.lucide)window.lucide.createIcons();
+    };
+    categories.addEventListener('click',e=>{const b=e.target.closest('[data-group]');if(!b)return;activeGroup=b.dataset.group;render();});
+    items.addEventListener('change',e=>{
+      const id=e.target.dataset.pref;if(!id)return;
+      flags[id]=e.target.checked;save();render();
+      document.getElementById('prefs-status').textContent='Kaydedildi · '+features.find(f=>f.id===id).name;
+    });
+    document.getElementById('prefs-search').addEventListener('input',e=>{query=e.target.value.trim().toLocaleLowerCase('tr');activeGroup='Tümü';render();});
+    document.getElementById('prefs-export').addEventListener('click',()=>download('nextdns-pro-tercihler.json',JSON.stringify({version:1,flags},null,2)));
+    document.getElementById('prefs-reset').addEventListener('click',()=>{if(!confirm('Tüm seçili tercihler sıfırlansın mı?'))return;flags={};save();render();document.getElementById('prefs-status').textContent='Tercihler sıfırlandı.';});
+    render();if(window.lucide)window.lucide.createIcons();
+    document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'&&!panel.classList.contains('hidden')){e.preventDefault();document.getElementById('prefs-search').focus();}});
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    init();
+    const dashboard=document.getElementById('dashboard-screen');
+    if(dashboard)new MutationObserver(()=>{if(!document.getElementById('tab-pro-features'))init();}).observe(dashboard,{attributes:true,attributeFilter:['class']});
+  });
+  document.addEventListener('click',e=>{
+    const btn=e.target.closest('.tab-btn[data-tab="pro-features"]');if(!btn)return;
+    document.querySelectorAll('.tab-btn').forEach(b=>{b.classList.remove('active','border-blue-500','text-blue-400');b.classList.add('border-transparent','text-zinc-400');});
+    btn.classList.add('active','border-blue-500','text-blue-400');btn.classList.remove('border-transparent','text-zinc-400');
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.add('hidden'));
+    document.getElementById('tab-pro-features')?.classList.remove('hidden');
+    if(window.lucide)window.lucide.createIcons();
+  });
+})();
+
+
+========================================================================================
+DOSYA: style.css
+========================================================================================
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+
+:root {
+  color-scheme: dark;
+  --page: #0b1018;
+  --surface: #111925;
+  --surface-raised: #151f2d;
+  --surface-soft: #0e1722;
+  --line: #243143;
+  --line-strong: #34445a;
+  --ink: #edf2f8;
+  --muted: #91a0b3;
+  --subtle: #64748b;
+  --accent: #78a9e8;
+  --accent-strong: #4f8edb;
+  --good: #58b89b;
+  --danger: #d97878;
+  --radius: 12px;
+  --shadow: 0 12px 34px rgba(0,0,0,.18);
+}
+
+* { box-sizing: border-box; }
+html { background: var(--page); scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  background: var(--page);
+  font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  letter-spacing: -.01em;
+  overflow-x: hidden;
+}
+h1,h2,h3,h4,.font-bold,.font-semibold { font-family: 'Manrope','DM Sans',sans-serif; letter-spacing: -.025em; }
+::selection { background: rgba(120,169,232,.25); color: #fff; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0b1018; }
+::-webkit-scrollbar-thumb { background: #2b394b; border: 2px solid #0b1018; border-radius: 20px; }
+::-webkit-scrollbar-thumb:hover { background: #43566e; }
+
+/* Surfaces: quiet borders, no glass blur or glowing gradients. */
+.glass-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+#login-screen { background: var(--page); }
+#login-screen > .glass-card {
+  max-width: 440px;
+  padding: 34px;
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow);
+}
+#login-screen h1 { font-size: 22px; font-weight: 800; }
+#login-screen input { min-height: 44px; }
+#login-screen a { text-decoration: none; }
+#dashboard-screen > header {
+  background: rgba(11,16,24,.96) !important;
+  border-color: var(--line) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+#dashboard-screen > header > div { max-width: 1440px; min-height: 46px; }
+#dashboard-screen > nav {
+  background: #0e1621 !important;
+  border-color: var(--line) !important;
+}
+#nav-tabs { max-width: 1440px; gap: 5px; }
+.tab-btn {
+  min-height: 46px;
+  padding: 0 15px !important;
+  border-bottom-width: 2px !important;
+  border-radius: 7px 7px 0 0;
+  font-size: 12px !important;
+  transition: color .16s ease, background .16s ease, border-color .16s ease;
+}
+.tab-btn:hover { background: rgba(255,255,255,.035); color: var(--ink) !important; }
+.tab-btn.active { color: #a9c9f2 !important; border-color: var(--accent-strong) !important; background: rgba(120,169,232,.07); }
+#dashboard-screen main { max-width: 1440px; padding: 30px 28px 48px; }
+.tab-content { animation: panelIn .18s ease-out both; }
+@keyframes panelIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Dashboard hierarchy and data cards. */
+#tab-overview > .grid:first-child { gap: 14px; }
+#tab-overview > .grid:first-child .glass-card {
+  min-height: 126px;
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+}
+#tab-overview > .grid:first-child .glass-card > div:first-child { color: var(--muted) !important; font-size: 12px; }
+#stat-total,#stat-blocked,#stat-ratio { margin-top: 10px; font-family: 'Manrope',sans-serif; font-size: clamp(27px,3vw,34px); letter-spacing: -.045em; }
+#tab-overview > .grid:nth-child(2) { gap: 14px; }
+#tab-overview > .grid:nth-child(2) .glass-card { padding: 20px 22px; min-height: 190px; }
+#tab-overview h3 { font-size: 13px; font-weight: 700; color: #dce5ef; }
+#devices-list > div,#top-blocked-list > div {
+  background: var(--surface-soft) !important;
+  border: 1px solid #202d3d !important;
+  border-radius: 8px !important;
+  padding: 11px 12px !important;
+}
+#tab-logs .glass-card,#tab-lists .glass-card,#tab-parental .glass-card,#tab-privacy .glass-card,#tab-setup .glass-card { border-radius: 11px; }
+input,select,textarea {
+  color: var(--ink);
+  background-color: #0c1420;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  outline: none;
+  box-shadow: none;
+  transition: border-color .15s ease, background .15s ease;
+}
+input::placeholder,textarea::placeholder { color: #66768b; }
+input:focus,select:focus,textarea:focus {
+  border-color: #5c8fc9 !important;
+  box-shadow: 0 0 0 3px rgba(92,143,201,.12) !important;
+}
+button { font-family: inherit; cursor: pointer; }
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px;
+}
+button.bg-blue-600,button.bg-blue-700 { background: #356da9 !important; }
+button.bg-blue-600:hover,button.bg-blue-700:hover { background: #427fbf !important; }
+button.bg-emerald-700 { background: #236d5a !important; }
+button.bg-red-600 { background: #9d4448 !important; }
+#logs-table-body tr { border-bottom: 1px solid #1e2a39; }
+#logs-table-body tr:hover { background: rgba(255,255,255,.025) !important; }
+table { border-collapse: separate; border-spacing: 0; }
+thead { background: #101a27; }
+thead th { color: #9aabc0 !important; font-weight: 600; letter-spacing: .02em; }
+#profile-select { max-width: min(320px,38vw); }
+
+/* The 100-feature center is a settings page, not a promotional landing page. */
+#tab-pro-features > .glass-card { padding: 24px; }
+#tab-pro-features h2 { font-size: 19px; color: #e9f0f8; }
+#tab-pro-features p { max-width: 720px; line-height: 1.65; }
+#pro-feature-grid label {
+  min-height: 70px;
+  padding: 13px 14px;
+  border: 1px solid #263548 !important;
+  border-radius: 9px !important;
+  background: #101925 !important;
+  transition: border-color .15s ease, background .15s ease;
+}
+#pro-feature-grid label:hover { border-color: #4d6e94 !important; background: #142033 !important; }
+#pro-feature-grid label span:first-child { color: #dce5ef; }
+#pro-feature-grid label span:nth-child(2) { color: #71839a; }
+#pro-feature-grid input[type=checkbox] { accent-color: #6c9fd9; width: 16px; height: 16px; }
+#pro-feature-search,#pro-feature-group { min-height: 40px; }
+#pro-feature-status { color: #8092a8 !important; padding-top: 8px; border-top: 1px solid #202d3d; }
+
+.tv-focused {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(120,169,232,.14) !important;
+  transform: none !important;
+  background-color: var(--surface-raised) !important;
+}
+
+@media (min-width: 1200px) {
+  #tab-overview > .grid:first-child .glass-card { padding: 22px 24px; }
+}
+@media (max-width: 760px) {
+  #dashboard-screen > header { padding: 12px 15px !important; }
+  #dashboard-screen > header > div { align-items: flex-start; }
+  #dashboard-screen > nav { padding: 0 12px !important; }
+  #nav-tabs { width: max-content; min-width: 100%; }
+  .tab-btn { padding: 0 12px !important; }
+  #dashboard-screen main { padding: 20px 14px 34px; }
+  #login-screen > .glass-card { padding: 25px 21px; }
+  #tab-pro-features > .glass-card { padding: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+
+/* Refined preferences workspace — restrained, editorial product UI */
+#tab-pro-features { color: var(--ink); }
+.prefs-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:28px; padding: 12px 2px 26px; border-bottom:1px solid var(--line); }
+.prefs-kicker,.prefs-overline { display:flex; align-items:center; gap:8px; color:#8091a6; font-size:9px; font-weight:700; letter-spacing:.14em; }
+.prefs-kicker-dot { width:6px;height:6px;border-radius:50%;background:#6e9ed0; }
+.prefs-kicker-sep { color:#3e4d60; }
+.prefs-heading h1 { margin:13px 0 4px; font-size:clamp(26px,3vw,34px); line-height:1.2; font-weight:700; letter-spacing:-.045em; color:#edf2f7; }
+.prefs-heading-copy p { margin:0; color:#8493a6; font-size:12px; }
+.prefs-summary { min-width:158px; padding:13px 16px; border:1px solid #29384a; border-radius:9px; background:#111a26; }
+.prefs-summary-label,.prefs-summary-foot { display:block; color:#8392a5; font-size:10px; }
+.prefs-summary strong { display:block; margin:2px 0; font:700 24px 'Manrope',sans-serif; letter-spacing:-.04em; color:#e8eff7; }
+.prefs-summary strong small { font:500 12px 'DM Sans',sans-serif; color:#718197; }
+.prefs-toolbar { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:19px 0; }
+.prefs-search { display:flex; align-items:center; gap:10px; width:min(430px,100%); height:40px; padding:0 11px; border:1px solid #29384a; border-radius:8px; background:#101925; }
+.prefs-search svg { width:15px;height:15px;color:#77889e; }
+.prefs-search input { flex:1; min-width:0; border:0!important; outline:0!important; box-shadow:none!important; background:transparent!important; font-size:12px; }
+.prefs-search kbd { padding:2px 5px; border:1px solid #344357; border-radius:4px; color:#8291a4; font-size:9px; }
+.prefs-toolbar-actions { display:flex; gap:8px; }
+.prefs-button { display:flex;align-items:center;gap:7px;height:36px;padding:0 12px;border:1px solid #35465b;border-radius:7px;background:#182536;color:#d5dfeb;font-size:11px;font-weight:600; }
+.prefs-button:hover { background:#203147; }
+.prefs-button svg { width:13px;height:13px;color:#9eb9d9; }
+.prefs-button-quiet { background:transparent;color:#93a1b3;border-color:#29384a; }
+.prefs-layout { display:grid;grid-template-columns:228px minmax(0,1fr);gap:17px;align-items:start; }
+.prefs-sidebar,.prefs-content { border:1px solid #263548;border-radius:10px;background:#101925; }
+.prefs-sidebar { padding:13px 9px 10px; }
+.prefs-sidebar-label { padding:5px 9px 11px;color:#718197;font-size:9px;font-weight:700;letter-spacing:.13em; }
+.prefs-category-list { display:flex;flex-direction:column;gap:3px; }
+.prefs-category { display:flex;align-items:center;gap:9px;width:100%;min-height:38px;padding:0 9px;border:1px solid transparent;border-radius:6px;background:transparent;color:#a7b4c4;text-align:left; }
+.prefs-category:hover { background:#172333;color:#e2eaf3; }
+.prefs-category.selected { background:#1a2a3e;border-color:#2b4563;color:#dce9f8; }
+.prefs-category-icon { display:grid;place-items:center;width:22px;height:22px;color:#8098b5; }
+.prefs-category-icon svg { width:14px;height:14px; }
+.prefs-category-name { flex:1;font-size:10px;font-weight:500; }
+.prefs-category-count { color:#718197;font:10px 'DM Sans',sans-serif; }
+.prefs-sidebar-note { display:flex;gap:8px;margin:14px 4px 2px;padding:11px 8px;border-top:1px solid #263548;color:#718197;font-size:9px;line-height:1.6; }
+.prefs-sidebar-note svg { flex:none;width:13px;height:13px;margin-top:1px;color:#8098b5; }
+.prefs-content { min-height:490px;padding:18px 19px 13px; }
+.prefs-content-top { display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:2px 1px 14px;border-bottom:1px solid #263548; }
+.prefs-overline { font-size:8px; }
+.prefs-content-top h2 { margin:4px 0 0;font-size:16px;font-weight:700;letter-spacing:-.025em;color:#e4ebf3; }
+.prefs-visible-count { color:#8291a4;font-size:10px; }
+.prefs-items { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:22px; }
+.prefs-item { display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:58px;padding:8px 3px;border-bottom:1px solid #202d3d;cursor:pointer; }
+.prefs-item-copy { display:flex;flex-direction:column;gap:3px;min-width:0; }
+.prefs-item-copy strong { color:#d2dce8;font-size:10px;font-weight:600;line-height:1.35; }
+.prefs-item-copy small { color:#718197;font-size:9px; }
+.prefs-switch { position:relative;flex:none;width:30px;height:17px; }
+.prefs-switch input { position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:2; }
+.prefs-switch-track { position:absolute;inset:0;border:1px solid #435267;border-radius:20px;background:#202b39;transition:background .16s,border-color .16s; }
+.prefs-switch-track:after { content:"";position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;background:#9aa8b9;transition:transform .16s,background .16s; }
+.prefs-switch input:checked + .prefs-switch-track { background:#355f88;border-color:#527eaa; }
+.prefs-switch input:checked + .prefs-switch-track:after { transform:translateX(13px);background:#e8f2fc; }
+.prefs-switch input:focus-visible + .prefs-switch-track { outline:2px solid #8db7e4;outline-offset:3px; }
+.prefs-empty { display:flex;flex-direction:column;align-items:center;gap:7px;padding:70px 15px;color:#8291a4;text-align:center; }
+.prefs-empty svg { width:23px;height:23px;margin-bottom:5px; }
+.prefs-empty strong { color:#d4deea;font-size:12px; }
+.prefs-empty span { font-size:10px; }
+.prefs-footer { display:flex;justify-content:space-between;gap:12px;margin-top:15px;padding-top:11px;border-top:1px solid #263548;color:#7f8fa4;font-size:9px; }
+.prefs-footer > span:last-child { display:flex;align-items:center;gap:7px;letter-spacing:.1em;font-size:8px; }
+.prefs-footer-dot { width:5px;height:5px;border-radius:50%;background:#5b9b83; }
+@media(max-width:850px){.prefs-layout{grid-template-columns:1fr}.prefs-category-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.prefs-sidebar-note{margin-top:8px}.prefs-content{min-height:0}}
+@media(max-width:560px){.prefs-heading{align-items:flex-start;flex-direction:column}.prefs-summary{width:100%}.prefs-toolbar{align-items:stretch;flex-direction:column}.prefs-search{width:100%}.prefs-toolbar-actions>*{flex:1;justify-content:center}.prefs-items{grid-template-columns:1fr}.prefs-category-list{grid-template-columns:1fr 1fr}.prefs-content{padding:14px 12px}.prefs-footer{flex-direction:column}}
+
+
+/* Browser installation guide */
+.browser-install-guide { border-color:#29394c; }
+.browser-guide-heading { display:flex;align-items:center;gap:13px; }
+.browser-guide-icon { display:grid;place-items:center;flex:none;width:42px;height:42px;border:1px solid #344a63;border-radius:10px;background:#152438;color:#a9c9ed; }
+.browser-guide-eyebrow { margin:0 0 3px;color:#7e9cbd;font-size:9px;font-weight:700;letter-spacing:.14em; }
+.browser-guide-heading h3 { margin:0;font-size:16px; }
+.browser-guide-note { display:flex;align-items:flex-start;gap:9px;padding:12px 13px;border:1px solid #31445a;border-radius:8px;background:#111f2e;color:#a7b8cb; }
+.browser-guide-note svg { flex:none;margin-top:1px;color:#8eb5df; }
+.browser-guide-note p { margin:0;font-size:11px;line-height:1.6; }
+.browser-guide-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; }
+.browser-guide-card { min-width:0;border:1px solid #29384a;border-radius:9px;background:#101925;overflow:hidden; }
+.browser-guide-card[open] { border-color:#3a506b; }
+.browser-guide-card summary { display:flex;align-items:center;gap:10px;min-height:62px;padding:10px 13px;cursor:pointer;list-style:none; }
+.browser-guide-card summary::-webkit-details-marker { display:none; }
+.browser-guide-card summary > span:nth-child(2) { display:flex;flex:1;flex-direction:column;gap:2px; }
+.browser-guide-card summary strong { color:#e0e8f1;font-size:11px;font-weight:650; }
+.browser-guide-card summary small { color:#8292a7;font-size:9px; }
+.browser-guide-card summary > svg { width:14px;height:14px;color:#8292a7;transition:transform .15s; }
+.browser-guide-card[open] summary > svg { transform:rotate(180deg); }
+.browser-guide-brand { display:grid;place-items:center;width:29px;height:29px;border-radius:7px;font:700 14px 'Manrope',sans-serif; }
+.browser-guide-brand.chrome { background:#253b35;color:#8fd0a7; }
+.browser-guide-brand.edge { background:#1c3943;color:#82c7dc; }
+.browser-guide-brand.brave { background:#422e28;color:#e9a17c; }
+.browser-guide-brand.opera { background:#422b31;color:#e58c9b; }
+.browser-guide-brand.firefox { background:#453426;color:#eab27c; }
+.browser-guide-brand.safari { background:#26374b;color:#9dc6f0; }
+.browser-guide-card ol { margin:0;padding:0 17px 4px 37px;color:#aab8c8;font-size:10px;line-height:1.75; }
+.browser-guide-card li { padding-left:2px;margin:3px 0; }
+.browser-guide-card b { color:#e1e9f2;font-weight:650; }
+.browser-guide-tip { margin:4px 13px 13px;padding:8px 9px;border-left:2px solid #567ba4;background:#152235;color:#91a7c0;font-size:9px;line-height:1.55; }
+.browser-guide-bottom { display:flex;justify-content:space-between;gap:15px;padding-top:13px;border-top:1px solid #29384a;color:#8292a7;font-size:9px; }
+.browser-guide-bottom span:first-child { display:flex;align-items:center;gap:7px;color:#91bba9; }
+.browser-guide-bottom svg { flex:none; }
+@media(max-width:700px){.browser-guide-grid{grid-template-columns:1fr}.browser-guide-bottom{flex-direction:column}.browser-guide-heading{align-items:flex-start}}
+
+/* WireGuard device-specific config workspace */
+#wg-config-file { min-height:42px; }
+#wg-device-list .wg-device-card { display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px;border:1px solid #29384a;border-radius:9px;background:#101925; }
+#wg-device-list .wg-device-meta { display:flex;flex-direction:column;gap:4px;min-width:0; }
+#wg-device-list .wg-device-meta strong { color:#e0e8f1;font-size:12px; }
+#wg-device-list .wg-device-meta span { color:#8292a7;font-size:10px;overflow-wrap:anywhere; }
+#wg-device-list .wg-device-actions { display:flex;flex-wrap:wrap;gap:7px;flex:none; }
+#wg-device-list .wg-device-actions button { padding:7px 10px;border:1px solid #35465b;border-radius:7px;background:#182536;color:#d5dfeb;font-size:10px; }
+#wg-device-list .wg-device-actions button:hover { background:#203147; }
+@media(max-width:600px){#wg-device-list .wg-device-card{align-items:flex-start;flex-direction:column}#wg-device-list .wg-device-actions{width:100%}#wg-device-list .wg-device-actions button{flex:1}}
+
+
+========================================================================================
+DOSYA: wireguard.js
+========================================================================================
+
+/* WireGuard config importer — local-only; no config or private key is uploaded or persisted. */
+(() => {
+  'use strict';
+  const devices = [];
+  const $ = (id) => document.getElementById(id);
+  const message = (text, error = false) => {
+    const el = $('wg-message');
+    if (!el) return;
+    el.textContent = text;
+    el.className = error ? 'text-xs text-red-400' : 'text-xs text-zinc-400';
+  };
+  const parseConfig = (source) => {
+    const text = String(source || '').replace(/^\\uFEFF/, '');
+    const sections = {};
+    let current = '';
+    for (const rawLine of text.split(/\\r?\\n/)) {
+      const line = rawLine.trim();
+      const section = line.match(/^\\[([^\\]]+)\\]$/);
+      if (section) {
+        current = section[1].toLowerCase();
+        sections[current] = sections[current] || {};
+        continue;
+      }
+      if (!current || !line || line.startsWith('#')) continue;
+      const separator = line.indexOf('=');
+      if (separator < 1) continue;
+      const key = line.slice(0, separator).trim().toLowerCase();
+      const value = line.slice(separator + 1).trim();
+      sections[current][key] = value;
+    }
+    const iface = sections.interface || {};
+    const peer = sections.peer || {};
+    const privateKey = iface.privatekey || '';
+    const address = iface.address || '';
+    const publicKey = peer.publickey || '';
+    const endpoint = peer.endpoint || '';
+    if (!privateKey || !address || !publicKey || !endpoint) {
+      throw new Error('Gerekli alanlar eksik: [Interface] içindeki PrivateKey ve Address ile [Peer] içindeki PublicKey ve Endpoint gerekli.');
+    }
+    return { address, endpoint, source: text };
+  };
+  const render = () => {
+    const list = $('wg-device-list');
+    const count = $('wg-device-count');
+    if (!list || !count) return;
+    count.textContent = devices.length + ' cihaz';
+    if (!devices.length) {
+      list.textContent = 'Henüz yapılandırma eklenmedi.';
+      return;
+    }
+    list.innerHTML = devices.map((device, index) => {
+      const safeName = device.name.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const safeAddress = device.address.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const safeEndpoint = device.endpoint.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      return '<article class="wg-device-card"><div class="wg-device-meta"><strong>' + safeName + '</strong><span>Adres: ' + safeAddress + '</span><span>Sunucu: ' + safeEndpoint + '</span><span>Yapılandırma hazır · VPN durumu uygulamadan kontrol edilir</span></div><div class="wg-device-actions"><button type="button" data-wg-download="' + index + '">.conf dosyasını indir</button><button type="button" data-wg-remove="' + index + '">Kaldır</button></div></article>';
+    }).join('');
+  };
+  const downloadConfig = (device) => {
+    const blob = new Blob([device.source], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = device.name.replace(/[^a-z0-9_-]/gi, '_').slice(0, 32) + '.conf';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  };
+  document.addEventListener('DOMContentLoaded', () => {
+    const importButton = $('wg-import-btn');
+    if (!importButton) return;
+    importButton.addEventListener('click', async () => {
+      const file = $('wg-config-file').files[0];
+      const name = $('wg-device-name').value.trim();
+      if (!name) return message('Önce cihaz için bir ad yaz.', true);
+      if (!file) return message('Önce bir .conf dosyası seç.', true);
+      if (file.size > 128 * 1024) return message('Dosya çok büyük. 128 KB sınırındaki bir yapılandırma dosyası seç.', true);
+      try {
+        const parsed = parseConfig(await file.text());
+        devices.push({ name, ...parsed });
+        $('wg-device-name').value = '';
+        $('wg-config-file').value = '';
+        message('Yapılandırma bu sekmeye eklendi. Şimdi .conf dosyasını indirip WireGuard uygulamasına içe aktar.');
+        render();
+      } catch (error) {
+        message(error.message || 'Yapılandırma okunamadı.', true);
+      }
+    });
+    $('wg-device-list').addEventListener('click', (event) => {
+      const download = event.target.closest('[data-wg-download]');
+      const remove = event.target.closest('[data-wg-remove]');
+      if (download) {
+        const device = devices[Number(download.dataset.wgDownload)];
+        if (device) downloadConfig(device);
+      }
+      if (remove) {
+        devices.splice(Number(remove.dataset.wgRemove), 1);
+        render();
+        message('Cihaz yapılandırması bu sekmeden kaldırıldı.');
+      }
+    });
+    render();
+  });
+})();
