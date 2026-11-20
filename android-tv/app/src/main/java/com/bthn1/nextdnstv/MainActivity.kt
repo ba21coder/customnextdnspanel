@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -119,7 +120,47 @@ class MainActivity:ComponentActivity(){override fun onCreate(savedInstanceState:
 }
 
 @Composable private fun TvInput(value:String,onValue:(String)->Unit,secret:Boolean=false,hint:String){
- BasicTextField(value,onValueChange=onValue,singleLine=true,visualTransformation=if(secret)PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,textStyle=androidx.compose.ui.text.TextStyle(color=Color.White,fontSize=14.sp),modifier=Modifier.fillMaxWidth().background(Color(0xFF08111F),RoundedCornerShape(8.dp)).border(1.dp,Color(0xFF33445D),RoundedCornerShape(8.dp)).padding(12.dp),decorationBox={inner->Box{if(value.isEmpty())Text(hint,color=Muted);inner()}})
+ var keyboardOpen by remember { mutableStateOf(false) }
+ Row(Modifier.fillMaxWidth().background(Color(0xFF08111F),RoundedCornerShape(8.dp)).border(1.dp,Color(0xFF33445D),RoundedCornerShape(8.dp)).padding(start=12.dp,end=5.dp,top=5.dp,bottom=5.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(6.dp)){
+  Box(Modifier.weight(1f).padding(vertical=7.dp)){
+   BasicTextField(value,onValueChange=onValue,singleLine=true,visualTransformation=if(secret)PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,textStyle=androidx.compose.ui.text.TextStyle(color=Color.White,fontSize=14.sp),modifier=Modifier.fillMaxWidth(),decorationBox={inner->Box{if(value.isEmpty())Text(hint,color=Muted);inner()}})
+  }
+  Button(onClick={keyboardOpen=true},contentPadding=PaddingValues(horizontal=13.dp,vertical=7.dp)){Text("⌨",fontSize=18.sp)}
+ }
+ if(keyboardOpen) TvOnScreenKeyboard(value,onValue,secret,{keyboardOpen=false})
+}
+
+@Composable private fun TvOnScreenKeyboard(value:String,onValue:(String)->Unit,secret:Boolean,onDismiss:()->Unit){
+ var upper by remember { mutableStateOf(false) }
+ val rows=listOf("1234567890","qwertyuiop","asdfghjkl","zxcvbnm")
+ Dialog(onDismissRequest=onDismiss){
+  Surface(color=Panel,shape=RoundedCornerShape(18.dp),modifier=Modifier.fillMaxWidth().padding(8.dp)){
+   Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(9.dp)){
+    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically){
+     Text("EKRAN KLAVYESİ",fontSize=17.sp,fontWeight=FontWeight.Bold)
+     Text(if(secret)"•".repeat(value.length) else value,fontSize=12.sp,color=Muted,maxLines=1)
+    }
+    rows.forEachIndexed{index,row->
+     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(5.dp)){
+      row.forEach{ch->Button(onClick={onValue(value+(if(upper)ch.uppercaseChar() else ch))},modifier=Modifier.weight(1f).height(46.dp),contentPadding=PaddingValues(0.dp)){Text(if(upper)ch.uppercaseChar().toString() else ch.toString(),fontSize=16.sp)}}
+     }
+    }
+    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(6.dp)){
+     Button(onClick={upper=!upper},modifier=Modifier.weight(1f)){Text("⇧")}
+     Button(onClick={onValue(value+"-"),modifier=Modifier.weight(1f)){Text("-")}
+     Button(onClick={onValue(value+"_"),modifier=Modifier.weight(1f)){Text("_")}
+     Button(onClick={onValue(value+"."),modifier=Modifier.weight(1f)){Text(".")}
+     Button(onClick={onValue(value+"@"),modifier=Modifier.weight(1f)){Text("@")}
+     Button(onClick={onValue(value.dropLast(1))},modifier=Modifier.weight(1f)){Text("⌫")}
+    }
+    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){
+     Button(onClick={onValue(value+" ")},modifier=Modifier.weight(1f)){Text("Boşluk")}
+     Button(onClick={onValue("")},modifier=Modifier.weight(1f),colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF743B45))){Text("Temizle")}
+     Button(onClick=onDismiss,modifier=Modifier.weight(1f),colors=ButtonDefaults.buttonColors(containerColor=Accent)){Text("Tamam")}
+    }
+   }
+  }
+ }
 }
 @Composable private fun Nav(label:String,active:Boolean,onClick:()->Unit){Button(onClick=onClick,modifier=Modifier.fillMaxWidth().height(48.dp),colors=ButtonDefaults.buttonColors(containerColor=if(active)Color(0xFF1C3C67) else Panel)){Text(label,modifier=Modifier.fillMaxWidth(),fontSize=12.sp)}}
 @Composable private fun Filter(label:String,active:Boolean,onClick:()->Unit){Button(onClick=onClick,colors=ButtonDefaults.buttonColors(containerColor=if(active)Accent else Panel)){Text(label,fontSize=11.sp)}}
