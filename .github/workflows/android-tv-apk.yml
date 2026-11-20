@@ -6,6 +6,13 @@ on:
     paths:
       - "android-tv/**"
       - ".github/workflows/android-tv-apk.yml"
+      - "index.html"
+      - "app.js"
+      - "style.css"
+      - "pro-features.js"
+      - "wireguard.js"
+      - "ai-assistant.js"
+      - "ai-worker.js"
   create:
     tags:
       - "tv-v*"
