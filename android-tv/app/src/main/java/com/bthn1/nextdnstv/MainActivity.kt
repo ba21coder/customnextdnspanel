@@ -147,10 +147,10 @@ class MainActivity:ComponentActivity(){override fun onCreate(savedInstanceState:
     }
     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(6.dp)){
      Button(onClick={upper=!upper},modifier=Modifier.weight(1f)){Text("⇧")}
-     Button(onClick={onValue(value+"-"),modifier=Modifier.weight(1f)){Text("-")}
-     Button(onClick={onValue(value+"_"),modifier=Modifier.weight(1f)){Text("_")}
-     Button(onClick={onValue(value+"."),modifier=Modifier.weight(1f)){Text(".")}
-     Button(onClick={onValue(value+"@"),modifier=Modifier.weight(1f)){Text("@")}
+     Button(onClick={onValue(value+"-")},modifier=Modifier.weight(1f)){Text("-")}
+     Button(onClick={onValue(value+"_")},modifier=Modifier.weight(1f)){Text("_")}
+     Button(onClick={onValue(value+".")},modifier=Modifier.weight(1f)){Text(".")}
+     Button(onClick={onValue(value+"@")},modifier=Modifier.weight(1f)){Text("@")}
      Button(onClick={onValue(value.dropLast(1))},modifier=Modifier.weight(1f)){Text("⌫")}
     }
     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){
