@@ -540,7 +540,7 @@ function updateLanguageTexts(lang) {
 function updateNetworkStatus(isOnline) {
     const banner = document.getElementById('network-status');
     if (!banner) return;
-    banner.classList.toggle('hidden', Boolean(isOnline));
+    banner.style.display = isOnline ? 'none' : 'block';
 }
 
 window.addEventListener('offline', () => updateNetworkStatus(false));
